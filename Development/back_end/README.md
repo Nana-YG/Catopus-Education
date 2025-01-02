@@ -1,6 +1,6 @@
 # Server Structure
 
-![(Server Structure](/Images/Server_Structure.png)
+![(Server Structure](/Images/Project-Structure.jpg)
 
 ## Server Kernel:
 
