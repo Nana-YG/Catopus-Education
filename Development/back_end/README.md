@@ -1,3 +1,3 @@
 # Server Structure
 
-![(Server Structure](/Images/Project-Structure.jpg)
+![(Server Structure](/Images/Project-Structure.png)
