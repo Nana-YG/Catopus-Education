@@ -1,0 +1,41 @@
+services:
+  csrm-nginx:
+    build:
+      context: ./Nginx-Container
+      dockerfile: Dockerfile
+    container_name: csrm-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+      - /var/lib/letsencrypt:/var/lib/letsencrypt
+    depends_on:
+      - csrm-login
+      - csrm-content
+    networks:
+      - csrm-network
+
+  csrm-login:
+    build:
+      context: ./Login-Container
+      dockerfile: Dockerfile
+    container_name: csrm-login
+    expose:
+      - "8080" # Only expose to internal network
+    networks:
+      - csrm-network
+
+  csrm-content:
+    build:
+      context: ./Content-Container
+      dockerfile: Dockerfile
+    container_name: csrm-content
+    expose:
+      - "8081" # Only expose to internal network
+    networks:
+      - csrm-network
+
+networks:
+  csrm-network:
+    driver: bridge
