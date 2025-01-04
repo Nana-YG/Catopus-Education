@@ -13,6 +13,9 @@ RUN apt-get update && \
 # Set the working directory inside the container
 WORKDIR /app
 
+# Copy website content
+COPY ./Content/ /app/Content
+
 # Copy your application files (if any) into the container
 # COPY ./your-app /app
 
