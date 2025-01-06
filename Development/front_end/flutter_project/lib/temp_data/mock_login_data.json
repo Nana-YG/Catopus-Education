@@ -1,0 +1,70 @@
+{
+  "users": [
+    {
+      "username": "teacher1",
+      "password": "password123",
+      "role": "teacher",
+      "classes": [
+        {
+          "name": "Math 101",
+          "image": ""
+        },
+        {
+          "name": "Physics 172",
+          "image": ""
+        },
+        {
+          "name": "Chemistry 303",
+          "image": ""
+        },
+        {
+          "name": "CS 250",
+          "image": ""
+        }
+      ]
+    },
+
+    {
+      "username": "123",
+      "password": "123",
+      "role": "teacher",
+      "classes": [
+        {
+          "name": "123 101",
+          "image": ""
+        },
+        {
+          "name": "123 202",
+          "image": ""
+        },
+        {
+          "name": "123 303",
+          "image": ""
+        },
+        {
+          "name": "123 250",
+          "image": ""
+        }
+      ]
+    },
+    
+    {
+      "username": "student1",
+      "password": "student1",
+      "role": "student",
+      "classes": [
+        { "name": "Math 101", "image": "" },
+        { "name": "Physics 202", "image": "" }
+      ]
+    },
+    {
+      "username": "student2",
+      "password": "studentpass2",
+      "role": "student",
+      "classes": [
+        { "name": "Chemistry 303", "image": "" },
+        { "name": "CS 250", "image": "" }
+      ]
+    }
+  ]
+}
