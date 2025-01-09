@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM maven:3.8.6-openjdk-21 AS build
+FROM maven:3.8.6-openjdk-17 AS build
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ COPY ./Login-Server/src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Run the application
-FROM openjdk:21-jdk-alpine
+FROM openjdk:17-jdk-alpine
 
 WORKDIR /app
 
