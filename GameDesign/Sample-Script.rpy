@@ -71,7 +71,7 @@ label start
     s "我叫[name]"
     show m4 at right
     m "很高兴认识你，[name]。我叫毛毛，刚刚在和我说话的是小张。之后我们会一起学习科学，构建科学知识体系。"
-    z1 "[name]是吧？你刚刚说听到了我们的对话。那我倒要问问你：化学反应中存在的两大变化是什么？"
+    z "[name]是吧？你刚刚说听到了我们的对话。那我倒要问问你：化学反应中存在的两大变化是什么？"
     menu:
         "参考之前的对话结论":
             jump refer_back_conclusion
@@ -97,7 +97,7 @@ label refer_back_conclusion:
             
 label refer_back_experiment:
     s "嗯，我记得，你们刚刚在做燃烧镁条的实验。"
-    m1 "是的，让我为你复现一下刚刚的实验！"
+    m "是的，让我为你复现一下刚刚的实验！"
     show MgOxidation
     show z1 at left
     show m1 at right
