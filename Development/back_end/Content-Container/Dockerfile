@@ -1,26 +1,24 @@
-# Use an official Ubuntu as the base image
-FROM ubuntu:latest
+# Stage 1: Build the application
+FROM maven:3.8.7-openjdk-18 AS build
 
-# Set the environment variables to avoid interactive prompts during package installation
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Update package repository and install essential tools
-RUN apt-get update && \
-    apt-get install -y nano&& \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy website content
-COPY ./Content/ /app/Content
+COPY Content-Server/pom.xml .
+RUN mvn dependency:go-offline
 
-# Copy your application files (if any) into the container
-# COPY ./your-app /app
+# Compile
+COPY Content-Server/src ./src
+RUN mvn clean package -DskipTests
 
-# Expose ports (if needed)
-# EXPOSE 8080
+# Stage 2: Run the application
+FROM openjdk:18-jdk-alpine
 
-# Define the default command to run when the container starts
-CMD ["/bin/bash"]
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
+# Start
+ENTRYPOINT ["java", "-jar", "app.jar"]

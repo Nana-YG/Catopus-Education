@@ -12,7 +12,7 @@ services:
       - /var/lib/letsencrypt:/var/lib/letsencrypt
     depends_on:
       - csrm-login
-      - csrm-content
+#      - csrm-content
     networks:
       - csrm-network
 

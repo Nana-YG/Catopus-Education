@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install softwares
 RUN apt-get update && \
-    apt-get install -y nginx nano certbot python3-certbot-nginx cron && \
+    apt-get install -y nginx nano certbot python3-certbot-nginx cron curl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
