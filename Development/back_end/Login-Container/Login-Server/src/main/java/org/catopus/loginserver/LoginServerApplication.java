@@ -20,4 +20,9 @@ public class LoginServerApplication {
         return "Hello World\n";
     }
 
+    @GetMapping({"/login/examination", "/login/examination/"})
+    public String examination() {
+        return "Examination API is working!\n";
+    }
+
 }
