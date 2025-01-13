@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'teacher_version/teacher_login.dart';
 import 'student_version/student_login.dart';
+import 'package:flutter_project/test.dart';
 
 class ChooseVersionPage extends StatelessWidget {
   const ChooseVersionPage({super.key});
@@ -44,7 +45,9 @@ class ChooseVersionPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
+                      fetchLogin();
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -72,7 +75,8 @@ class ChooseVersionPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
+                      fetchLogin();
                       Navigator.push(
                         context,
                         MaterialPageRoute(
