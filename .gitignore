@@ -46,3 +46,5 @@ Development/front_end/flutter_project/pubspec.lock
 /Development/back_end/WordPress-DB/public_key.pem
 /Development/back_end/WordPress-DB/server-cert.pem
 /Development/back_end/WordPress-DB/server-key.pem
+.idea/
+back_end/Content-Container/.idea/
