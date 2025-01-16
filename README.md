@@ -1,6 +1,6 @@
 ![Logo](GameDesign/Images/Items/catopus-logo-long.png)
 
-# Classroom-Dialogue-Project
+# Catopus: Classroom-Dialogue-Project
 
 ## Table of content
 
