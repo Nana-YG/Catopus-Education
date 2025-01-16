@@ -5,7 +5,5 @@ Development/back_end/.idea/misc.xml
 Development/back_end/.idea/modules.xml
 Development/back_end/.idea/vcs.xml
 Development/front_end/flutter_project/pubspec.lock
-/Development/back_end/WordPress-Container/wp-content/*
-/Development/back_end/WordPress-DB/*
 .idea/
 back_end/Content-Container/.idea/
