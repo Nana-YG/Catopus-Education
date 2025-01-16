@@ -12,7 +12,8 @@ services:
       - /var/lib/letsencrypt:/var/lib/letsencrypt
     depends_on:
       - csrm-login
-#      - csrm-content
+      - csrm-content
+      - wordpress
     networks:
       - csrm-network
 
@@ -51,6 +52,48 @@ services:
       - database
     networks:
       - csrm-network
+
+
+  # MySQL for WordPress
+  wordpress-db:
+    image: mysql:5.7
+    container_name: wordpress-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress_password
+    volumes:
+      - ./WordPress-DB:/var/lib/mysql
+    networks:
+      - csrm-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # WordPress Service
+  wordpress:
+    image: wordpress:latest
+    container_name: wordpress
+    expose:
+      - "8080"
+      - "80"
+    restart: always
+    depends_on:
+      - wordpress-db
+    environment:
+      WORDPRESS_DB_HOST: wordpress-db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress_password
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - ./WordPress-Container/wp-content:/var/www/html
+    networks:
+      - csrm-network
+
 
   database:
     image: mysql:8.0
