@@ -116,6 +116,10 @@
 
     Rice University - MS CS
   
+* **Jingzhi Zhao**: Content Creator
+
+    College of William & Mary - PhD in Neuroscience
+
 * **Qingchan Gao**: Art Director
 
     North China University of Technology - BA Visual Communication Design
@@ -123,7 +127,11 @@
 * **Xinyi (Sindy) Zheng**: Product Manager
 
    Purdue University - BS IT System Design & BA Digital Criminology
- 
+  
+* **Xiuwen Fang**: 
+
+   Purdue University - 
+   
 * **Yihan Huang**: User Experience Designer
 
    Purdue University - MFA Interaction Design
