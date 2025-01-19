@@ -6,6 +6,13 @@ Development/back_end/.idea/modules.xml
 Development/back_end/.idea/vcs.xml
 Development/front_end/flutter_project/pubspec.lock
 .idea/
+Development/back_end/Content-Container/.idea/
+Development/website/
+Development/website/WordPress-DB/ib_logfile0
+Development/website/WordPress-DB/ibdata1
+Development/website/WordPress-DB/ibtmp1
+Development/website/WordPress-DB/wordpress/wp_options.ibd
+
 back_end/Content-Container/.idea/
 Development/front_end/flutter_project/ios/Flutter/Debug.xcconfig
 *.xcconfig
