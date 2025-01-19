@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/pages/login.dart';
 import 'dart:async';
-import 'pages/choose_version.dart'; 
+import 'pages/choose_version.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,7 +34,7 @@ class _WelcomePageState extends State<WelcomePage> {
     Timer(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => ChooseVersionPage()),
+        MaterialPageRoute(builder: (context) => LoginPage()),
       );
     });
   }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'teacher_version/teacher_login.dart';
-import 'student_version/student_login.dart';
+import 'login.dart';
 import 'package:flutter_project/test.dart';
 
 class ChooseVersionPage extends StatelessWidget {
@@ -47,13 +46,6 @@ class ChooseVersionPage extends StatelessWidget {
                     ),
                     onPressed: () async {
                       fetchLogin();
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const TeacherLoginPage(),
-                        ),
-                      );
                     },
                     child: Text(
                       'Teacher',
@@ -76,13 +68,7 @@ class ChooseVersionPage extends StatelessWidget {
                       ),
                     ),
                     onPressed: () async {
-                      fetchLogin();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const StudentLoginPage(),
-                        ),
-                      );
+
                     },
                     child: Text(
                       'Student',
