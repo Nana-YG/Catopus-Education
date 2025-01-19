@@ -118,7 +118,7 @@
   
 * **Jingzhi Zhao**: Content Creator
 
-    College of William & Mary - PhD in Neuroscience
+    College of William & Mary - PhD Student in Neuroscience
 
 * **Qingchan Gao**: Art Director
 
@@ -128,9 +128,9 @@
 
    Purdue University - BS IT System Design & BA Digital Criminology
   
-* **Xiuwen Fang**: 
+* **Xiuwen Fang**: Software Developer
 
-   Purdue University - 
+   Purdue University - BS Computer Science
    
 * **Yihan Huang**: User Experience Designer
 
