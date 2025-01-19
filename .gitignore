@@ -7,3 +7,11 @@ Development/back_end/.idea/vcs.xml
 Development/front_end/flutter_project/pubspec.lock
 .idea/
 back_end/Content-Container/.idea/
+Development/front_end/flutter_project/ios/Flutter/Debug.xcconfig
+*.xcconfig
+Development/front_end/flutter_project/ios/Podfile
+Development/front_end/flutter_project/macos/Flutter/GeneratedPluginRegistrant.swift
+Development/front_end/flutter_project/macos/Podfile
+Development/front_end/flutter_project/macos/Podfile.lock
+Development/front_end/flutter_project/macos/Runner.xcodeproj/project.pbxproj
+Development/front_end/flutter_project/macos/Runner.xcworkspace/contents.xcworkspacedata
