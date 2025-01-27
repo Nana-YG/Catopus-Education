@@ -111,7 +111,7 @@ label reasoning_MgOxidation_SubstanceChange:
     m "除此之外，你看，镁条燃烧时发出的亮光和热量，都是能量的表现。"
     menu:
         "反思总结":
-        jump reflection_MgOxidation
+            jump reflection_MgOxidation
 label reflection_MgOxidation:
     s "原来是能量啊...所以镁条燃烧不仅仅是**物质**的变化，而且也是**能量**的变化。"
     z "嗯，是这样的。走吧，带你去实验室看看。"
@@ -125,13 +125,13 @@ label inv_to_build_on:
     z "这里我们可以观察到两个明显的变化。一个是反应的**物质变化**，镁条从最开始闪亮的银白色变成了白色的灰烬。"
     menu:
         "继续推理":
-        jump reasoning_MgOxidation_SubstanceChange
+            jump reasoning_MgOxidation_SubstanceChange
 label reasoning_MgOxidation_SubstanceChange:
     s "反应过程中，镁条与空气中的氧气发生反应。镁（Mg）与氧（O₂）结合，形成了氧化镁（MgO）。"
     m "除此之外，你看，镁条燃烧时发出的亮光和热量，都是能量的表现。"
     menu:
-      "反思总结":
-      jump reflection_MgOxidation
+        "反思总结":
+            jump reflection_MgOxidation
 label reflection_MgOxidation:
     s "原来是能量啊...所以镁条燃烧不仅仅是**物质**的变化，而且也是**能量**的变化。"
     z "嗯，是这样的。走吧，带你去实验室看看。"
