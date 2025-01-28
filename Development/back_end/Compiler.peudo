@@ -1,0 +1,86 @@
+/**
+* API List:
+*
+* Character(String name, file_directory image)
+*   Returns a hashcode, provided by the dialogue module, dialogue module
+*   hosts a queue for tokens and arguments.  Compiler sends
+*   flush = 00000000 to dialogue module at the end of each line that involves dialogue module
+*
+*
+*
+*
+* Reserved word List:
+*
+* define: create a token (string) that links to a hashcode
+* $token: pass the hashcode of that token to dialogue module
+* with: pass agreed hashcode for transition to the dialogue module
+* effect: pass the hashcode of that effect to dialogue module
+* show: pass hashcode for show to dialogue module
+* at: pass hashcode for the direction argument to dialogue module, must be followed by a direction
+* right: DIRECTION
+* left: DIRECTION
+* center: DIRECTION
+* default: create a variable
+* menu: pass hashcode for menu to dialogue module along with options
+*
+* label: store the line number
+* jump: must follow a label, move the line pointer to next line of that label, calculate offset and skip lines
+* if: argument == true then go to next line, else skip indented lines
+* else: go to next line anyway
+*
+*/
+
+Compile(String script):
+
+    // Global parameters
+    current_indentation = 0
+    current_line_index = 0
+    labels={}
+    tokens={}
+
+    // First round: store all labels
+    for line in script:
+        current_line_index++
+        *current_char = *line
+        arguments = []
+        argument = new string
+        while (current_char != '\n'):
+            while (current_char != ' '):
+                argument.append(*current_char)
+                current_char++
+            arguments.append(argument)
+
+        if (arguments[0] == "label"):
+            labels[arguments[1]] = current_line_index
+
+
+    // Second round: execute each line
+    for line in script:
+
+        *current_char = *line
+        space_count = 0
+        arguments = []
+
+        // Indentation
+        while (current_char == ' '):
+            space_count++
+            current_char++
+        current_indentation = space_count / 4
+
+        // Parse a line
+        argument = new string
+        while (current_char != '\n'):
+            while (current_char != ' '):
+                argument.append(*current_char)
+                current_char++
+            arguments.append(argument)
+
+        if (arguments[0] == <reserved word>):
+            # Call corresponding function
+        else if (arguments[0] is in token list):
+            # Pass tokens and arguments
+        else:
+            # This is a new variable, allocate space for that
+
+
+

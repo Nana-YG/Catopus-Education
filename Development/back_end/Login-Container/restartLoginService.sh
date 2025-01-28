@@ -4,11 +4,11 @@
 CONTAINER_NAME="csrm-login"
 
 # 检查是否有同名容器正在运行
-RUNNING_CONTAINER=$(docker ps -q -f name=$CONTAINER_NAME)
+EXISTING_CONTAINER=$(docker ps -aq -f name=$CONTAINER_NAME)
 
-if [[ -n "$RUNNING_CONTAINER" ]]; then
+if [[ -n "$EXISTING_CONTAINER" ]]; then
     echo "Stopping and removing the existing container '$CONTAINER_NAME'..."
-    docker stop $CONTAINER_NAME
+    docker stop $CONTAINER_NAME 2>/dev/null
     docker rm $CONTAINER_NAME
 fi
 
