@@ -25,3 +25,5 @@ flutter:
 
   assets:
     - lib/temp_data/mock_login_data.json
+    - assets/images/孩子-哈！.png
+    - assets/images/烧杯.png

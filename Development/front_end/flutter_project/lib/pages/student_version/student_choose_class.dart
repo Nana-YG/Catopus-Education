@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/utils/class_card.dart';
+import 'package:flutter_project/pages/test_ha_pages.dart'; // 确保路径正确
 
 class StudentChooseClassPage extends StatelessWidget {
   final String studentName;
@@ -8,7 +9,7 @@ class StudentChooseClassPage extends StatelessWidget {
   const StudentChooseClassPage({
     super.key,
     required this.studentName,
-    required this.classes, // 接收学生课程数据
+    required this.classes,
   });
 
   @override
@@ -35,10 +36,22 @@ class StudentChooseClassPage extends StatelessWidget {
                 return ClassCard(
                   classData: classes[index],
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text('Selected: ${classes[index]['name']}')),
-                    );
+                    String className = classes[index]['name'];
+
+                    if (className == "Chemistry 303") {
+                      // 跳转到 test_ha_pages.dart
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TestHaPage(),
+                        ),
+                      );
+                    } else {
+                      // 其他课程弹出提示
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Selected: $className')),
+                      );
+                    }
                   },
                 );
               },
