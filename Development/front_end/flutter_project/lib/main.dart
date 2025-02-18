@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_project/pages/login.dart';
 import 'dart:async';
-import 'pages/choose_version.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]).then((_) {
+    runApp(const MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -12,9 +18,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: WelcomePage(),
+      home: const WelcomePage(),
     );
   }
 }
@@ -30,7 +36,7 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   void initState() {
     super.initState();
-    // 延迟3秒后跳转到ChooseVersionPage
+    // 3秒后跳转到LoginPage
     Timer(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
@@ -41,15 +47,22 @@ class _WelcomePageState extends State<WelcomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    // 获取屏幕大小
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
+    return Scaffold(
       backgroundColor: Colors.blueAccent,
-      body: Center(
-        child: Text(
-          'Welcome Catopus-Education',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+      body: SafeArea( // 避免 iOS 刘海屏遮挡
+        child: Center(
+          child: Text(
+            'Welcome Catopus-Education',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: screenWidth * 0.05, // 让文字大小自适应屏幕
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
         ),
       ),

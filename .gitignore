@@ -22,3 +22,5 @@ Development/front_end/flutter_project/macos/Podfile
 Development/front_end/flutter_project/macos/Podfile.lock
 Development/front_end/flutter_project/macos/Runner.xcodeproj/project.pbxproj
 Development/front_end/flutter_project/macos/Runner.xcworkspace/contents.xcworkspacedata
+Development/front_end/flutter_project/ios/Runner.xcodeproj/project.pbxproj
+Development/front_end/flutter_project/ios/Runner.xcworkspace/contents.xcworkspacedata
