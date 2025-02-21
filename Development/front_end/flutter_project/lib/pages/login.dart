@@ -103,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
         child: Container(
           width: screenWidth,
           height: screenHeight,
-          decoration: BoxDecoration(color: Colors.white),
+          decoration: const BoxDecoration(color: Colors.white),
           child: Stack(
             children: [
               Positioned(
@@ -160,14 +160,14 @@ class _LoginPageState extends State<LoginPage> {
       style: TextStyle(fontSize: 30 * scaleX), // **字体大小**
       decoration: InputDecoration(
         filled: true,
-        fillColor: Color(0xFFECECEC), // **背景颜色**
+        fillColor: const Color(0xFFECECEC), // **背景颜色**
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8), // **一点点圆角**
           borderSide: BorderSide.none, // **去掉边框**
         ),
-        contentPadding: EdgeInsets.symmetric(horizontal: 20), // **左右间距**
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20), // **左右间距**
         hintText: 'Enter your name', // **提示文本**
-        hintStyle: TextStyle(color: Colors.black45), // **提示文本颜色**
+        hintStyle: const TextStyle(color: Colors.black45), // **提示文本颜色**
       ),
     ),
   ),
@@ -188,14 +188,14 @@ class _LoginPageState extends State<LoginPage> {
       style: TextStyle(fontSize: 30 * scaleX), // **设置字体大小**
       decoration: InputDecoration(
         filled: true,
-        fillColor: Color(0xFFECECEC), // **背景色**
+        fillColor: const Color(0xFFECECEC), // **背景色**
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8), // **稍微增加一点圆角**
           borderSide: BorderSide.none, // **去掉边框**
         ),
-        contentPadding: EdgeInsets.symmetric(horizontal: 20), // **控制左右间距**
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20), // **控制左右间距**
         hintText: 'Enter your password', // **提示文本**
-        hintStyle: TextStyle(color: Colors.black45), // **提示文本颜色**
+        hintStyle: const TextStyle(color: Colors.black45), // **提示文本颜色**
       ),
     ),
   ),
@@ -210,7 +210,7 @@ class _LoginPageState extends State<LoginPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ChooseVersionPage(),
+                        builder: (context) => const ChooseVersionPage(),
                       ),
                     );
                   },
@@ -220,7 +220,7 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8), // **增加一点圆角**
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                           color: Color(0x3F000000),
                           blurRadius: 15,
@@ -252,7 +252,7 @@ class _LoginPageState extends State<LoginPage> {
                     width: 276 * scaleX,
                     height: 69 * scaleY,
                     decoration: BoxDecoration(
-                      color: Color(0xFF292929),
+                      color: const Color(0xFF292929),
                       borderRadius: BorderRadius.circular(8), // **增加一点圆角**
                     ),
                     child: Center(

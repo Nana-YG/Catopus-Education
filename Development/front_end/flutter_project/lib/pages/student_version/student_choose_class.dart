@@ -43,7 +43,7 @@ class StudentChooseClassPage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => TestHaPage(),
+                          builder: (context) => const TestHaPage(),
                         ),
                       );
                     } else {

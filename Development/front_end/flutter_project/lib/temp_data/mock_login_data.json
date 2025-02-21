@@ -47,7 +47,7 @@
         }
       ]
     },
-    
+
     {
       "username": "student1",
       "password": "student1",
@@ -58,8 +58,8 @@
       ]
     },
     {
-      "username": "student2",
-      "password": "studentpass2",
+      "username": "321",
+      "password": "321",
       "role": "student",
       "classes": [
         { "name": "Chemistry 303", "image": "" },

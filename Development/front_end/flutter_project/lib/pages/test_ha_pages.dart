@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/components/character_display.dart';
 
 class TestHaPage extends StatefulWidget {
-  final Offset initialPosition; // 允许传入烧杯的初始位置
+  final Offset initialPosition;
   const TestHaPage({super.key, this.initialPosition = const Offset(0.5, 0.5)});
 
   @override
@@ -9,28 +10,18 @@ class TestHaPage extends StatefulWidget {
 }
 
 class _TestHaPageState extends State<TestHaPage> {
-  bool isLabMode = false; // 是否处于实验室模式
-  late Offset _position; // 烧杯的位置
+  bool isLabMode = false;
+  late Offset _position;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final screenWidth = MediaQuery.of(context).size.width;
-      final screenHeight = MediaQuery.of(context).size.height;
-
-      setState(() {
-        _position = Offset(
-          screenWidth * widget.initialPosition.dx,
-          screenHeight * widget.initialPosition.dy,
-        );
-      });
-    });
+    _position = widget.initialPosition;
   }
 
   void toggleMode() {
     setState(() {
-      isLabMode = !isLabMode; // 切换实验室和人物场景
+      isLabMode = !isLabMode;
     });
   }
 
@@ -43,7 +34,7 @@ class _TestHaPageState extends State<TestHaPage> {
       appBar: AppBar(title: Text(isLabMode ? "实验室场景" : "孩子-哈！")),
       body: Stack(
         children: [
-          // 背景（实验室模式才显示）
+          // 背景
           if (isLabMode)
             Positioned.fill(
               child: Image.asset(
@@ -52,20 +43,11 @@ class _TestHaPageState extends State<TestHaPage> {
               ),
             ),
 
-          // 人物（仅在非实验室模式下显示）
+          // 显示角色（非实验室模式）
           if (!isLabMode)
-            Positioned(
-              left: screenWidth * 0.55, // 调整人物向右移动（55% 屏幕宽度）
-              top: screenHeight * 0.06, // 稍微向下调整
-              child: Image.asset(
-                "assets/images/孩子-哈！.png",
-                width: screenWidth * 0.4, // 让人物大小适应屏幕
-                height: screenHeight * 0.8,
-                fit: BoxFit.contain,
-              ),
-            ),
+            showCharacter("孩子-哈！", "left", "assets/images/孩子-哈！.png"),
 
-          // 可拖动的烧杯（仅在实验室模式下可见）
+          // 可拖动的烧杯（实验室模式下才可见）
           if (isLabMode)
             Positioned(
               left: _position.dx.clamp(0, screenWidth - screenWidth * 0.3),
@@ -74,17 +56,14 @@ class _TestHaPageState extends State<TestHaPage> {
                 onPanUpdate: (details) {
                   setState(() {
                     _position = Offset(
-                      (_position.dx + details.delta.dx).clamp(0, screenWidth - screenWidth * 0.3),
-                      (_position.dy + details.delta.dy).clamp(0, screenHeight - screenHeight * 0.3),
+                      (_position.dx + details.delta.dx)
+                          .clamp(0, screenWidth - screenWidth * 0.3),
+                      (_position.dy + details.delta.dy)
+                          .clamp(0, screenHeight - screenHeight * 0.3),
                     );
                   });
                 },
-                child: Image.asset(
-                  "assets/images/烧杯.png",
-                  width: screenWidth * 0.8, // 让烧杯大小适应屏幕
-                  height: screenHeight * 0.8,
-                  fit: BoxFit.contain,
-                ),
+                child: showCharacter("烧杯", "left", "assets/images/烧杯.png"),
               ),
             ),
 
