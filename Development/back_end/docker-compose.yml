@@ -10,9 +10,6 @@ services:
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
       - /var/lib/letsencrypt:/var/lib/letsencrypt
-    depends_on:
-      - csrm-login
-      - csrm-content
     networks:
       - csrm-network
 
