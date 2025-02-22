@@ -27,24 +27,26 @@ public class AuthController {
 
         boolean success = userService.register(username, password);
         if (success) {
-            return ResponseEntity.ok(Map.of("message", "User registered successfully"));
+           String token = userService.getTokenByUsername(username); // 注册成功返回 token
+           return ResponseEntity.ok(Map.of("message", "User registered successfully", "token", token));
         } else {
             return ResponseEntity.badRequest().body(Map.of("error", "User already exists"));
         }
     }
 
     @PostMapping("/log-in")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
-        String username = request.get("username");
-        String password = request.get("password");
+    public ResponseEntity<?> login(
+            @RequestHeader(value = "Username", required = false) String username,
+            @RequestHeader(value = "Password", required = false) String password) {
+
 
         if (username == null || password == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Username and password required"));
         }
 
-        boolean success = userService.login(username, password);
-        if (success) {
-            return ResponseEntity.ok(Map.of("message", "Login successful"));
+        String token = userService.login(username, password);
+        if (token != null) {
+            return ResponseEntity.ok(Map.of("message", "Login successful", "token", token));
         } else {
             return ResponseEntity.status(401).body(Map.of("error", "Invalid username or password"));
         }
