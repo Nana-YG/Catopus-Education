@@ -50,10 +50,14 @@ class CharacterDisplay extends StatelessWidget {
 }
 
 /// Helper Function: 直接返回 `CharacterDisplay` 组件
-Widget showCharacter(String name, String position, String imagePath) {
+Widget showCharacter(List<String> args) {
+  if (args.length < 3) {
+    throw ArgumentError("showCharacter 需要 3 个参数，但只提供了 ${args.length} 个");
+  }
   return CharacterDisplay(
-    characterName: name,
-    position: position,
-    imagePath: imagePath,
+    characterName: args[0],
+    position: args[1],
+    imagePath: args[2],
   );
 }
+

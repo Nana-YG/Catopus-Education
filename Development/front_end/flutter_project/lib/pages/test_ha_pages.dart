@@ -29,6 +29,10 @@ class _TestHaPageState extends State<TestHaPage> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    // array
+     List<String> args1 = ["孩子-哈！", "mid", "assets/images/孩子-哈！.png"];
+     List<String> args2 = ["烧杯", "left", "assets/images/烧杯.png"];
+
 
     return Scaffold(
       appBar: AppBar(title: Text(isLabMode ? "实验室场景" : "孩子-哈！")),
@@ -45,7 +49,10 @@ class _TestHaPageState extends State<TestHaPage> {
 
           // 显示角色（非实验室模式）
           if (!isLabMode)
-            showCharacter("孩子-哈！", "left", "assets/images/孩子-哈！.png"),
+
+
+           showCharacter(args1), // 传入整个数组
+
 
           // 可拖动的烧杯（实验室模式下才可见）
           if (isLabMode)
@@ -63,7 +70,7 @@ class _TestHaPageState extends State<TestHaPage> {
                     );
                   });
                 },
-                child: showCharacter("烧杯", "left", "assets/images/烧杯.png"),
+                child: showCharacter(args2),
               ),
             ),
 
