@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_project/pages/register_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
 import 'package:flutter_project/utils/constant.dart'; // ✅ 引入 baseApiUrl
-import 'package:flutter_project/pages/choose_version.dart';
 import 'package:flutter_project/pages/student_version/student_choose_class.dart';
 import 'package:flutter_project/pages/teacher_version/teacher_choose_class.dart';
 import 'package:flutter_project/test.dart'; // 引入 fetchLogin 方法
@@ -117,7 +117,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-
 
   @override
   void initState() {
@@ -245,7 +244,7 @@ class _LoginPageState extends State<LoginPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const ChooseVersionPage(),
+                        builder: (context) => const RegisterPage(userType: "Student"),
                       ),
                     );
                   },

@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_project/pages/fill_info_page.dart';
+import 'package:flutter_project/pages/login.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_project/utils/constant.dart';
 
@@ -52,7 +54,13 @@ class _RegisterPageState extends State<RegisterPage> {
         const SnackBar(content: Text('Registration successful')),
       );
 
-      Navigator.pop(context); // 注册成功后返回登录页面
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FillUserInfoPage(),
+        ),
+      );
+      // 注册成功后跳转到fill info
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(responseBody["error"] ?? "Registration failed")),
@@ -126,7 +134,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 20),
                       hintText: 'Enter your name',
                       hintStyle: const TextStyle(color: Colors.black45),
                     ),
@@ -167,7 +176,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 20),
                       hintText: 'Enter your password',
                       hintStyle: const TextStyle(color: Colors.black45),
                     ),
@@ -229,7 +239,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : Text(
-                              'Sign up',
+                              'Next',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 32 * scaleX,
@@ -244,11 +254,16 @@ class _RegisterPageState extends State<RegisterPage> {
 
               // **已有账号？返回登录**
               Positioned(
-                left: 981 * scaleX,
+                left: 880 * scaleX,
                 top: 810 * scaleY,
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                    );
                   },
                   child: Text(
                     'Already have an account? Sign in',
