@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/test.dart';
+import 'package:flutter_project/pages/register_page.dart'; // 确保正确导入注册页面
 
 class ChooseVersionPage extends StatelessWidget {
   const ChooseVersionPage({super.key});
@@ -11,6 +11,7 @@ class ChooseVersionPage extends StatelessWidget {
 
     double buttonWidth = screenWidth * 0.4;
     double buttonHeight = screenHeight * 0.2;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Choose Version'),
@@ -43,8 +44,13 @@ class ChooseVersionPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    onPressed: () async {
-                      fetchLogin();
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RegisterPage(userType: "Teacher"),
+                        ),
+                      );
                     },
                     child: Text(
                       'Teacher',
@@ -66,8 +72,13 @@ class ChooseVersionPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    onPressed: () async {
-
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RegisterPage(userType: "Student"),
+                        ),
+                      );
                     },
                     child: Text(
                       'Student',

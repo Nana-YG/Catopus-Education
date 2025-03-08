@@ -1,48 +1,40 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_project/pages/register_page.dart';
+import 'package:flutter_project/pages/fill_info_page.dart';
+import 'package:flutter_project/pages/login.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/services.dart';
-import 'package:flutter_project/utils/constant.dart'; // ✅ 引入 baseApiUrl
-import 'package:flutter_project/pages/student_version/student_choose_class.dart';
-import 'package:flutter_project/pages/teacher_version/teacher_choose_class.dart';
-import 'package:flutter_project/test.dart'; // 引入 fetchLogin 方法
+import 'package:flutter_project/utils/constant.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  final String userType; // 区分教师和学生
+
+  const RegisterPage({super.key, required this.userType});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _RegisterPageState createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  /// **连接后端的登录逻辑**
-  Future<void> _login() async {
-  String username = _usernameController.text.trim();
-  String password = _passwordController.text.trim();
+  Future<void> _register() async {
+    String username = _usernameController.text;
+    String password = _passwordController.text;
 
-  if (username.isEmpty || password.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please enter both username and password')),
-    );
-    return;
-  }
+    if (username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields')),
+      );
+      return;
+    }
 
-  setState(() {
-    _isLoading = true;
-  });
+    setState(() {
+      _isLoading = true;
+    });
 
-  try {
-    var url = Uri.parse("$baseApiUrl/login/log-in");
-
-    // **1️⃣ 打印请求信息**
-    print("🔹 [REQUEST] Sending POST request to: $url");
-    print("🔹 Headers: {Username: $username, Password: $password}");
-
+    var url = Uri.parse("$baseApiUrl/login/register");
     var response = await http.post(
       url,
       headers: {
@@ -55,77 +47,29 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = false;
     });
 
-    // **2️⃣ 打印完整的 Response 信息**
-    print("🔸 [RESPONSE] Status Code: ${response.statusCode}");
-    print("🔸 Response Headers: ${response.headers}");
-    print("🔸 Response Body: ${response.body}");
-
     var responseBody = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
-      String token = responseBody["token"];
-
-      print("✅ Login Successful!");
-      print("🔹 Token: $token");
-
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login successful')),
+        const SnackBar(content: Text('Registration successful')),
       );
 
-      fetchLogin(); // ✅ 之前的 fetchLogin 方法仍然调用
-
-      // **从后端获取角色**
-      String role = username.startsWith('t') ? 'Teacher' : 'Student';
-
-      if (role == 'Teacher') {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TeacherChooseClassPage(
-              teacherName: username,
-              classes: [],
-            ),
-          ),
-        );
-      } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => StudentChooseClassPage(
-              studentName: username,
-              classes: [],
-            ),
-          ),
-        );
-      }
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FillUserInfoPage(),
+        ),
+      );
+      // 注册成功后跳转到fill info
     } else {
-      print("❌ Login Failed: ${responseBody["error"]}");
-
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(responseBody["error"] ?? "Login failed")),
+        SnackBar(content: Text(responseBody["error"] ?? "Registration failed")),
       );
     }
-  } catch (e) {
-    setState(() {
-      _isLoading = false;
-    });
-
-    print("❌ Network Error: $e");
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Network error, please try again later")),
-    );
-  }
-}
-
-  @override
-  void initState() {
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    // ✅ **UI 代码完全保留，不做任何修改**
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -143,11 +87,12 @@ class _LoginPageState extends State<LoginPage> {
           decoration: const BoxDecoration(color: Colors.white),
           child: Stack(
             children: [
+              // **页面标题**
               Positioned(
                 left: 666 * scaleX,
                 top: 234 * scaleY,
                 child: Text(
-                  'Login',
+                  'Register as ${widget.userType}',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 48 * scaleX,
@@ -157,25 +102,12 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
 
+              // **用户名**
               Positioned(
                 left: 855 * scaleX,
                 top: 354 * scaleY,
                 child: Text(
                   'Name',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 32 * scaleX,
-                    fontFamily: 'Manrope',
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ),
-
-              Positioned(
-                left: 855 * scaleX,
-                top: 515 * scaleY,
-                child: Text(
-                  'Password',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 32 * scaleX,
@@ -202,10 +134,26 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 20),
                       hintText: 'Enter your name',
                       hintStyle: const TextStyle(color: Colors.black45),
                     ),
+                  ),
+                ),
+              ),
+
+              // **密码**
+              Positioned(
+                left: 855 * scaleX,
+                top: 515 * scaleY,
+                child: Text(
+                  'Password',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 32 * scaleX,
+                    fontFamily: 'Manrope',
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ),
@@ -228,7 +176,8 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 20),
                       hintText: 'Enter your password',
                       hintStyle: const TextStyle(color: Colors.black45),
                     ),
@@ -236,17 +185,13 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
 
+              // **返回按钮**
               Positioned(
                 left: 753 * scaleX,
                 top: 707 * scaleY,
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const RegisterPage(userType: "Student"),
-                      ),
-                    );
+                    Navigator.pop(context);
                   },
                   child: Container(
                     width: 276 * scaleX,
@@ -264,7 +209,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     child: Center(
                       child: Text(
-                        'Sign up',
+                        'Back',
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 32 * scaleX,
@@ -277,11 +222,12 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
 
+              // **注册按钮**
               Positioned(
                 left: 1131 * scaleX,
                 top: 707 * scaleY,
                 child: GestureDetector(
-                  onTap: _login, // ✅ **调用后端登录 API**
+                  onTap: _register,
                   child: Container(
                     width: 276 * scaleX,
                     height: 69 * scaleY,
@@ -290,28 +236,37 @@ class _LoginPageState extends State<LoginPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
-                      child: Text(
-                        'Sign in',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 32 * scaleX,
-                          fontFamily: 'Manrope',
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : Text(
+                              'Next',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 32 * scaleX,
+                                fontFamily: 'Manrope',
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
                     ),
                   ),
                 ),
               ),
+
+              // **已有账号？返回登录**
               Positioned(
-                left: 981 * scaleX,
+                left: 880 * scaleX,
                 top: 810 * scaleY,
                 child: GestureDetector(
                   onTap: () {
-                    // TODO: 忘记密码逻辑
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                    );
                   },
                   child: Text(
-                    'Forgot password?',
+                    'Already have an account? Sign in',
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 24 * scaleX,
