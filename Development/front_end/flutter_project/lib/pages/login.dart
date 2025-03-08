@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_project/generated/app_localizations.dart';
 import 'package:flutter_project/pages/register_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
@@ -118,6 +119,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
+
   @override
   void initState() {
     super.initState();
@@ -147,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
                 left: 666 * scaleX,
                 top: 234 * scaleY,
                 child: Text(
-                  'Login',
+                  AppLocalizations.of(context)!.login,
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 48 * scaleX,
@@ -161,7 +163,7 @@ class _LoginPageState extends State<LoginPage> {
                 left: 855 * scaleX,
                 top: 354 * scaleY,
                 child: Text(
-                  'Name',
+                  AppLocalizations.of(context)!.name,
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 32 * scaleX,
@@ -175,7 +177,7 @@ class _LoginPageState extends State<LoginPage> {
                 left: 855 * scaleX,
                 top: 515 * scaleY,
                 child: Text(
-                  'Password',
+                  AppLocalizations.of(context)!.password,
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 32 * scaleX,
@@ -203,7 +205,7 @@ class _LoginPageState extends State<LoginPage> {
                         borderSide: BorderSide.none,
                       ),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                      hintText: 'Enter your name',
+                      hintText: AppLocalizations.of(context)!.enterYourName,
                       hintStyle: const TextStyle(color: Colors.black45),
                     ),
                   ),
@@ -229,7 +231,7 @@ class _LoginPageState extends State<LoginPage> {
                         borderSide: BorderSide.none,
                       ),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                      hintText: 'Enter your password',
+                      hintText: AppLocalizations.of(context)!.enterYourPassword,
                       hintStyle: const TextStyle(color: Colors.black45),
                     ),
                   ),
@@ -264,7 +266,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     child: Center(
                       child: Text(
-                        'Sign up',
+                        AppLocalizations.of(context)!.signUp,
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 32 * scaleX,
@@ -291,7 +293,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     child: Center(
                       child: Text(
-                        'Sign in',
+                        AppLocalizations.of(context)!.signIn,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 32 * scaleX,
@@ -311,7 +313,7 @@ class _LoginPageState extends State<LoginPage> {
                     // TODO: 忘记密码逻辑
                   },
                   child: Text(
-                    'Forgot password?',
+                    AppLocalizations.of(context)!.forgotPassword,
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 24 * scaleX,

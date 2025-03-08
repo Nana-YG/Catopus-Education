@@ -1,0 +1,53 @@
+{
+  "appName": "Catopus 教育",
+
+  "welcomeText": "欢迎来到 Catopus-Education",
+  "settings": "设置",
+  "chooseLanguage": "选择语言",
+
+  "login": "登录",
+  "name": "用户名",
+  "password": "密码",
+  "enterYourName": "输入用户名",
+  "enterYourPassword": "输入密码",
+  "signUp": "注册",
+  "signIn": "登录",
+  "forgotPassword": "忘记密码？",
+
+  "loginSuccessful": "登录成功",
+  "loginFailed": "登录失败",
+  "networkError": "网络错误，请稍后重试",
+  "pleaseEnterBothFields": "请输入用户名和密码",
+
+  "teacherChooseClass": "选择您的课程（教师）",
+  "studentChooseClass": "选择您的课程（学生）",
+  "noClassesAvailable": "暂无课程",
+
+  "loading": "加载中...",
+  "retry": "重试",
+
+  "logout": "退出登录",
+  "confirmLogout": "确定要退出登录吗？",
+
+  "profile": "个人资料",
+  "updateProfile": "更新个人资料",
+  "saveChanges": "保存更改",
+  "cancel": "取消",
+
+  "success": "成功",
+  "error": "错误",
+  "tryAgain": "请重试",
+  "actionNotAllowed": "该操作不允许",
+
+  "registerAs": "注册为",
+  "pleaseFillAllFields": "请填写所有字段",
+  "registrationSuccessful": "注册成功",
+  "registrationFailed": "注册失败",
+  "back": "返回",
+  "next": "下一步",
+  "alreadyHaveAccount": "已有账号？登录",
+
+  "fillInfoTitle": "填写您的信息",
+  "submit": "提交",
+  "skip": "跳过"
+}

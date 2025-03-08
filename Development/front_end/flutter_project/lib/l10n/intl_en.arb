@@ -1,0 +1,53 @@
+{
+  "appName": "Catopus Education",
+
+  "welcomeText": "Welcome to Catopus-Education",
+  "settings": "Settings",
+  "chooseLanguage": "Choose a language",
+
+  "login": "Login",
+  "name": "Name",
+  "password": "Password",
+  "enterYourName": "Enter your name",
+  "enterYourPassword": "Enter your password",
+  "signUp": "Sign up",
+  "signIn": "Sign in",
+  "forgotPassword": "Forgot password?",
+
+  "loginSuccessful": "Login successful",
+  "loginFailed": "Login failed",
+  "networkError": "Network error, please try again later",
+  "pleaseEnterBothFields": "Please enter both username and password",
+
+  "teacherChooseClass": "Choose Your Class (Teacher)",
+  "studentChooseClass": "Choose Your Class (Student)",
+  "noClassesAvailable": "No classes available",
+
+  "loading": "Loading...",
+  "retry": "Retry",
+
+  "logout": "Logout",
+  "confirmLogout": "Are you sure you want to logout?",
+
+  "profile": "Profile",
+  "updateProfile": "Update Profile",
+  "saveChanges": "Save Changes",
+  "cancel": "Cancel",
+
+  "success": "Success",
+  "error": "Error",
+  "tryAgain": "Please try again",
+  "actionNotAllowed": "This action is not allowed",
+
+  "registerAs": "Register as",
+  "pleaseFillAllFields": "Please fill in all fields",
+  "registrationSuccessful": "Registration successful",
+  "registrationFailed": "Registration failed",
+  "back": "Back",
+  "next": "Next",
+  "alreadyHaveAccount": "Already have an account? Sign in",
+
+  "fillInfoTitle": "Fill in your information",
+  "submit": "Submit",
+  "skip": "Skip"
+}

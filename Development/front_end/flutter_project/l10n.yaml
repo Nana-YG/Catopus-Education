@@ -1,0 +1,8 @@
+arb-dir: lib/l10n
+template-arb-file: intl_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+synthetic-package: false
+nullable-getter: false
+output-dir: lib/generated  # **指定输出目录**
+

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_project/generated/app_localizations.dart';
 import 'package:flutter_project/pages/fill_info_page.dart';
 import 'package:flutter_project/pages/login.dart';
 import 'package:http/http.dart' as http;
@@ -25,7 +26,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.pleaseFillAllFields)),
       );
       return;
     }
@@ -51,7 +52,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registration successful')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.registrationSuccessful)),
       );
 
       Navigator.push(
@@ -63,7 +64,7 @@ class _RegisterPageState extends State<RegisterPage> {
       // 注册成功后跳转到fill info
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(responseBody["error"] ?? "Registration failed")),
+        SnackBar(content: Text(responseBody["error"] ?? AppLocalizations.of(context)!.registrationFailed)),
       );
     }
   }
@@ -92,7 +93,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 left: 666 * scaleX,
                 top: 234 * scaleY,
                 child: Text(
-                  'Register as ${widget.userType}',
+                  '${AppLocalizations.of(context)!.registerAs} ${widget.userType}',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 48 * scaleX,
@@ -107,7 +108,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 left: 855 * scaleX,
                 top: 354 * scaleY,
                 child: Text(
-                  'Name',
+                  AppLocalizations.of(context)!.name,
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 32 * scaleX,
@@ -136,7 +137,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       contentPadding:
                           const EdgeInsets.symmetric(horizontal: 20),
-                      hintText: 'Enter your name',
+                      hintText: AppLocalizations.of(context)!.enterYourName,
                       hintStyle: const TextStyle(color: Colors.black45),
                     ),
                   ),
@@ -148,7 +149,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 left: 855 * scaleX,
                 top: 515 * scaleY,
                 child: Text(
-                  'Password',
+                  AppLocalizations.of(context)!.password,
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 32 * scaleX,
@@ -178,7 +179,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       contentPadding:
                           const EdgeInsets.symmetric(horizontal: 20),
-                      hintText: 'Enter your password',
+                      hintText: AppLocalizations.of(context)!.enterYourPassword,
                       hintStyle: const TextStyle(color: Colors.black45),
                     ),
                   ),
@@ -209,7 +210,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     child: Center(
                       child: Text(
-                        'Back',
+                        AppLocalizations.of(context)!.back,
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 32 * scaleX,
@@ -239,7 +240,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : Text(
-                              'Next',
+                              AppLocalizations.of(context)!.next,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 32 * scaleX,
@@ -266,7 +267,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     );
                   },
                   child: Text(
-                    'Already have an account? Sign in',
+                    AppLocalizations.of(context)!.alreadyHaveAccount,
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 24 * scaleX,

@@ -13,6 +13,14 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   google_fonts: ^6.0.1
+  http: ^1.0.0
+  flutter_localizations: # 添加 Flutter 本地化支持
+    sdk: flutter
+  intl: ^0.19.0 # 添加 intl 进行本地化
+  flutter_gen: ^5.10.0
+  shared_preferences: ^2.2.2  # 确保是最新版本
+
+
 
 dev_dependencies:
   flutter_test:
@@ -22,6 +30,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
 
   assets:
     - lib/temp_data/mock_login_data.json
