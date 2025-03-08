@@ -1,13 +1,13 @@
 package org.catopus.loginserver.service;
 
+import java.security.SecureRandom;
+import java.util.Optional;
+
 import org.catopus.loginserver.model.User;
 import org.catopus.loginserver.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
-import java.security.SecureRandom;
 
 @Service
 public class UserService {
@@ -59,4 +59,8 @@ public class UserService {
         return null; // 密码错误
     }
 
+    public boolean isTokenValidForUser(String username, String token) {
+        Optional<User> user = userRepository.findByUsernameAndToken(username, token);
+        return user.isPresent();
+    }
 }
