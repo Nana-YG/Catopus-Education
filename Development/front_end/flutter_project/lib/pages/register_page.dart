@@ -5,6 +5,7 @@ import 'package:flutter_project/pages/fill_info_page.dart';
 import 'package:flutter_project/pages/login.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_project/utils/constant.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterPage extends StatefulWidget {
   final String userType; // 区分教师和学生
@@ -26,7 +27,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.pleaseFillAllFields)),
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!.pleaseFillAllFields)),
       );
       return;
     }
@@ -35,7 +37,7 @@ class _RegisterPageState extends State<RegisterPage> {
       _isLoading = true;
     });
 
-    var url = Uri.parse("$baseApiUrl/login/register");
+    var url = Uri.parse("$baseApiUrl/login/signup");
     var response = await http.post(
       url,
       headers: {
@@ -51,20 +53,34 @@ class _RegisterPageState extends State<RegisterPage> {
     var responseBody = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
+      String token = responseBody["token"]; // ✅ 获取 `token`
+
+      // **存储 `token` 到本地**
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token);
+      await prefs.setString('username', username);
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.registrationSuccessful)),
+        SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.registrationSuccessful)),
       );
 
+      // ✅ 传递 `username` 和 `token` 进入 `FillUserInfoPage`
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => FillUserInfoPage(),
+          builder: (context) => FillUserInfoPage(
+            username: username,
+            token: token,
+          ),
         ),
       );
-      // 注册成功后跳转到fill info
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(responseBody["error"] ?? AppLocalizations.of(context)!.registrationFailed)),
+        SnackBar(
+            content: Text(responseBody["error"] ??
+                AppLocalizations.of(context)!.registrationFailed)),
       );
     }
   }

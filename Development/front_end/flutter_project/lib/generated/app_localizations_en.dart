@@ -128,4 +128,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get skip => 'Skip';
+
+  @override
+  String get nickname => 'Nickname';
+
+  @override
+  String get realName => 'Real Name';
+
+  @override
+  String get school => 'School';
+
+  @override
+  String get className => 'Class';
+
+  @override
+  String get studentID => 'Student ID';
+
+  @override
+  String get age => 'Age';
+
+  @override
+  String get gender => 'Gender';
+
+  @override
+  String get male => 'Male';
+
+  @override
+  String get female => 'Female';
+
+  @override
+  String get preferNotToSay => 'Prefer not to say';
+
+  @override
+  String get selectSubjects => 'Select Subjects:';
+
+  @override
+  String get math => 'Math';
+
+  @override
+  String get science => 'Science';
+
+  @override
+  String get history => 'History';
+
+  @override
+  String get art => 'Art';
+
+  @override
+  String get music => 'Music';
+
+  @override
+  String get pe => 'PE';
+
+  @override
+  String get english => 'English';
 }

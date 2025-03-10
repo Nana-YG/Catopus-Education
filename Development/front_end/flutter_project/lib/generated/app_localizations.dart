@@ -340,6 +340,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Skip'**
   String get skip;
+
+  /// No description provided for @nickname.
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname'**
+  String get nickname;
+
+  /// No description provided for @realName.
+  ///
+  /// In en, this message translates to:
+  /// **'Real Name'**
+  String get realName;
+
+  /// No description provided for @school.
+  ///
+  /// In en, this message translates to:
+  /// **'School'**
+  String get school;
+
+  /// No description provided for @className.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get className;
+
+  /// No description provided for @studentID.
+  ///
+  /// In en, this message translates to:
+  /// **'Student ID'**
+  String get studentID;
+
+  /// No description provided for @age.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get age;
+
+  /// No description provided for @gender.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get gender;
+
+  /// No description provided for @male.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get male;
+
+  /// No description provided for @female.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get female;
+
+  /// No description provided for @preferNotToSay.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer not to say'**
+  String get preferNotToSay;
+
+  /// No description provided for @selectSubjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Subjects:'**
+  String get selectSubjects;
+
+  /// No description provided for @math.
+  ///
+  /// In en, this message translates to:
+  /// **'Math'**
+  String get math;
+
+  /// No description provided for @science.
+  ///
+  /// In en, this message translates to:
+  /// **'Science'**
+  String get science;
+
+  /// No description provided for @history.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get history;
+
+  /// No description provided for @art.
+  ///
+  /// In en, this message translates to:
+  /// **'Art'**
+  String get art;
+
+  /// No description provided for @music.
+  ///
+  /// In en, this message translates to:
+  /// **'Music'**
+  String get music;
+
+  /// No description provided for @pe.
+  ///
+  /// In en, this message translates to:
+  /// **'PE'**
+  String get pe;
+
+  /// No description provided for @english.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get english;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

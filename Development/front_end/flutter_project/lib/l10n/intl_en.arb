@@ -49,5 +49,24 @@
 
   "fillInfoTitle": "Fill in your information",
   "submit": "Submit",
-  "skip": "Skip"
+  "skip": "Skip",
+
+  "nickname": "Nickname",
+  "realName": "Real Name",
+  "school": "School",
+  "className": "Class",
+  "studentID": "Student ID",
+  "age": "Age",
+  "gender": "Gender",
+  "male": "Male",
+  "female": "Female",
+  "preferNotToSay": "Prefer not to say",
+  "selectSubjects": "Select Subjects:",
+  "math": "Math",
+  "science": "Science",
+  "history": "History",
+  "art": "Art",
+  "music": "Music",
+  "pe": "PE",
+  "english": "English"
 }

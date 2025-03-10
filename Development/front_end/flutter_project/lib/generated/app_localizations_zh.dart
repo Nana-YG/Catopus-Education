@@ -128,4 +128,58 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get skip => '跳过';
+
+  @override
+  String get nickname => '昵称';
+
+  @override
+  String get realName => '真实姓名';
+
+  @override
+  String get school => '学校';
+
+  @override
+  String get className => '班级';
+
+  @override
+  String get studentID => '学号';
+
+  @override
+  String get age => '年龄';
+
+  @override
+  String get gender => '性别';
+
+  @override
+  String get male => '男';
+
+  @override
+  String get female => '女';
+
+  @override
+  String get preferNotToSay => '不愿透露';
+
+  @override
+  String get selectSubjects => '选择科目:';
+
+  @override
+  String get math => '数学';
+
+  @override
+  String get science => '科学';
+
+  @override
+  String get history => '历史';
+
+  @override
+  String get art => '美术';
+
+  @override
+  String get music => '音乐';
+
+  @override
+  String get pe => '体育';
+
+  @override
+  String get english => '英语';
 }
