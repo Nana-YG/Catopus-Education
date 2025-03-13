@@ -3,6 +3,7 @@ package org.catopus.loginserver.controller;
 import java.util.Map;
 import java.util.Optional;
 
+import org.catopus.loginserver.model.AccountType;
 import org.catopus.loginserver.model.UserInfo;
 import org.catopus.loginserver.service.UserInfoService;
 import org.catopus.loginserver.service.UserService;
@@ -26,17 +27,19 @@ public class AuthController {
         this.userInfoService = userInfoService;
     }
 
-
     @PostMapping("/signup")
     public ResponseEntity<?> register(
             @RequestHeader(value = "Username", required = false) String username,
-            @RequestHeader(value = "Password", required = false) String password) {
+            @RequestHeader(value = "Password", required = false) String password,
+            @RequestHeader(value = "AccountType", required = false) String accountTypeStr) {
 
-        if (username == null || password == null || username.isBlank() || password.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Username and password required"));
+        if (username == null || password == null || accountTypeStr == null || username.isBlank() || password.isBlank() || accountTypeStr.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Username, password and accoutn type are required"));
         }
 
-        boolean success = userService.register(username, password);
+        AccountType accountType = AccountType.valueOf(accountTypeStr.toUpperCase());
+
+        boolean success = userService.register(username, password, accountType);
         if (success) {
             String token = userService.getTokenByUsername(username); // 注册成功返回 token
             return ResponseEntity.ok(Map.of("message", "User registered successfully", "token", token));
@@ -56,7 +59,16 @@ public class AuthController {
 
         String token = userService.login(username, password);
         if (token != null) {
-            return ResponseEntity.ok(Map.of("message", "Login successful", "token", token));
+            try {
+                AccountType accountType = userService.getAccountTypeByUsername(username);
+                return ResponseEntity.ok(Map.of(
+                        "message", "Login successful",
+                        "token", token,
+                        "accountType", accountType.name()
+                ));
+            } catch (IllegalStateException e) {
+                return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+            }
         } else {
             return ResponseEntity.status(401).body(Map.of("error", "Invalid username or password"));
         }
@@ -95,7 +107,7 @@ public class AuthController {
         if (!isValid) {
             return ResponseEntity.status(401).body(Map.of("error", "Unauthorized: Invalid token or username"));
         }
-        
+
         // Initializing the current user's info in info table.
         userInfoService.initializeUserInfo(token, userInfoRequest);
 

@@ -3,6 +3,7 @@ package org.catopus.loginserver.service;
 import java.security.SecureRandom;
 import java.util.Optional;
 
+import org.catopus.loginserver.model.AccountType;
 import org.catopus.loginserver.model.User;
 import org.catopus.loginserver.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,7 +20,7 @@ public class UserService {
         this.userRepository = userRepository;
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
-    
+
     private String generateToken() {
         SecureRandom random = new SecureRandom();
         StringBuilder token = new StringBuilder(32);
@@ -29,13 +30,13 @@ public class UserService {
         }
         return token.toString();
     }
-    
+
     public String getTokenByUsername(String username) {
         Optional<User> userOpt = userRepository.findByUsername(username);
         return userOpt.map(User::getToken).orElse(null);
     }
 
-    public boolean register(String username, String password) {
+    public boolean register(String username, String password, AccountType accountType) {
         if (userRepository.findByUsername(username).isPresent()) {
             return false; // 用户已存在
         }
@@ -43,6 +44,7 @@ public class UserService {
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password)); // 加密密码
         user.setToken(generateToken()); // 生成随机 token
+        user.setAccountType(accountType);
         userRepository.save(user);
         return true;
     }
@@ -63,4 +65,16 @@ public class UserService {
         Optional<User> user = userRepository.findByUsernameAndToken(username, token);
         return user.isPresent();
     }
+
+    public AccountType getAccountTypeByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .map(user -> {
+                    if (user.getAccountType() == null) {
+                        throw new IllegalStateException("Account type is missing for this user.");
+                    }
+                    return user.getAccountType();
+                })
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+    }
+
 }
