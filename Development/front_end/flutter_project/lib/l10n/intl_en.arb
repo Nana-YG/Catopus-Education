@@ -2,8 +2,9 @@
   "appName": "Catopus Education",
 
   "welcomeText": "Welcome to Catopus-Education",
-  "settings": "Settings",
-  "chooseLanguage": "Choose a language",
+  "languageSettings": "Language Settings",
+
+  "chooseLanguage": "Please Choose a language",
 
   "login": "Login",
   "name": "Name",
@@ -62,11 +63,23 @@
   "female": "Female",
   "preferNotToSay": "Prefer not to say",
   "selectSubjects": "Select Subjects:",
-  "math": "Math",
-  "science": "Science",
   "history": "History",
-  "art": "Art",
-  "music": "Music",
-  "pe": "PE",
-  "english": "English"
+  "geography": "Geography",
+  "politics": "Politics",
+  "physics": "Physics",
+  "chemistry": "Chemistry",
+  "biology": "Biology",
+  "mathematics": "Mathematics",
+  "psychology": "Psychology",
+  "cs": "Computer Science",
+  "sociology": "Sociology",
+  "economics": "Economics",
+  "finance": "Finance",
+  "literature": "Literature",
+  "other": "Other",
+
+  "studentTermsTitle": "Student Terms and Conditions",
+  "studentTermsContent": "As a student using Catopus Education, you must follow the platform's guidelines and code of conduct. Any violation may result in account suspension...",
+  "agreeStudentTerms": "I agree to the Student Terms and Conditions",
+  "continueButton": "Continue"
 }

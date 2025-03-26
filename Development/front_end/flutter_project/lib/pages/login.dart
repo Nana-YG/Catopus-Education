@@ -1,13 +1,16 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/generated/app_localizations.dart';
+import 'package:flutter_project/pages/student_version/student_fill_info_page.dart';
 import 'package:flutter_project/pages/register_page.dart';
+import 'package:flutter_project/pages/teacher_version/teacher_fill_info_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
 import 'package:flutter_project/utils/constant.dart'; // ✅ 引入 baseApiUrl
 import 'package:flutter_project/pages/student_version/student_choose_class.dart';
 import 'package:flutter_project/pages/teacher_version/teacher_choose_class.dart';
-import 'package:flutter_project/test.dart'; // 引入 fetchLogin 方法
+import 'package:flutter_project/test.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // 引入 fetchLogin 方法
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -21,104 +24,154 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  /// **连接后端的登录逻辑**
   Future<void> _login() async {
-  String username = _usernameController.text.trim();
-  String password = _passwordController.text.trim();
+    String username = _usernameController.text.trim();
+    String password = _passwordController.text.trim();
 
-  if (username.isEmpty || password.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please enter both username and password')),
-    );
-    return;
-  }
-
-  setState(() {
-    _isLoading = true;
-  });
-
-  try {
-    var url = Uri.parse("$baseApiUrl/login/signin");
-
-    // **1️⃣ 打印请求信息**
-    print("🔹 [REQUEST] Sending POST request to: $url");
-    print("🔹 Headers: {Username: $username, Password: $password}");
-
-    var response = await http.post(
-      url,
-      headers: {
-        "Username": username,
-        "Password": password,
-      },
-    );
+    if (username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!.pleaseEnterBothFields)),
+      );
+      return;
+    }
 
     setState(() {
-      _isLoading = false;
+      _isLoading = true;
     });
 
-    // **2️⃣ 打印完整的 Response 信息**
-    print("🔸 [RESPONSE] Status Code: ${response.statusCode}");
-    print("🔸 Response Headers: ${response.headers}");
-    print("🔸 Response Body: ${response.body}");
+    try {
+      var url = Uri.parse("$baseApiUrl/login/signin");
 
-    var responseBody = jsonDecode(response.body);
-
-    if (response.statusCode == 200) {
-      String token = responseBody["token"];
-
-      print("✅ Login Successful!");
-      print("🔹 Token: $token");
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login successful')),
+      var response = await http.post(
+        url,
+        headers: {
+          "Username": username,
+          "Password": password,
+        },
       );
 
-      fetchLogin(); // ✅ 之前的 fetchLogin 方法仍然调用
+      setState(() {
+        _isLoading = false;
+      });
 
-      // **从后端获取角色**
-      String role = username.startsWith('t') ? 'Teacher' : 'Student';
+      var responseBody = jsonDecode(response.body);
 
-      if (role == 'Teacher') {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TeacherChooseClassPage(
-              teacherName: username,
-              classes: [],
-            ),
-          ),
+      if (response.statusCode == 200) {
+        print("🔹 [CHECK LOGIN] Status: ${response.statusCode}");
+        print("🔹 [CHECK LOGIN] Body: ${response.body}");
+        String token = responseBody["token"];
+        String accountType = responseBody["accountType"]; // ✅ 获取 accountType
+
+        // **存储 token, username, accountType**
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+        await prefs.setString('username', username);
+        await prefs.setString('accountType', accountType); // ✅ 存储 accountType
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!.loginSuccessful)),
         );
+
+        // **✅ 调用 check API，确保用户信息是否完整**
+        await _checkUserInfo(username, token, accountType);
       } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => StudentChooseClassPage(
-              studentName: username,
-              classes: [],
-            ),
-          ),
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(responseBody["error"] ??
+                  AppLocalizations.of(context)!.loginFailed)),
         );
       }
-    } else {
-      print("❌ Login Failed: ${responseBody["error"]}");
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(responseBody["error"] ?? "Login failed")),
+        SnackBar(content: Text(AppLocalizations.of(context)!.networkError)),
       );
     }
-  } catch (e) {
-    setState(() {
-      _isLoading = false;
-    });
-
-    print("❌ Network Error: $e");
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Network error, please try again later")),
-    );
   }
-}
 
+  Future<void> _checkUserInfo(
+      String username, String token, String accountType) async {
+    final url = Uri.parse("$baseApiUrl/login/check");
+    final headers = {
+      "Username": username,
+      "Token": token,
+    };
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      print("🔹 [CHECK LOGIN] Status: ${response.statusCode}");
+      print("🔹 [CHECK LOGIN] Body: ${response.body}");
+
+      if (response.statusCode == 204) {
+        print("❌ 用户信息不完整，需要填写信息");
+
+        // ✅ 根据 accountType 跳转到对应的信息填写页面
+        if (accountType == "TEACHER") {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TeacherUserInfoPage(
+                username: username,
+                token: token,
+              ),
+            ),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => StudentUserInfoPage(
+                username: username,
+                token: token,
+              ),
+            ),
+          );
+        }
+      } else if (response.statusCode == 200) {
+        print("✅ 用户信息完整，跳转到选择课程页面");
+
+        var userInfo = jsonDecode(response.body);
+
+        if (accountType == "TEACHER") {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TeacherChooseClassPage(
+                teacherName: username,
+                classes: userInfo["classes"] ?? [],
+              ),
+            ),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => StudentChooseClassPage(
+                studentName: username,
+                classes: userInfo["classes"] ?? [],
+              ),
+            ),
+          );
+        }
+      } else {
+        print("❌ 服务器返回错误: ${response.statusCode}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.networkError)),
+        );
+      }
+    } catch (e) {
+      print("❌ 登录检查失败: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.networkError)),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -158,7 +211,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
               Positioned(
                 left: 855 * scaleX,
                 top: 354 * scaleY,
@@ -172,7 +224,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
               Positioned(
                 left: 855 * scaleX,
                 top: 515 * scaleY,
@@ -186,7 +237,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
               Positioned(
                 left: 855 * scaleX,
                 top: 413 * scaleY,
@@ -204,14 +254,14 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 20),
                       hintText: AppLocalizations.of(context)!.enterYourName,
                       hintStyle: const TextStyle(color: Colors.black45),
                     ),
                   ),
                 ),
               ),
-
               Positioned(
                 left: 855 * scaleX,
                 top: 573 * scaleY,
@@ -230,14 +280,14 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 20),
                       hintText: AppLocalizations.of(context)!.enterYourPassword,
                       hintStyle: const TextStyle(color: Colors.black45),
                     ),
                   ),
                 ),
               ),
-
               Positioned(
                 left: 753 * scaleX,
                 top: 707 * scaleY,
@@ -246,7 +296,8 @@ class _LoginPageState extends State<LoginPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const RegisterPage(userType: "Student"),
+                        builder: (context) =>
+                            const RegisterPage(userType: "Student"),
                       ),
                     );
                   },
@@ -278,7 +329,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
               Positioned(
                 left: 1131 * scaleX,
                 top: 707 * scaleY,

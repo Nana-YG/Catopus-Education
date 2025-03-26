@@ -107,16 +107,16 @@ abstract class AppLocalizations {
   /// **'Welcome to Catopus-Education'**
   String get welcomeText;
 
-  /// No description provided for @settings.
+  /// No description provided for @languageSettings.
   ///
   /// In en, this message translates to:
-  /// **'Settings'**
-  String get settings;
+  /// **'Language Settings'**
+  String get languageSettings;
 
   /// No description provided for @chooseLanguage.
   ///
   /// In en, this message translates to:
-  /// **'Choose a language'**
+  /// **'Please Choose a language'**
   String get chooseLanguage;
 
   /// No description provided for @login.
@@ -407,47 +407,113 @@ abstract class AppLocalizations {
   /// **'Select Subjects:'**
   String get selectSubjects;
 
-  /// No description provided for @math.
-  ///
-  /// In en, this message translates to:
-  /// **'Math'**
-  String get math;
-
-  /// No description provided for @science.
-  ///
-  /// In en, this message translates to:
-  /// **'Science'**
-  String get science;
-
   /// No description provided for @history.
   ///
   /// In en, this message translates to:
   /// **'History'**
   String get history;
 
-  /// No description provided for @art.
+  /// No description provided for @geography.
   ///
   /// In en, this message translates to:
-  /// **'Art'**
-  String get art;
+  /// **'Geography'**
+  String get geography;
 
-  /// No description provided for @music.
+  /// No description provided for @politics.
   ///
   /// In en, this message translates to:
-  /// **'Music'**
-  String get music;
+  /// **'Politics'**
+  String get politics;
 
-  /// No description provided for @pe.
+  /// No description provided for @physics.
   ///
   /// In en, this message translates to:
-  /// **'PE'**
-  String get pe;
+  /// **'Physics'**
+  String get physics;
 
-  /// No description provided for @english.
+  /// No description provided for @chemistry.
   ///
   /// In en, this message translates to:
-  /// **'English'**
-  String get english;
+  /// **'Chemistry'**
+  String get chemistry;
+
+  /// No description provided for @biology.
+  ///
+  /// In en, this message translates to:
+  /// **'Biology'**
+  String get biology;
+
+  /// No description provided for @mathematics.
+  ///
+  /// In en, this message translates to:
+  /// **'Mathematics'**
+  String get mathematics;
+
+  /// No description provided for @psychology.
+  ///
+  /// In en, this message translates to:
+  /// **'Psychology'**
+  String get psychology;
+
+  /// No description provided for @cs.
+  ///
+  /// In en, this message translates to:
+  /// **'Computer Science'**
+  String get cs;
+
+  /// No description provided for @sociology.
+  ///
+  /// In en, this message translates to:
+  /// **'Sociology'**
+  String get sociology;
+
+  /// No description provided for @economics.
+  ///
+  /// In en, this message translates to:
+  /// **'Economics'**
+  String get economics;
+
+  /// No description provided for @finance.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance'**
+  String get finance;
+
+  /// No description provided for @literature.
+  ///
+  /// In en, this message translates to:
+  /// **'Literature'**
+  String get literature;
+
+  /// No description provided for @other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get other;
+
+  /// No description provided for @studentTermsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Terms and Conditions'**
+  String get studentTermsTitle;
+
+  /// No description provided for @studentTermsContent.
+  ///
+  /// In en, this message translates to:
+  /// **'As a student using Catopus Education, you must follow the platform\'s guidelines and code of conduct. Any violation may result in account suspension...'**
+  String get studentTermsContent;
+
+  /// No description provided for @agreeStudentTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree to the Student Terms and Conditions'**
+  String get agreeStudentTerms;
+
+  /// No description provided for @continueButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueButton;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

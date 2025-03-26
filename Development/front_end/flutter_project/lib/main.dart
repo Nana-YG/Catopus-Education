@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_project/generated/app_localizations.dart';
-import 'package:flutter_project/pages/settings.dart';
+import 'package:flutter_project/pages/language_setting_page.dart.dart';
 import 'package:flutter_project/pages/welcome.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+   // ✅ 清除 SharedPreferences 数据
+  // await clearSharedPreferences(); // **运行一次后可以注释掉**
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
@@ -38,6 +40,8 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _locale = widget.savedLocale ?? const Locale('zh', 'CN'); // 默认中文
     _hasChosenLanguage = widget.hasChosenLanguage; // 读取是否选择过语言
+    debugPrint("🌍 当前存储的语言: ${_locale.languageCode}");
+  debugPrint("🚀 是否已经选择语言: $_hasChosenLanguage");
   }
 
   void setLocale(Locale newLocale) async {
@@ -72,8 +76,8 @@ class _MyAppState extends State<MyApp> {
         return const Locale('zh', 'CN'); // 默认使用中文
       },
       home: _hasChosenLanguage
-          ? WelcomePage() // **如果已经选过语言，进入 WelcomePage**
-          : SettingsPage(setLocale: setLocale), // **否则进入 SettingsPage**
+          ? const WelcomePage() // **如果已经选过语言，进入 WelcomePage**
+          : LanguageSettingsPage(setLocale: setLocale), // **否则进入 SettingsPage**
     );
   }
 }
@@ -89,5 +93,14 @@ Future<Locale?> getSavedLocale() async {
 
 Future<bool> getHasChosenLanguage() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getBool('hasChosenLanguage') ?? false;
+  bool hasChosen = prefs.getBool('hasChosenLanguage') ?? false;
+  debugPrint("🚀 hasChosenLanguage: $hasChosen"); // ✅ 打印日志，确认值
+  return hasChosen;
 }
+Future<void> clearSharedPreferences() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.clear(); // 清除所有存储数据
+  debugPrint("🚀 SharedPreferences 已清除");
+}
+
+

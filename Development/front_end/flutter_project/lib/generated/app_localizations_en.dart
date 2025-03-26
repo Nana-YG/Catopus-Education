@@ -13,10 +13,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeText => 'Welcome to Catopus-Education';
 
   @override
-  String get settings => 'Settings';
+  String get languageSettings => 'Language Settings';
 
   @override
-  String get chooseLanguage => 'Choose a language';
+  String get chooseLanguage => 'Please Choose a language';
 
   @override
   String get login => 'Login';
@@ -163,23 +163,56 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectSubjects => 'Select Subjects:';
 
   @override
-  String get math => 'Math';
-
-  @override
-  String get science => 'Science';
-
-  @override
   String get history => 'History';
 
   @override
-  String get art => 'Art';
+  String get geography => 'Geography';
 
   @override
-  String get music => 'Music';
+  String get politics => 'Politics';
 
   @override
-  String get pe => 'PE';
+  String get physics => 'Physics';
 
   @override
-  String get english => 'English';
+  String get chemistry => 'Chemistry';
+
+  @override
+  String get biology => 'Biology';
+
+  @override
+  String get mathematics => 'Mathematics';
+
+  @override
+  String get psychology => 'Psychology';
+
+  @override
+  String get cs => 'Computer Science';
+
+  @override
+  String get sociology => 'Sociology';
+
+  @override
+  String get economics => 'Economics';
+
+  @override
+  String get finance => 'Finance';
+
+  @override
+  String get literature => 'Literature';
+
+  @override
+  String get other => 'Other';
+
+  @override
+  String get studentTermsTitle => 'Student Terms and Conditions';
+
+  @override
+  String get studentTermsContent => 'As a student using Catopus Education, you must follow the platform\'s guidelines and code of conduct. Any violation may result in account suspension...';
+
+  @override
+  String get agreeStudentTerms => 'I agree to the Student Terms and Conditions';
+
+  @override
+  String get continueButton => 'Continue';
 }

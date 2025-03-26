@@ -1,21 +1,25 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_project/pages/student_version/student_choose_class.dart';
+import 'package:flutter_project/pages/student_version/student_terms_page.dart';
+import 'package:flutter_project/pages/teacher_version/teacher_choose_class.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_project/generated/app_localizations.dart';
 import 'package:flutter_project/utils/constant.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class FillUserInfoPage extends StatefulWidget {
+class StudentUserInfoPage extends StatefulWidget {
   final String username; // ✅ 添加用户名
   final String token; // ✅ 添加 token
 
-  const FillUserInfoPage({super.key, required this.username, required this.token});
+  const StudentUserInfoPage(
+      {super.key, required this.username, required this.token});
 
   @override
   _FillUserInfoPageState createState() => _FillUserInfoPageState();
 }
 
-
-class _FillUserInfoPageState extends State<FillUserInfoPage> {
+class _FillUserInfoPageState extends State<StudentUserInfoPage> {
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _realNameController = TextEditingController();
   final TextEditingController _schoolController = TextEditingController();
@@ -28,63 +32,140 @@ class _FillUserInfoPageState extends State<FillUserInfoPage> {
   List<String> _selectedSubjects = [];
 
   List<String> _subjects = []; // ✅ 先声明为空列表
-/// **提交用户信息到后端**
-Future<void> _submitUserInfo() async {
-  if (_nicknameController.text.isEmpty ||
-      _realNameController.text.isEmpty ||
-      _schoolController.text.isEmpty ||
-      _classController.text.isEmpty ||
-      _studentIDController.text.isEmpty ||
-      _ageController.text.isEmpty ||
-      _selectedGender.isEmpty ||
-      _selectedSubjects.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.pleaseFillAllFields)),
-    );
-    return;
-  }
-
-  final url = Uri.parse("$baseApiUrl/login/signup/setinfo");
-  final headers = {
-  "Content-Type": "application/json",
-  "Username": widget.username, // ✅ 传递实际的用户名
-  "Token": widget.token,  // ✅ 传递实际的 token
-};
-
-
-  final body = jsonEncode({
-    "nickname": _nicknameController.text,
-    "realName": _realNameController.text,
-    "school": _schoolController.text,
-    "className": _classController.text,
-    "studentId": _studentIDController.text,
-    "gender": _selectedGender,
-    "age": int.parse(_ageController.text),
-    "subjects": _selectedSubjects.join(","), // **逗号分隔的字符串**
-    "studentConsent": true,
-    "guardianConsent": true
-  });
-
-  try {
-    final response = await http.post(url, headers: headers, body: body);
-    final responseBody = jsonDecode(response.body);
-
-    if (response.statusCode == 200) {
+  /// **提交用户信息到后端**
+  Future<void> _submitUserInfo() async {
+    if (_nicknameController.text.isEmpty ||
+        _realNameController.text.isEmpty ||
+        _schoolController.text.isEmpty ||
+        _classController.text.isEmpty ||
+        _studentIDController.text.isEmpty ||
+        _ageController.text.isEmpty ||
+        _selectedGender.isEmpty ||
+        _selectedSubjects.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.registrationSuccessful)),
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!.pleaseFillAllFields)),
       );
-      Navigator.pop(context);
-    } else {
+      return;
+    }
+    Future<void> loginAfterSubmit(String username, String token) async {
+      final checkUrl = Uri.parse("$baseApiUrl/login/check");
+      final headers = {
+        "Username": username,
+        "Token": token,
+      };
+
+      try {
+        final response = await http.get(checkUrl, headers: headers);
+
+        print("🔹 [CHECK LOGIN] Status: ${response.statusCode}");
+        print("🔹 [CHECK LOGIN] Body: ${response.body}");
+
+        if (response.statusCode == 204) {
+          // **用户信息不完整，仍然留在 `FillUserInfoPage`**
+          print("❌ 用户信息仍然不完整");
+        } else if (response.statusCode == 200) {
+          // **用户信息完整，解析数据并跳转**
+          var userInfo = jsonDecode(response.body);
+          String role = username.startsWith('t') ? 'Teacher' : 'Student';
+
+          if (role == 'Teacher') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TeacherChooseClassPage(
+                  teacherName: username,
+                  classes: userInfo["classes"] ?? [],
+                ),
+              ),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => StudentTermsPage(
+                  username: widget.username,
+            token: widget.token,
+                ),
+              ),
+            );
+          }
+        } else {
+          print("❌ 服务器返回错误: ${response.statusCode}");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context)!.networkError)),
+          );
+        }
+      } catch (e) {
+        print("❌ 登录检查失败: $e");
+      }
+    }
+
+    final url = Uri.parse("$baseApiUrl/login/signup/setinfo");
+    final headers = {
+      "Content-Type": "application/json",
+      "Username": widget.username,
+      "Token": widget.token,
+    };
+
+    final body = jsonEncode({
+      "nickname": _nicknameController.text,
+      "realName": _realNameController.text,
+      "school": _schoolController.text,
+      "className": _classController.text,
+      "studentId": _studentIDController.text,
+      "gender": _selectedGender,
+      "age": int.parse(_ageController.text),
+      "subjects": _selectedSubjects.join(","),
+      "studentConsent": true,
+      "guardianConsent": true
+    });
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+
+      print("🔹 [RESPONSE STATUS]: ${response.statusCode}");
+      print("🔹 [RESPONSE BODY]: ${response.body}");
+
+      if (response.body.isEmpty) {
+        print("❌ 服务器返回了空响应");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.networkError)),
+        );
+        return;
+      }
+
+      final responseBody = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text(AppLocalizations.of(context)!.registrationSuccessful)),
+        );
+
+        // ✅ **存储 token 以便自动登录**
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', widget.token);
+        await prefs.setString('username', widget.username);
+
+        // ✅ **提交成功后自动登录**
+        await loginAfterSubmit(widget.username, widget.token);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(responseBody["error"] ??
+                  AppLocalizations.of(context)!.registrationFailed)),
+        );
+      }
+    } catch (e) {
+      print("❌ 网络错误: $e");
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(responseBody["error"] ?? AppLocalizations.of(context)!.registrationFailed)),
+        SnackBar(content: Text(AppLocalizations.of(context)!.networkError)),
       );
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context)!.networkError)),
-    );
   }
-}
 
   @override
   void initState() {
@@ -93,13 +174,20 @@ Future<void> _submitUserInfo() async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         _subjects = [
-          AppLocalizations.of(context)!.math,
-          AppLocalizations.of(context)!.science,
-          AppLocalizations.of(context)!.history,
-          AppLocalizations.of(context)!.art,
-          AppLocalizations.of(context)!.music,
-          AppLocalizations.of(context)!.pe,
-          AppLocalizations.of(context)!.english,
+          AppLocalizations.of(context).history,
+          AppLocalizations.of(context).geography,
+          AppLocalizations.of(context).politics,
+          AppLocalizations.of(context).physics,
+          AppLocalizations.of(context).chemistry,
+          AppLocalizations.of(context).biology,
+          AppLocalizations.of(context).mathematics,
+          AppLocalizations.of(context).psychology,
+          AppLocalizations.of(context).sociology,
+          AppLocalizations.of(context).economics,
+          AppLocalizations.of(context).finance,
+          AppLocalizations.of(context).literature,
+          AppLocalizations.of(context).cs,
+          AppLocalizations.of(context).other,
         ];
       });
     });
@@ -120,18 +208,18 @@ Future<void> _submitUserInfo() async {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(AppLocalizations.of(context)!.gender,
+        Text(AppLocalizations.of(context).gender,
             style: TextStyle(fontSize: fontSize)),
         Wrap(
           spacing: 20 * scaleX, // 控制选项之间的间距
           runSpacing: 10 * scaleX, // 防止换行时紧贴
           children: [
             _buildGenderOption(
-                AppLocalizations.of(context)!.male, fontSize, scaleX),
+                AppLocalizations.of(context).male, fontSize, scaleX),
             _buildGenderOption(
-                AppLocalizations.of(context)!.female, fontSize, scaleX),
+                AppLocalizations.of(context).female, fontSize, scaleX),
             _buildGenderOption(
-                AppLocalizations.of(context)!.preferNotToSay, fontSize, scaleX),
+                AppLocalizations.of(context).preferNotToSay, fontSize, scaleX),
           ],
         ),
       ],
@@ -249,7 +337,7 @@ Future<void> _submitUserInfo() async {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  AppLocalizations.of(context)!.fillInfoTitle,
+                  AppLocalizations.of(context).fillInfoTitle,
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 48 * scaleX,
@@ -259,21 +347,22 @@ Future<void> _submitUserInfo() async {
                 ),
                 SizedBox(height: 20 * scaleX),
                 _buildTextField(_nicknameController,
-                    AppLocalizations.of(context)!.nickname, scaleX),
+                    AppLocalizations.of(context).nickname, scaleX),
                 SizedBox(height: 20 * scaleX),
                 _buildTextField(_realNameController,
-                    AppLocalizations.of(context)!.realName, scaleX),
+                    AppLocalizations.of(context).realName, scaleX),
+                SizedBox(height: 20 * scaleX),
                 _buildTextField(_schoolController,
-                    AppLocalizations.of(context)!.school, scaleX),
+                    AppLocalizations.of(context).school, scaleX),
                 SizedBox(height: 20 * scaleX),
                 _buildTextField(_classController,
-                    AppLocalizations.of(context)!.className, scaleX),
+                    AppLocalizations.of(context).className, scaleX),
                 SizedBox(height: 20 * scaleX),
                 _buildTextField(_studentIDController,
-                    AppLocalizations.of(context)!.studentID, scaleX),
+                    AppLocalizations.of(context).studentID, scaleX),
                 SizedBox(height: 20 * scaleX),
                 _buildTextField(
-                    _ageController, AppLocalizations.of(context)!.age, scaleX,
+                    _ageController, AppLocalizations.of(context).age, scaleX,
                     keyboardType: TextInputType.number),
                 SizedBox(height: 20 * scaleX),
                 SizedBox(
@@ -284,7 +373,7 @@ Future<void> _submitUserInfo() async {
                 SizedBox(
                   width: 450 * scaleX, // 确保和输入框对齐
                   child: Text(
-                    AppLocalizations.of(context)!.selectSubjects,
+                    AppLocalizations.of(context).selectSubjects,
                     style: TextStyle(fontSize: 20 * scaleX),
                     textAlign: TextAlign.left,
                   ),
@@ -293,7 +382,7 @@ Future<void> _submitUserInfo() async {
                 _buildSubjectButtons(scaleX),
                 SizedBox(height: 40 * scaleX),
                 ElevatedButton(
-                  onPressed:_submitUserInfo,
+                  onPressed: _submitUserInfo,
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8 * scaleX),
@@ -302,7 +391,7 @@ Future<void> _submitUserInfo() async {
                     padding: EdgeInsets.symmetric(
                         vertical: 16 * scaleX, horizontal: 80 * scaleX),
                   ),
-                  child: Text(AppLocalizations.of(context)!.submit,
+                  child: Text(AppLocalizations.of(context).submit,
                       style: TextStyle(
                           color: Colors.white, fontSize: 20 * scaleX)),
                 ),

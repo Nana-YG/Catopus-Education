@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/generated/app_localizations.dart';
-import 'package:flutter_project/pages/fill_info_page.dart';
+import 'package:flutter_project/pages/student_version/student_fill_info_page.dart';
 import 'package:flutter_project/pages/login.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_project/utils/constant.dart';
@@ -28,7 +28,7 @@ class _RegisterPageState extends State<RegisterPage> {
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(AppLocalizations.of(context)!.pleaseFillAllFields)),
+            content: Text(AppLocalizations.of(context).pleaseFillAllFields)),
       );
       return;
     }
@@ -38,13 +38,17 @@ class _RegisterPageState extends State<RegisterPage> {
     });
 
     var url = Uri.parse("$baseApiUrl/login/signup");
+    var headers = {
+    "Username": username, // ✅ 传递 username
+    "Password": password, // ✅ 传递 password
+    "AccountType": widget.userType, // ✅ 传递用户类型（Teacher 或 Student）
+  };
     var response = await http.post(
       url,
-      headers: {
-        "Username": username,
-        "Password": password,
-      },
+      headers: headers,
     );
+    print("🔹 [REQUEST URL]: $url");
+  print("🔹 [HEADERS]: $headers");
 
     setState(() {
       _isLoading = false;
@@ -62,15 +66,14 @@ class _RegisterPageState extends State<RegisterPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content:
-                Text(AppLocalizations.of(context)!.registrationSuccessful)),
+            content: Text(AppLocalizations.of(context).registrationSuccessful)),
       );
 
       // ✅ 传递 `username` 和 `token` 进入 `FillUserInfoPage`
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => FillUserInfoPage(
+          builder: (context) => StudentUserInfoPage(
             username: username,
             token: token,
           ),
@@ -80,7 +83,7 @@ class _RegisterPageState extends State<RegisterPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text(responseBody["error"] ??
-                AppLocalizations.of(context)!.registrationFailed)),
+                AppLocalizations.of(context).registrationFailed)),
       );
     }
   }
@@ -109,7 +112,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 left: 666 * scaleX,
                 top: 234 * scaleY,
                 child: Text(
-                  '${AppLocalizations.of(context)!.registerAs} ${widget.userType}',
+                  '${AppLocalizations.of(context).registerAs} ${widget.userType}',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 48 * scaleX,
@@ -124,7 +127,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 left: 855 * scaleX,
                 top: 354 * scaleY,
                 child: Text(
-                  AppLocalizations.of(context)!.name,
+                  AppLocalizations.of(context).name,
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 32 * scaleX,
@@ -153,7 +156,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       contentPadding:
                           const EdgeInsets.symmetric(horizontal: 20),
-                      hintText: AppLocalizations.of(context)!.enterYourName,
+                      hintText: AppLocalizations.of(context).enterYourName,
                       hintStyle: const TextStyle(color: Colors.black45),
                     ),
                   ),
@@ -165,7 +168,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 left: 855 * scaleX,
                 top: 515 * scaleY,
                 child: Text(
-                  AppLocalizations.of(context)!.password,
+                  AppLocalizations.of(context).password,
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 32 * scaleX,
@@ -195,7 +198,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       contentPadding:
                           const EdgeInsets.symmetric(horizontal: 20),
-                      hintText: AppLocalizations.of(context)!.enterYourPassword,
+                      hintText: AppLocalizations.of(context).enterYourPassword,
                       hintStyle: const TextStyle(color: Colors.black45),
                     ),
                   ),
@@ -226,7 +229,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     child: Center(
                       child: Text(
-                        AppLocalizations.of(context)!.back,
+                        AppLocalizations.of(context).back,
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 32 * scaleX,
@@ -256,7 +259,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : Text(
-                              AppLocalizations.of(context)!.next,
+                              AppLocalizations.of(context).next,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 32 * scaleX,
@@ -283,7 +286,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     );
                   },
                   child: Text(
-                    AppLocalizations.of(context)!.alreadyHaveAccount,
+                    AppLocalizations.of(context).alreadyHaveAccount,
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 24 * scaleX,

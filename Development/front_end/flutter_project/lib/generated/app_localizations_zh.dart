@@ -13,10 +13,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get welcomeText => '欢迎来到 Catopus-Education';
 
   @override
-  String get settings => '设置';
+  String get languageSettings => '语言设置';
 
   @override
-  String get chooseLanguage => '选择语言';
+  String get chooseLanguage => '请选择语言';
 
   @override
   String get login => '登录';
@@ -163,23 +163,56 @@ class AppLocalizationsZh extends AppLocalizations {
   String get selectSubjects => '选择科目:';
 
   @override
-  String get math => '数学';
-
-  @override
-  String get science => '科学';
-
-  @override
   String get history => '历史';
 
   @override
-  String get art => '美术';
+  String get geography => '地理';
 
   @override
-  String get music => '音乐';
+  String get politics => '政治';
 
   @override
-  String get pe => '体育';
+  String get physics => '物理';
 
   @override
-  String get english => '英语';
+  String get chemistry => '化学';
+
+  @override
+  String get biology => '生物';
+
+  @override
+  String get mathematics => '数学';
+
+  @override
+  String get psychology => '心理';
+
+  @override
+  String get cs => '计算机';
+
+  @override
+  String get sociology => '社会学';
+
+  @override
+  String get economics => '经济';
+
+  @override
+  String get finance => '金融';
+
+  @override
+  String get literature => '文学';
+
+  @override
+  String get other => '其他';
+
+  @override
+  String get studentTermsTitle => '学生用户协议';
+
+  @override
+  String get studentTermsContent => '作为 Catopus 教育平台的学生，您必须遵守平台的指南和行为准则。任何违规行为可能导致账户暂停...';
+
+  @override
+  String get agreeStudentTerms => '我同意学生用户协议';
+
+  @override
+  String get continueButton => '继续';
 }

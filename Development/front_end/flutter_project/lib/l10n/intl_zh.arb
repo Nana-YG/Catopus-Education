@@ -2,8 +2,8 @@
   "appName": "Catopus 教育",
 
   "welcomeText": "欢迎来到 Catopus-Education",
-  "settings": "设置",
-  "chooseLanguage": "选择语言",
+  "languageSettings": "语言设置",
+  "chooseLanguage": "请选择语言",
 
   "login": "登录",
   "name": "用户名",
@@ -62,11 +62,23 @@
   "female": "女",
   "preferNotToSay": "不愿透露",
   "selectSubjects": "选择科目:",
-  "math": "数学",
-  "science": "科学",
   "history": "历史",
-  "art": "美术",
-  "music": "音乐",
-  "pe": "体育",
-  "english": "英语"
+  "geography": "地理",
+  "politics": "政治",
+  "physics": "物理",
+  "chemistry": "化学",
+  "biology": "生物",
+  "mathematics": "数学",
+  "psychology": "心理",
+  "cs": "计算机",
+  "sociology": "社会学",
+  "economics": "经济",
+  "finance": "金融",
+  "literature": "文学",
+  "other": "其他",
+
+   "studentTermsTitle": "学生用户协议",
+  "studentTermsContent": "作为 Catopus 教育平台的学生，您必须遵守平台的指南和行为准则。任何违规行为可能导致账户暂停...",
+  "agreeStudentTerms": "我同意学生用户协议",
+  "continueButton": "继续"
 }
