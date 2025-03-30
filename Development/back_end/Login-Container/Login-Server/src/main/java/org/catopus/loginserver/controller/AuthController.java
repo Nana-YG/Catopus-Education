@@ -41,8 +41,13 @@ public class AuthController {
 
         boolean success = userService.register(username, password, accountType);
         if (success) {
-            String token = userService.getTokenByUsername(username); // 注册成功返回 token
-            return ResponseEntity.ok(Map.of("message", "User registered successfully", "token", token));
+            String token = userService.getTokenByUsername(username);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Register successful",
+                    "username", username,
+                    "token", token,
+                    "accountType", accountType.name()
+            ));
         } else {
             return ResponseEntity.badRequest().body(Map.of("error", "User already exists"));
         }
@@ -63,6 +68,7 @@ public class AuthController {
                 AccountType accountType = userService.getAccountTypeByUsername(username);
                 return ResponseEntity.ok(Map.of(
                         "message", "Login successful",
+                        "username", username,
                         "token", token,
                         "accountType", accountType.name()
                 ));
@@ -89,8 +95,12 @@ public class AuthController {
         }
 
         Optional<UserInfo> userInfo = userInfoService.getUserInfoByToken(token);
-        if (userInfo.isEmpty() || !userInfoService.isUserInfoComplete(userInfo.get())) {
-            return ResponseEntity.status(204).build(); // No Content
+        AccountType accountType = userService.getAccountTypeByUsername(username);
+
+        if (accountType == AccountType.STUDENT) {
+            if (userInfo.isEmpty() || !userInfoService.isUserInfoComplete(userInfo.get())) {
+                return ResponseEntity.status(204).build(); // No Content
+            }
         }
 
         return ResponseEntity.ok(userInfo.get());
