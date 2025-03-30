@@ -90,33 +90,39 @@ public class CourseController {
     public ResponseEntity<?> updateCourse(
             @RequestHeader("Username") String username,
             @RequestHeader("Token") String token,
+            @RequestHeader("Original-CourseCode") String originalCourseCode,
+            @RequestHeader("Original-Teacher") String originalTeacher,
             @RequestBody CourseRegistration updatedCourse) {
 
+        // Check authorization
         if (!userService.isTokenValidForUser(username, token)) {
             return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
         }
 
+        //  Account type check
         if (userService.getAccountTypeByUsername(username) != AccountType.TEACHER) {
             return ResponseEntity.status(403).body(Map.of("error", "Only teachers can update courses"));
         }
 
-        Optional<CourseRegistration> existingOpt = courseService.findByCode(updatedCourse.getCourseCode());
+        // Find the original course
+        Optional<CourseRegistration> existingOpt = courseService.findByCode(originalCourseCode);
         if (existingOpt.isEmpty()) {
-            return ResponseEntity.status(404).body(Map.of("error", "Course not found"));
+            return ResponseEntity.status(404).body(Map.of("error", "Original course not found"));
         }
 
         CourseRegistration existing = existingOpt.get();
 
-        if (!existing.getTeacher().equals(username)) {
+        // Check if the original teacher is the same as the one in the request
+        if (!existing.getTeacher().equals(originalTeacher) || !username.equals(originalTeacher)) {
             return ResponseEntity.status(403).body(Map.of("error", "You can only update your own courses"));
         }
 
-        // Ensure critical fields are preserved
+        // Set the original course id, teacher, and students
         updatedCourse.setId(existing.getId());
-        updatedCourse.setTeacher(username); // Can't be changed by user input
-        updatedCourse.setStudents(existing.getStudents()); // Preserve the student list
+        updatedCourse.setTeacher(originalTeacher);
+        updatedCourse.setStudents(existing.getStudents());
 
-        // Persist the update
+        // Update the course
         courseService.updateCourse(updatedCourse);
 
         return ResponseEntity.ok(Map.of("message", "Course updated"));
