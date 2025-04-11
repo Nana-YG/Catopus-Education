@@ -2,8 +2,6 @@ package org.catopus.loginserver.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,24 +10,25 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "courses")
+public class CourseRegistration {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String courseName;
+    
     @Column(unique = true, nullable = false)
-    private String username;
+    private String courseCode;
 
     @Column(nullable = false)
-    private String password;
-    
-    @Column(unique = true, nullable = false, length = 32)
-    private String token;
+    private String teacher;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
-    private AccountType accountType;
+    @Column(nullable = false)
+    private String students;
 
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private Boolean current = true;
 }

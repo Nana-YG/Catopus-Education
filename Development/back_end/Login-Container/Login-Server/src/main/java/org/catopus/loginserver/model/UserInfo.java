@@ -45,7 +45,7 @@ public class UserInfo {
     private Integer age;
 
     @Column(nullable = false, length = 255)
-    private String subjects; // Could be a JSON string or comma-separated values
+    private String subjects;
 
     @Column(nullable = false)
     private Boolean studentConsent;
