@@ -1,10 +1,10 @@
 package org.catopus.contentserver.controller;
 
-import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -12,54 +12,49 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 @RestController
 @RequestMapping("/content")
 public class ContentController {
 
-    private final RestTemplate restTemplate;
+    private final String LOGIN_CHECK_URL = "http://catopus.education/login/check";
+    private final String SRC_DIR = "resources"; // path to the directory for downloads
 
-    public ContentController(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    @GetMapping("/resource/{fileName:.+}")
+    public ResponseEntity<StreamingResponseBody> downloadFile(
+            @PathVariable String fileName,
+            @RequestHeader("Username") String username,
+            @RequestHeader("Token") String token) {
+
+        if (!isTokenValid(username, token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        Path filePath = Paths.get(SRC_DIR, fileName);
+        if (!Files.exists(filePath)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        StreamingResponseBody stream = outputStream -> {
+            try (InputStream inputStream = Files.newInputStream(filePath)) {
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+            }
+        };
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(stream);
     }
 
-    @GetMapping("/fetch")
-    public ResponseEntity<?> fetchContent(
-            @RequestHeader(value = "Username", required = false) String username,
-            @RequestHeader(value = "Token", required = false) String token) {
-
-        if (username == null || token == null || username.isBlank() || token.isBlank()) {
-            return ResponseEntity.badRequest().body("Username and Token required");
-        }
-
-        // Call csrm-login service to check authentication
-        String loginServiceUrl = "http://csrm-login:8080/login/check"; // Ensure the correct internal service URL
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Username", username);
-        headers.set("Token", token);
-
-        HttpEntity<String> request = new HttpEntity<>(headers);
-        ResponseEntity<String> loginResponse = restTemplate.exchange(loginServiceUrl, HttpMethod.GET, request, String.class);
-
-        if (loginResponse.getStatusCode() != HttpStatus.OK) {
-            return ResponseEntity.status(401).body("Unauthorized: Invalid token or username");
-        }
-
-        // If authentication is valid, return a text file
-        try {
-            Resource resource = new ClassPathResource("static/sample.txt"); // Ensure file exists in 'resources/static/'
-            byte[] fileContent = Files.readAllBytes(resource.getFile().toPath());
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.TEXT_PLAIN)
-                    .body(new String(fileContent));
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body("Error reading file");
-        }
-    }
 }
