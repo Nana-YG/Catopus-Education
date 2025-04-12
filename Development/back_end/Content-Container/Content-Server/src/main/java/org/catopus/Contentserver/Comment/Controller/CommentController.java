@@ -1,9 +1,9 @@
-package org.catopus.Contentserver.Controller;
+package org.catopus.Contentserver.Comment.Controller;
 
-import org.catopus.Contentserver.Model.Comment;
-import org.catopus.Contentserver.Model.CommentThread;
-import org.catopus.Contentserver.Model.CommentRequest;
-import org.catopus.Contentserver.Repository.CommentRepository;
+import org.catopus.Contentserver.Comment.Model.Comment;
+import org.catopus.Contentserver.Comment.Model.CommentThread;
+import org.catopus.Contentserver.Comment.Model.CommentRequest;
+import org.catopus.Contentserver.Comment.Repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

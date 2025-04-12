@@ -1,4 +1,4 @@
-package org.catopus.Contentserver.Model;
+package org.catopus.Contentserver.Comment.Model;
 
 public class Comment {
     private String commentId; // 新增字段

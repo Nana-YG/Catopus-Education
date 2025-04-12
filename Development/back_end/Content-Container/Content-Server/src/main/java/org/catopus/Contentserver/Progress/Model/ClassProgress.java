@@ -1,4 +1,4 @@
-package org.catopus.Contentserver.Model;
+package org.catopus.Contentserver.Progress.Model;
 
 import java.util.Map;
 

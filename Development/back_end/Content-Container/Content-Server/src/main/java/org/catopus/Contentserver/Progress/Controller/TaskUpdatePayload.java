@@ -1,4 +1,4 @@
-package org.catopus.Contentserver.Controller;
+package org.catopus.Contentserver.Progress.Controller;
 
 public class TaskUpdatePayload {
     private String subject;

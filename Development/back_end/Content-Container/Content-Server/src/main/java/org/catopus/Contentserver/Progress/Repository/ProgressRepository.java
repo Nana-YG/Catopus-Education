@@ -1,6 +1,6 @@
-package org.catopus.Contentserver.Repository;
+package org.catopus.Contentserver.Progress.Repository;
 
-import org.catopus.Contentserver.Model.UserProgress;
+import org.catopus.Contentserver.Progress.Model.UserProgress;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface ProgressRepository extends MongoRepository<UserProgress, String> {

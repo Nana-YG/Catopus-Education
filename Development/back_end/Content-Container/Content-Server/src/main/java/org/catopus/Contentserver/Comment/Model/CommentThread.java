@@ -1,4 +1,4 @@
-package org.catopus.Contentserver.Model;
+package org.catopus.Contentserver.Comment.Model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

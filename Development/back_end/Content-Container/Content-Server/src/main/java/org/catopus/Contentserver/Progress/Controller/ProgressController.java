@@ -1,8 +1,8 @@
-package org.catopus.Contentserver.Controller;
+package org.catopus.Contentserver.Progress.Controller;
 
-import org.catopus.Contentserver.Model.UserProgress;
-import org.catopus.Contentserver.Model.ClassProgress;
-import org.catopus.Contentserver.Repository.ProgressRepository;
+import org.catopus.Contentserver.Progress.Model.UserProgress;
+import org.catopus.Contentserver.Progress.Model.ClassProgress;
+import org.catopus.Contentserver.Progress.Repository.ProgressRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

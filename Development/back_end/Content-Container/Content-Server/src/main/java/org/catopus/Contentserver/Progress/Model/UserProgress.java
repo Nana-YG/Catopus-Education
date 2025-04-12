@@ -1,4 +1,4 @@
-package org.catopus.Contentserver.Model;
+package org.catopus.Contentserver.Progress.Model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
