@@ -1,4 +1,4 @@
-package org.catopus.loginserver.model;
+package org.catopus.loginserver.Model;
 
 public enum AccountType {
     TEACHER,
