@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.catopus.loginserver.model.AccountType;
-import org.catopus.loginserver.model.CourseRegistration;
-import org.catopus.loginserver.service.CourseService;
-import org.catopus.loginserver.service.UserService;
+import org.catopus.loginserver.Model.AccountType;
+import org.catopus.loginserver.Model.CourseRegistration;
+import org.catopus.loginserver.Service.CourseService;
+import org.catopus.loginserver.Service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;

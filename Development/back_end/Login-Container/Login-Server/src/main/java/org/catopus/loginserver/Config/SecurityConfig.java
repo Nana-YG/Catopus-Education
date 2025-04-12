@@ -1,4 +1,4 @@
-package org.catopus.loginserver.config;
+package org.catopus.loginserver.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
