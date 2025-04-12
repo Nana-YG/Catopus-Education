@@ -7,7 +7,6 @@ public class AuthUtil {
 
     private static final String LOGIN_CHECK_URL = "http://csrm-login:8080/login/check"; // Docker 内部地址
 
-    // ❗️防止被 new 出实例
     private AuthUtil() {
         throw new UnsupportedOperationException("Utility class");
     }
@@ -28,9 +27,13 @@ public class AuthUtil {
                     entity,
                     String.class
             );
-            return response.getStatusCode() == HttpStatus.OK;
+            if (response.getStatusCode() == HttpStatus.OK
+                    || response.getStatusCode() == HttpStatus.NO_CONTENT) {
+                return true;
+            }
         } catch (Exception e) {
             return false;
         }
+        return false;
     }
 }
