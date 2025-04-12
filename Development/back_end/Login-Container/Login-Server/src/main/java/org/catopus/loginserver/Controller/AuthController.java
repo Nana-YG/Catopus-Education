@@ -34,7 +34,7 @@ public class AuthController {
             @RequestHeader(value = "AccountType", required = false) String accountTypeStr) {
 
         if (username == null || password == null || accountTypeStr == null || username.isBlank() || password.isBlank() || accountTypeStr.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Username, password and accoutn type are required"));
+            return ResponseEntity.badRequest().body(Map.of("error", "Username, password and account type are required"));
         }
 
         AccountType accountType = AccountType.valueOf(accountTypeStr.toUpperCase());
