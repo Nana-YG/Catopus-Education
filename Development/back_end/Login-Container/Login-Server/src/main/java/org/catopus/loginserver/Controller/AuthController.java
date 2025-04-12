@@ -1,12 +1,12 @@
-package org.catopus.loginserver.controller;
+package org.catopus.loginserver.Controller;
 
 import java.util.Map;
 import java.util.Optional;
 
-import org.catopus.loginserver.model.AccountType;
-import org.catopus.loginserver.model.UserInfo;
-import org.catopus.loginserver.service.UserInfoService;
-import org.catopus.loginserver.service.UserService;
+import org.catopus.loginserver.Model.AccountType;
+import org.catopus.loginserver.Model.UserInfo;
+import org.catopus.loginserver.Service.UserInfoService;
+import org.catopus.loginserver.Service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;

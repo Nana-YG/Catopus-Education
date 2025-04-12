@@ -1,11 +1,11 @@
-package org.catopus.loginserver.service;
+package org.catopus.loginserver.Service;
 
 import java.util.Optional;
 
-import org.catopus.loginserver.model.User;
-import org.catopus.loginserver.model.UserInfo;
-import org.catopus.loginserver.repository.UserInfoRepository;
-import org.catopus.loginserver.repository.UserRepository;
+import org.catopus.loginserver.Model.User;
+import org.catopus.loginserver.Model.UserInfo;
+import org.catopus.loginserver.Repository.UserInfoRepository;
+import org.catopus.loginserver.Repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 @Service

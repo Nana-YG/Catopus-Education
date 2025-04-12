@@ -1,11 +1,11 @@
-package org.catopus.loginserver.service;
+package org.catopus.loginserver.Service;
 
 import java.security.SecureRandom;
 import java.util.Optional;
 
-import org.catopus.loginserver.model.AccountType;
-import org.catopus.loginserver.model.User;
-import org.catopus.loginserver.repository.UserRepository;
+import org.catopus.loginserver.Model.AccountType;
+import org.catopus.loginserver.Model.User;
+import org.catopus.loginserver.Repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
