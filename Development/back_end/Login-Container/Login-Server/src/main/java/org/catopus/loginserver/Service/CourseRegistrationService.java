@@ -1,5 +1,6 @@
 package org.catopus.loginserver.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.catopus.loginserver.Model.CourseRegistration;
@@ -15,11 +16,23 @@ public class CourseRegistrationService {
         this.courseRepo = courseRepo;
     }
 
+    public CourseRegistration save(CourseRegistration course) {
+        return courseRepo.save(course);
+    }
+
     public Optional<CourseRegistration> findByClassNameAndJoinKey(String className, String joinKey) {
         return courseRepo.findByClassNameAndJoinKey(className, joinKey);
     }
 
-    public CourseRegistration save(CourseRegistration course) {
-        return courseRepo.save(course);
+    public Optional<CourseRegistration> findById(Long id) {
+        return courseRepo.findById(id);
+    }
+
+    public Optional<CourseRegistration> findByClassName(String className) {
+        return courseRepo.findByClassName(className);
+    }
+
+    public List<CourseRegistration> findAll() {
+        return courseRepo.findAll();
     }
 }
