@@ -1,3 +1,4 @@
+// Updated CourseController.java
 package org.catopus.loginserver.Controller;
 
 import java.util.Arrays;
@@ -33,7 +34,7 @@ public class CourseController {
         this.userService = userService;
     }
 
-    // ✅ 老师创建课程接口
+    // Create a new course(Teacher)
     @PostMapping("/createClass")
     public ResponseEntity<?> createCourse(
             @RequestHeader("Username") String username,
@@ -48,11 +49,7 @@ public class CourseController {
             return ResponseEntity.status(403).body(Map.of("error", "Student cannot create courses"));
         }
 
-        // 检查课程名是否全局唯一
-        if (courseService.findByClassName(course.getClassName()).isPresent()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Class name already in use"));
-        }
-
+        course.setClassId(courseService.generateUniqueClassId());
         course.setTeacher(username);
         course.setStudents("");
         course.setCurrent(true);
@@ -61,7 +58,7 @@ public class CourseController {
         return ResponseEntity.ok(saved);
     }
 
-    // ✅ 学生加入课程接口
+    // Join a class(Student)
     @PostMapping("/joinClass")
     public ResponseEntity<?> joinCourse(
             @RequestHeader("Username") String username,
@@ -76,46 +73,51 @@ public class CourseController {
             return ResponseEntity.status(403).body(Map.of("error", "Teacher cannot join courses"));
         }
 
-        String className = body.get("className");
+        String classId = body.get("classId");
         String joinKey = body.get("joinKey");
 
-        if (className == null || joinKey == null || className.isBlank() || joinKey.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Missing className or joinKey"));
+        if (classId == null || joinKey == null || classId.isBlank() || joinKey.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Missing classId or joinKey"));
         }
 
-        Optional<CourseRegistration> courseOpt = courseService.findByClassNameAndJoinKey(className, joinKey);
+        Optional<CourseRegistration> courseOpt = courseService.findById(classId);
 
         if (courseOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "No matching course found"));
+            return ResponseEntity.badRequest().body(Map.of("error", "Course not found"));
         }
 
         CourseRegistration course = courseOpt.get();
+        if (!course.getJoinKey().equals(joinKey)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid join key"));
+        }
 
-        String currentStudents = course.getStudents();
-
-        List<String> existing = Arrays.asList(currentStudents.split(","));
+        List<String> existing = Arrays.asList(course.getStudents().split(","));
         if (existing.contains(username)) {
             return ResponseEntity.badRequest().body(Map.of("error", "You have already joined this course"));
         }
 
-        String updatedStudents = currentStudents.isBlank()
+        String updatedStudents = course.getStudents().isBlank()
                 ? username
-                : currentStudents + "," + username;
+                : course.getStudents() + "," + username;
 
         course.setStudents(updatedStudents);
-
         courseService.save(course);
 
-        return ResponseEntity.ok(Map.of("message", "Joined course successfully", "className", className));
+        return ResponseEntity.ok(Map.of(
+                "message", "Joined course successfully",
+                "classId", classId,
+                "className", course.getClassName()
+        ));
     }
 
+    // Modify an existing class's details(Teacher)
+    // Modifications are limited to className, joinKey, coursePackage, current.
     @PostMapping("/updateClass")
     public ResponseEntity<?> updateCourse(
             @RequestHeader("Username") String username,
             @RequestHeader("Token") String token,
             @RequestBody CourseRegistration updatedCourse) {
 
-        // 权限验证
         if (!userService.isTokenValidForUser(username, token)) {
             return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
         }
@@ -124,8 +126,8 @@ public class CourseController {
             return ResponseEntity.status(403).body(Map.of("error", "Student cannot update courses"));
         }
 
-        // 找到原课程（必须是该老师的）
-        Optional<CourseRegistration> courseOpt = courseService.findById(updatedCourse.getId());
+        Optional<CourseRegistration> courseOpt = courseService.findById(updatedCourse.getClassId());
+
         if (courseOpt.isEmpty()) {
             return ResponseEntity.status(404).body(Map.of("error", "Course not found"));
         }
@@ -136,7 +138,6 @@ public class CourseController {
             return ResponseEntity.status(403).body(Map.of("error", "You can only update your own courses"));
         }
 
-        // Can update ClassName, JoinKey, CoursePackage, Current
         existingCourse.setClassName(updatedCourse.getClassName());
         existingCourse.setJoinKey(updatedCourse.getJoinKey());
         existingCourse.setCoursePackage(updatedCourse.getCoursePackage());
@@ -146,8 +147,9 @@ public class CourseController {
         return ResponseEntity.ok(saved);
     }
 
-    @GetMapping("/registeredCoursePackages")
-    public ResponseEntity<?> getRegisteredCoursePackages(
+    // View all courses’ package for classes being created(Teacher)
+    @GetMapping("/createdCoursePackages")
+    public ResponseEntity<?> getCreatedCoursePackages(
             @RequestHeader("Username") String username,
             @RequestHeader("Token") String token) {
 
@@ -155,83 +157,22 @@ public class CourseController {
             return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
         }
 
-        AccountType accountType = userService.getAccountTypeByUsername(username);
-        List<CourseRegistration> allCourses = courseService.findAll();
-
-        List<String> packages;
-
-        if (accountType == AccountType.STUDENT) {
-            // 学生：从 students 字段中匹配自己
-            packages = allCourses.stream()
-                    .filter(course -> {
-                        String studentsStr = course.getStudents();
-                        if (studentsStr == null || studentsStr.isBlank()) {
-                            return false;
-                        }
-                        return Arrays.stream(studentsStr.split(","))
-                                .map(String::trim)
-                                .anyMatch(s -> s.equals(username));
-                    })
-                    .map(course -> course.getCoursePackage().name())
-                    .toList();
-        } else if (accountType == AccountType.TEACHER) {
-            // 老师：匹配自己是 teacher
-            packages = allCourses.stream()
-                    .filter(course -> username.equals(course.getTeacher()))
-                    .map(course -> course.getCoursePackage().name())
-                    .distinct()
-                    .toList();
-        } else {
-            return ResponseEntity.status(403).body(Map.of("error", "Unsupported account type"));
+        if (userService.getAccountTypeByUsername(username) != AccountType.TEACHER) {
+            return ResponseEntity.status(403).body(Map.of("error", "Only teachers can access this"));
         }
+
+        List<String> packages = courseService.findAll().stream()
+                .filter(course -> username.equals(course.getTeacher()))
+                .map(course -> course.getCoursePackage().name())
+                .distinct()
+                .toList();
 
         return ResponseEntity.ok(Map.of("coursePackages", packages));
     }
 
-    @GetMapping("/inClassStudents")
-    public ResponseEntity<?> getStudentListByClassName(
-            @RequestHeader("Username") String username,
-            @RequestHeader("Token") String token,
-            @RequestHeader("ClassName") String className) {
-
-        // 验证身份
-        if (!userService.isTokenValidForUser(username, token)) {
-            return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
-        }
-
-        if (userService.getAccountTypeByUsername(username) != AccountType.TEACHER) {
-            return ResponseEntity.status(403).body(Map.of("error", "Only teachers can access student lists"));
-        }
-
-        // 根据唯一 className 查找课程
-        Optional<CourseRegistration> courseOpt = courseService.findByClassName(className);
-        if (courseOpt.isEmpty()) {
-            return ResponseEntity.status(404).body(Map.of("error", "Course not found"));
-        }
-
-        CourseRegistration course = courseOpt.get();
-
-        // 验证是否是该老师创建的课程
-        if (!course.getTeacher().equals(username)) {
-            return ResponseEntity.status(403).body(Map.of("error", "You can only view your own courses"));
-        }
-
-        // 解析学生名单
-        String studentsStr = course.getStudents();
-        List<String> studentList = studentsStr == null || studentsStr.isBlank()
-                ? List.of()
-                : Arrays.stream(studentsStr.split(","))
-                        .map(String::trim)
-                        .toList();
-
-        return ResponseEntity.ok(Map.of(
-                "className", course.getClassName(),
-                "studentList", studentList
-        ));
-    }
-
-    @GetMapping("/registeredClasses")
-    public ResponseEntity<?> getRegisteredClassNames(
+    // View all course-name they joined(Student)
+    @GetMapping("/joinedClassList")
+    public ResponseEntity<?> getJoinedCourseList(
             @RequestHeader("Username") String username,
             @RequestHeader("Token") String token) {
 
@@ -243,36 +184,82 @@ public class CourseController {
             return ResponseEntity.status(403).body(Map.of("error", "Only students can access this"));
         }
 
-        List<CourseRegistration> allCourses = courseService.findAll();
-
-        List<String> classNames = allCourses.stream()
-                .filter(course -> {
-                    String studentsStr = course.getStudents();
-                    if (studentsStr == null || studentsStr.isBlank()) {
-                        return false;
-                    }
-                    return Arrays.stream(studentsStr.split(","))
-                            .map(String::trim)
-                            .anyMatch(s -> s.equals(username));
-                })
+        List<String> joinedClassNames = courseService.findAll().stream()
+                .filter(course -> Arrays.stream(course.getStudents().split(","))
+                .map(String::trim)
+                .anyMatch(s -> s.equals(username)))
                 .map(CourseRegistration::getClassName)
                 .toList();
 
-        return ResponseEntity.ok(Map.of("classNames", classNames));
+        return ResponseEntity.ok(Map.of("classNames", joinedClassNames));
+    }
+
+    // View all courses’ package for classes being joint(Student)
+    @GetMapping("/joinedCoursePackages")
+    public ResponseEntity<?> getJoinedCoursePackages(
+            @RequestHeader("Username") String username,
+            @RequestHeader("Token") String token) {
+
+        if (!userService.isTokenValidForUser(username, token)) {
+            return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
+        }
+
+        if (userService.getAccountTypeByUsername(username) != AccountType.STUDENT) {
+            return ResponseEntity.status(403).body(Map.of("error", "Only students can access this"));
+        }
+
+        List<String> packages = courseService.findAll().stream()
+                .filter(course -> Arrays.stream(course.getStudents().split(","))
+                .map(String::trim)
+                .anyMatch(s -> s.equals(username)))
+                .map(course -> course.getCoursePackage().name())
+                .toList();
+
+        return ResponseEntity.ok(Map.of("coursePackages", packages));
+    }
+
+    // View all student as list for a class(Teacher) 
+    @GetMapping("/inClassStudents")
+    public ResponseEntity<?> getStudentListByClassName(
+            @RequestHeader("Username") String username,
+            @RequestHeader("Token") String token,
+            @RequestHeader("ClassId") String classId) {
+
+        if (!userService.isTokenValidForUser(username, token)) {
+            return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
+        }
+
+        if (userService.getAccountTypeByUsername(username) != AccountType.TEACHER) {
+            return ResponseEntity.status(403).body(Map.of("error", "Only teachers can access student lists"));
+        }
+
+        Optional<CourseRegistration> courseOpt = courseService.findById(classId);
+        if (courseOpt.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("error", "Course not found"));
+        }
+
+        CourseRegistration course = courseOpt.get();
+
+        if (!course.getTeacher().equals(username)) {
+            return ResponseEntity.status(403).body(Map.of("error", "You can only view your own courses"));
+        }
+
+        List<String> studentList = course.getStudents() == null || course.getStudents().isBlank()
+                ? List.of()
+                : Arrays.stream(course.getStudents().split(","))
+                        .map(String::trim)
+                        .toList();
+
+        return ResponseEntity.ok(Map.of("className", course.getClassName(), "studentList", studentList));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleEnumParseError(HttpMessageNotReadableException ex) {
         if (ex.getCause() instanceof InvalidFormatException formatException) {
             if (formatException.getTargetType().isEnum()) {
-                return ResponseEntity.badRequest().body(Map.of(
-                        "error", "Invalid course package."));
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid course package."));
             }
         }
-
-        return ResponseEntity.badRequest().body(Map.of(
-                "error", "Invalid request body"
-        ));
+        return ResponseEntity.badRequest().body(Map.of("error", "Invalid request body"));
     }
-
 }
