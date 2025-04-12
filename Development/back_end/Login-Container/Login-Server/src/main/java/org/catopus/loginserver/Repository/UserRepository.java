@@ -1,8 +1,8 @@
-package org.catopus.loginserver.repository;
+package org.catopus.loginserver.Repository;
 
 import java.util.Optional;
 
-import org.catopus.loginserver.model.User;
+import org.catopus.loginserver.Model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<User, Long> {

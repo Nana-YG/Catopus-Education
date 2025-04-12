@@ -1,10 +1,10 @@
-package org.catopus.loginserver.service;
+package org.catopus.loginserver.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-import org.catopus.loginserver.model.CourseRegistration;
-import org.catopus.loginserver.repository.CourseRepository;
+import org.catopus.loginserver.Model.CourseRegistration;
+import org.catopus.loginserver.Repository.CourseRepository;
 import org.springframework.stereotype.Service;
 
 @Service

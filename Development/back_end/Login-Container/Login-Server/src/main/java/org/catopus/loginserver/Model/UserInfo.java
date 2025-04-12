@@ -1,4 +1,4 @@
-package org.catopus.loginserver.model;
+package org.catopus.loginserver.Model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

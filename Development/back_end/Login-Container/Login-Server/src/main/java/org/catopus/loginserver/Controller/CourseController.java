@@ -1,4 +1,4 @@
-package org.catopus.loginserver.controller;
+package org.catopus.loginserver.Controller;
 
 import java.util.List;
 import java.util.Map;
