@@ -1,4 +1,3 @@
-// Updated CourseRegistrationRepository.java
 package org.catopus.loginserver.Repository;
 
 import java.util.Optional;

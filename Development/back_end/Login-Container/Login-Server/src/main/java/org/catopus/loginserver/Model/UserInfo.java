@@ -52,4 +52,7 @@ public class UserInfo {
 
     @Column(nullable = false)
     private Boolean guardianConsent;
+
+    @Column
+    private String mobile;
 }

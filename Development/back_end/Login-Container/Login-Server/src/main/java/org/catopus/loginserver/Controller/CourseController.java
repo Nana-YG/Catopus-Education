@@ -194,7 +194,29 @@ public class CourseController {
         return ResponseEntity.ok(Map.of("classNames", joinedClassNames));
     }
 
-    // View all courses’ package for classes being joint(Student)
+    // Veiw all course-name they created(Teacher)
+    @GetMapping("/createdClassList")
+    public ResponseEntity<?> getCreatedCourseList(
+            @RequestHeader("Username") String username,
+            @RequestHeader("Token") String token) {
+
+        if (!userService.isTokenValidForUser(username, token)) {
+            return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
+        }
+
+        if (userService.getAccountTypeByUsername(username) != AccountType.TEACHER) {
+            return ResponseEntity.status(403).body(Map.of("error", "Only teachers can access this"));
+        }
+
+        List<String> createdClassNames = courseService.findAll().stream()
+                .filter(course -> course.getTeacher().equals(username))
+                .map(CourseRegistration::getClassName)
+                .toList();
+
+        return ResponseEntity.ok(Map.of("classNames", createdClassNames));
+    }
+
+    // View all courses’ package for classes being joined(Student)
     @GetMapping("/joinedCoursePackages")
     public ResponseEntity<?> getJoinedCoursePackages(
             @RequestHeader("Username") String username,
