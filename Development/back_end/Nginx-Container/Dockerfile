@@ -14,6 +14,9 @@ COPY ./html/website /var/www/html/website
 # Copy Nginx config file
 COPY ./docker-resources/nginx/default.conf /etc/nginx/sites-available/default
 
+# Nginx.conf
+COPY ./docker-resources/nginx/nginx.conf /etc/nginx/nginx.conf
+
 # Set working directory
 WORKDIR /var/www/html/website
 

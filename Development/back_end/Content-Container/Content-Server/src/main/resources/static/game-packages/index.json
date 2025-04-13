@@ -1,0 +1,28 @@
+{
+  "packages": [
+    {
+      "name": "math101",
+      "Tasks": [
+        {
+          "task-1": "https://catopus.education/static/TestGame/SeriousGameProject.html"
+        }
+      ]
+    },
+    {
+      "name": "chem101",
+      "Tasks": [
+        {
+          "task-1": "https://catopus.education/static/TestGame/SeriousGameProject.html"
+        }
+      ]
+    },
+    {
+      "name": "bio101",
+      "Tasks": [
+        {
+          "task-1": "https://catopus.education/static/TestGame/SeriousGameProject.html"
+        }
+      ]
+    }
+  ]
+}
