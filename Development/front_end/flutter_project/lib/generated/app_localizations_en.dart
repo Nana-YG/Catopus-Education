@@ -145,6 +145,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentID => 'Student ID';
 
   @override
+  String get mobile => 'Mobile Number';
+
+  @override
   String get age => 'Age';
 
   @override

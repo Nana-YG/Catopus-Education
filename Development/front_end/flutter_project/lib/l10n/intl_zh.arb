@@ -56,6 +56,7 @@
   "school": "学校",
   "className": "班级",
   "studentID": "学号",
+  "mobile": "电话号码",
   "age": "年龄",
   "gender": "性别",
   "male": "男",

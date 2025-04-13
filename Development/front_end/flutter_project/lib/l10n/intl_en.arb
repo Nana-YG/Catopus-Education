@@ -57,6 +57,7 @@
   "school": "School",
   "className": "Class",
   "studentID": "Student ID",
+  "mobile": "Mobile Number",
   "age": "Age",
   "gender": "Gender",
   "male": "Male",

@@ -145,6 +145,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get studentID => '学号';
 
   @override
+  String get mobile => '电话号码';
+
+  @override
   String get age => '年龄';
 
   @override

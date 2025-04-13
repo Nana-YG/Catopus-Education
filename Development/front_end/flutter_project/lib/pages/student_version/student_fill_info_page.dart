@@ -26,6 +26,8 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
   final TextEditingController _classController = TextEditingController();
   final TextEditingController _studentIDController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
+  final TextEditingController _mobileController = TextEditingController();
+
 
   String _selectedGender = "";
 
@@ -39,6 +41,7 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
         _schoolController.text.isEmpty ||
         _classController.text.isEmpty ||
         _studentIDController.text.isEmpty ||
+         _mobileController.text.isEmpty ||
         _ageController.text.isEmpty ||
         _selectedGender.isEmpty ||
         _selectedSubjects.isEmpty) {
@@ -116,6 +119,7 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
       "gender": _selectedGender,
       "age": int.parse(_ageController.text),
       "subjects": _selectedSubjects.join(","),
+      "mobile": _mobileController.text,
       "studentConsent": true,
       "guardianConsent": true
     });
@@ -360,6 +364,11 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
                 _buildTextField(_studentIDController,
                     AppLocalizations.of(context).studentID, scaleX),
                 SizedBox(height: 20 * scaleX),
+_buildTextField(_mobileController, AppLocalizations.of(context).mobile, scaleX,
+    keyboardType: TextInputType.phone),
+
+                SizedBox(height: 20 * scaleX),
+
                 _buildTextField(
                     _ageController, AppLocalizations.of(context).age, scaleX,
                     keyboardType: TextInputType.number),

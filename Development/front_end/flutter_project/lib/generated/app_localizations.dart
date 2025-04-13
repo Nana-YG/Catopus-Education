@@ -371,6 +371,12 @@ abstract class AppLocalizations {
   /// **'Student ID'**
   String get studentID;
 
+  /// No description provided for @mobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Number'**
+  String get mobile;
+
   /// No description provided for @age.
   ///
   /// In en, this message translates to:
