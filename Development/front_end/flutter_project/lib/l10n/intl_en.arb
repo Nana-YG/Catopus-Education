@@ -81,5 +81,15 @@
   "studentTermsTitle": "Student Terms and Conditions",
   "studentTermsContent": "As a student using Catopus Education, you must follow the platform's guidelines and code of conduct. Any violation may result in account suspension...",
   "agreeStudentTerms": "I agree to the Student Terms and Conditions",
-  "continueButton": "Continue"
+  "continueButton": "Continue",
+
+"joinClassTitle": "Join a Class",
+"classId": "Class ID",
+"joinKey": "Join Key",
+"studentPrefix": "Student",
+"teacherPrefix": "Teacher",
+"joinButton": "Join",
+"createClass":"Create Class",
+"coursePackage":"Course Package"
+
 }

@@ -66,8 +66,7 @@ class _StudentTermsPageState extends State<StudentTermsPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => StudentChooseClassPage(
-                              studentName: widget.username,
-                              classes: [],
+                              studentName: widget.username
                             ),
                           ),
                         );

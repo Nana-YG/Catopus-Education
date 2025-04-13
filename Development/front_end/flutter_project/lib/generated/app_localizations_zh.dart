@@ -215,4 +215,28 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get continueButton => '继续';
+
+  @override
+  String get joinClassTitle => '加入课程';
+
+  @override
+  String get classId => '课程ID';
+
+  @override
+  String get joinKey => '加入码';
+
+  @override
+  String get studentPrefix => '学生';
+
+  @override
+  String get teacherPrefix => '教师';
+
+  @override
+  String get joinButton => '加入';
+
+  @override
+  String get createClass => '创建课程';
+
+  @override
+  String get coursePackage => '课程资源';
 }

@@ -19,7 +19,9 @@ dependencies:
   intl: ^0.19.0 # 添加 intl 进行本地化
   flutter_gen: ^5.10.0
   shared_preferences: ^2.2.2  # 确保是最新版本
-
+  webview_flutter: ^4.0.7
+  universal_platform: ^1.0.0+1
+  webviewx_plus: ^0.5.1
 
 
 dev_dependencies:

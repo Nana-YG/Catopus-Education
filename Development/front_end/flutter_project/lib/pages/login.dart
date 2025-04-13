@@ -105,8 +105,8 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final response = await http.get(url, headers: headers);
 
-      print("🔹 [CHECK LOGIN] Status: ${response.statusCode}");
-      print("🔹 [CHECK LOGIN] Body: ${response.body}");
+      print("🔹 [CHECKINFO LOGIN] Status: ${response.statusCode}");
+      print("🔹 [CHECKINFO LOGIN] Body: ${response.body}");
 
       if (response.statusCode == 204) {
         print("❌ 用户信息不完整，需要填写信息");
@@ -144,7 +144,6 @@ class _LoginPageState extends State<LoginPage> {
             MaterialPageRoute(
               builder: (context) => TeacherChooseClassPage(
                 teacherName: username,
-                classes: userInfo["classes"] ?? [],
               ),
             ),
           );
@@ -154,7 +153,6 @@ class _LoginPageState extends State<LoginPage> {
             MaterialPageRoute(
               builder: (context) => StudentChooseClassPage(
                 studentName: username,
-                classes: userInfo["classes"] ?? [],
               ),
             ),
           );

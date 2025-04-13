@@ -75,7 +75,6 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
               MaterialPageRoute(
                 builder: (context) => TeacherChooseClassPage(
                   teacherName: username,
-                  classes: userInfo["classes"] ?? [],
                 ),
               ),
             );

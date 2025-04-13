@@ -80,5 +80,15 @@
    "studentTermsTitle": "学生用户协议",
   "studentTermsContent": "作为 Catopus 教育平台的学生，您必须遵守平台的指南和行为准则。任何违规行为可能导致账户暂停...",
   "agreeStudentTerms": "我同意学生用户协议",
-  "continueButton": "继续"
+  "continueButton": "继续",
+
+"joinClassTitle": "加入课程",
+"classId": "课程ID",
+"joinKey": "加入码",
+"studentPrefix": "学生",
+"teacherPrefix": "教师",
+"joinButton": "加入",
+"createClass":"创建课程",
+"coursePackage":"课程资源"
+
 }

@@ -514,6 +514,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue'**
   String get continueButton;
+
+  /// No description provided for @joinClassTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a Class'**
+  String get joinClassTitle;
+
+  /// No description provided for @classId.
+  ///
+  /// In en, this message translates to:
+  /// **'Class ID'**
+  String get classId;
+
+  /// No description provided for @joinKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Key'**
+  String get joinKey;
+
+  /// No description provided for @studentPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get studentPrefix;
+
+  /// No description provided for @teacherPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher'**
+  String get teacherPrefix;
+
+  /// No description provided for @joinButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get joinButton;
+
+  /// No description provided for @createClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Class'**
+  String get createClass;
+
+  /// No description provided for @coursePackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Course Package'**
+  String get coursePackage;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

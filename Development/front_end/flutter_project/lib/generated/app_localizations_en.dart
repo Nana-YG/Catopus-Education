@@ -215,4 +215,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get continueButton => 'Continue';
+
+  @override
+  String get joinClassTitle => 'Join a Class';
+
+  @override
+  String get classId => 'Class ID';
+
+  @override
+  String get joinKey => 'Join Key';
+
+  @override
+  String get studentPrefix => 'Student';
+
+  @override
+  String get teacherPrefix => 'Teacher';
+
+  @override
+  String get joinButton => 'Join';
+
+  @override
+  String get createClass => 'Create Class';
+
+  @override
+  String get coursePackage => 'Course Package';
 }

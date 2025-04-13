@@ -89,7 +89,6 @@ class _TeacherUserInfoPageState extends State<TeacherUserInfoPage> {
           MaterialPageRoute(
             builder: (context) => TeacherChooseClassPage(
               teacherName: widget.username,
-              classes: [],
             ),
           ),
         );
