@@ -47,12 +47,19 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
     if (!mounted) return;
 
     if (response.statusCode == 200) {
+      print("🧾 Raw response: ${response.body}");
       final result = jsonDecode(response.body);
-      final classNames = result['classNames'] as List;
-      print("📦 收到课程列表: $classNames");
+      final courseList = result['courses'] as List;
+      print("📦 收到课程列表: $courseList");
 
       setState(() {
-        classes = classNames.map((name) => {'name': name}).toList();
+        classes = courseList
+            .map((course) => {
+                  'name': course['className'],
+                  'classId': course['classId'],
+                  'joinKey': course['joinKey'],
+                })
+            .toList();
         isLoading = false;
       });
     } else {
@@ -147,77 +154,78 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
   }
 
   Future<void> _createCourse(String name, String pkg, String joinKey) async {
-  final prefs = await SharedPreferences.getInstance();
-  final username = prefs.getString('username') ?? '';
-  final token = prefs.getString('token') ?? '';
+    final prefs = await SharedPreferences.getInstance();
+    final username = prefs.getString('username') ?? '';
+    final token = prefs.getString('token') ?? '';
 
-  final url = Uri.parse('$baseApiUrl/course/createClass');
-  final body = {
-    'className': name,
-    'coursePackage': pkg,
-    'joinKey': joinKey,
-  };
+    final url = Uri.parse('$baseApiUrl/course/createClass');
+    final body = {
+      'className': name,
+      'coursePackage': pkg,
+      'joinKey': joinKey,
+    };
 
-  try {
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Username': username,
-        'Token': token,
-      },
-      body: jsonEncode(body),
-    );
-
-    final responseBody = jsonDecode(response.body);
-
-    if (response.statusCode == 200) {
-      final classId = responseBody['classId'] ?? 'N/A';
-      final className = responseBody['className'] ?? name;
-      final joinKeyReturned = responseBody['joinKey'] ?? joinKey;
-
-      if (!mounted) return;
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return AlertDialog(
-            title: Text(AppLocalizations.of(context)!.success),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('${AppLocalizations.of(context)!.className}: $className'),
-                const SizedBox(height: 8),
-                Text('Class ID: $classId'),
-                const SizedBox(height: 8),
-                Text('${AppLocalizations.of(context)!.joinKey}: $joinKeyReturned'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () async {
-                  Navigator.pop(context);
-                  await _loadTeacherClasses();
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          );
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Username': username,
+          'Token': token,
         },
+        body: jsonEncode(body),
       );
-    } else {
+
+      final responseBody = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        final classId = responseBody['classId'] ?? 'N/A';
+        final className = responseBody['className'] ?? name;
+        final joinKeyReturned = responseBody['joinKey'] ?? joinKey;
+
+        if (!mounted) return;
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return AlertDialog(
+              title: Text(AppLocalizations.of(context)!.success),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                      '${AppLocalizations.of(context)!.className}: $className'),
+                  const SizedBox(height: 8),
+                  Text('Class ID: $classId'),
+                  const SizedBox(height: 8),
+                  Text(
+                      '${AppLocalizations.of(context)!.joinKey}: $joinKeyReturned'),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await _loadTeacherClasses();
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${responseBody['error']}')),
+        );
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${responseBody['error']}')),
+        SnackBar(content: Text('Request failed: $e')),
       );
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Request failed: $e')),
-    );
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
