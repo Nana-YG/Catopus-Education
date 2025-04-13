@@ -1,5 +1,6 @@
 package org.catopus.loginserver.Service;
 
+import java.lang.reflect.Field;
 import java.util.Optional;
 
 import org.catopus.loginserver.Model.User;
@@ -10,9 +11,10 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserInfoService {
+
     private final UserRepository userRepository;
     private final UserInfoRepository userInfoRepository;
-    
+
     public UserInfoService(UserInfoRepository userInfoRepository, UserRepository userRepository) {
         this.userInfoRepository = userInfoRepository;
         this.userRepository = userRepository;
@@ -23,19 +25,34 @@ public class UserInfoService {
     }
 
     public boolean isUserInfoComplete(UserInfo userInfo) {
-        return userInfo.getNickname() != null && !userInfo.getNickname().isBlank() &&
-               userInfo.getRealName() != null && !userInfo.getRealName().isBlank() &&
-               userInfo.getSchool() != null && !userInfo.getSchool().isBlank() &&
-               userInfo.getClassName() != null && !userInfo.getClassName().isBlank() &&
-               userInfo.getStudentId() != null && !userInfo.getStudentId().isBlank() &&
-               userInfo.getGender() != null && !userInfo.getGender().isBlank() &&
-               userInfo.getAge() != null &&
-               userInfo.getSubjects() != null && !userInfo.getSubjects().isBlank() &&
-               userInfo.getStudentConsent() != null &&
-               userInfo.getGuardianConsent() != null;
+        Field[] fields = UserInfo.class.getDeclaredFields();
+
+        for (Field field : fields) {
+            field.setAccessible(true);
+
+            // Skip `id` and `user` (the token link)
+            if (field.getName().equals("id") || field.getName().equals("user")) {
+                continue;
+            }
+
+            try {
+                Object value = field.get(userInfo);
+                if (value == null) {
+                    return false;
+                }
+
+                if (value instanceof String && ((String) value).isBlank()) {
+                    return false;
+                }
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException("Error accessing field: " + field.getName(), e);
+            }
+        }
+
+        return true;
     }
 
-     public void initializeUserInfo(String token, UserInfo userInfoRequest) {
+    public void initializeUserInfo(String token, UserInfo userInfoRequest) {
         Optional<User> user = userRepository.findByToken(token);
         if (user.isEmpty()) {
             throw new RuntimeException("User not found for token: " + token);
@@ -54,7 +71,8 @@ public class UserInfoService {
         userInfo.setSubjects(userInfoRequest.getSubjects());
         userInfo.setStudentConsent(userInfoRequest.getStudentConsent());
         userInfo.setGuardianConsent(userInfoRequest.getGuardianConsent());
-
+        userInfo.setMobile(userInfoRequest.getMobile());
+        
         userInfoRepository.save(userInfo);
     }
 }

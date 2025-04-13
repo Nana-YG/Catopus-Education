@@ -93,13 +93,16 @@ public class AuthController {
         if (!isValid) {
             return ResponseEntity.status(401).body(Map.of("error", "Unauthorized: Invalid token or username"));
         }
-
-        Optional<UserInfo> userInfo = userInfoService.getUserInfoByToken(token);
         AccountType accountType = userService.getAccountTypeByUsername(username);
 
+        if (accountType == AccountType.TEACHER) {
+            return ResponseEntity.ok(Map.of("message", "Notice, now teachers do not need to fill the personal info"));
+        }
+
+        Optional<UserInfo> userInfo = userInfoService.getUserInfoByToken(token);
         if (accountType == AccountType.STUDENT) {
             if (userInfo.isEmpty() || !userInfoService.isUserInfoComplete(userInfo.get())) {
-                return ResponseEntity.status(204).build(); // No Content
+                return ResponseEntity.status(204).build();
             }
         }
 

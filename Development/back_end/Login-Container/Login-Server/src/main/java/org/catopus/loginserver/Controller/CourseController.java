@@ -2,6 +2,7 @@
 package org.catopus.loginserver.Controller;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -194,7 +195,6 @@ public class CourseController {
         return ResponseEntity.ok(Map.of("classNames", joinedClassNames));
     }
 
-    // Veiw all course-name they created(Teacher)
     @GetMapping("/createdClassList")
     public ResponseEntity<?> getCreatedCourseList(
             @RequestHeader("Username") String username,
@@ -208,12 +208,18 @@ public class CourseController {
             return ResponseEntity.status(403).body(Map.of("error", "Only teachers can access this"));
         }
 
-        List<String> createdClassNames = courseService.findAll().stream()
-                .filter(course -> course.getTeacher().equals(username))
-                .map(CourseRegistration::getClassName)
+        List<Map<String, Object>> result = courseService.findAll().stream()
+                .filter(course -> username.equals(course.getTeacher()))
+                .map(course -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("classId", course.getClassId());
+                    map.put("className", course.getClassName());
+                    map.put("joinKey", course.getJoinKey());
+                    return map;
+                })
                 .toList();
 
-        return ResponseEntity.ok(Map.of("classNames", createdClassNames));
+        return ResponseEntity.ok(Map.of("courses", result));
     }
 
     // View all courses’ package for classes being joined(Student)
