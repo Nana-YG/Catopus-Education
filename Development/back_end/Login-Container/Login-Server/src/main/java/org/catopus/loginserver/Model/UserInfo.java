@@ -23,34 +23,34 @@ public class UserInfo {
     @JoinColumn(name = "token", referencedColumnName = "token", nullable = false, unique = true)
     private User user;
 
-    @Column(nullable = false, length = 50)
+    @Column(length = 50)
     private String nickname;
 
-    @Column(nullable = false, length = 100)
+    @Column(length = 100)
     private String realName;
 
-    @Column(nullable = false, length = 100)
+    @Column(length = 100)
     private String school;
 
-    @Column(nullable = false, length = 50)
+    @Column(length = 50)
     private String className;
 
-    @Column(nullable = false, unique = true)
+    @Column
     private String studentId;
 
-    @Column(nullable = false, length = 10)
+    @Column(length = 10)
     private String gender;
 
-    @Column(nullable = false)
+    @Column
     private Integer age;
 
-    @Column(nullable = false, length = 255)
+    @Column(length = 255)
     private String subjects;
 
-    @Column(nullable = false)
+    @Column
     private Boolean studentConsent;
 
-    @Column(nullable = false)
+    @Column
     private Boolean guardianConsent;
 
     @Column
