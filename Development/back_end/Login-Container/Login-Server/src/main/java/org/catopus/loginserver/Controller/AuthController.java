@@ -95,15 +95,16 @@ public class AuthController {
         }
         AccountType accountType = userService.getAccountTypeByUsername(username);
 
-        if (accountType == AccountType.TEACHER) {
-            return ResponseEntity.ok(Map.of("message", "Notice, now teachers do not need to fill the personal info"));
-        }
-
         Optional<UserInfo> userInfo = userInfoService.getUserInfoByToken(token);
         if (accountType == AccountType.STUDENT) {
             if (userInfo.isEmpty() || !userInfoService.isUserInfoComplete(userInfo.get())) {
                 return ResponseEntity.status(204).build();
             }
+        } else if (accountType == AccountType.TEACHER) {
+            if (userInfo.isEmpty() || !userInfoService.isUserInfoComplete(userInfo.get())) {
+                return ResponseEntity.ok(Map.of("message", "Notice this teacher has incomplete info."));
+            }
+            return ResponseEntity.ok(userInfo.get());
         }
 
         return ResponseEntity.ok(userInfo.get());
