@@ -38,12 +38,12 @@ public class UserService {
 
     public boolean register(String username, String password, AccountType accountType) {
         if (userRepository.findByUsername(username).isPresent()) {
-            return false; // 用户已存在
+            return false; // user already exists
         }
         User user = new User();
         user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(password)); // 加密密码
-        user.setToken(generateToken()); // 生成随机 token
+        user.setPassword(passwordEncoder.encode(password)); // encrypt password
+        user.setToken(generateToken()); // generate random token
         user.setAccountType(accountType);
         userRepository.save(user);
         return true;
@@ -52,13 +52,13 @@ public class UserService {
     public String login(String username, String password) {
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isEmpty()) {
-            return null; // 用户不存在
+            return null; // user does not exist
         }
         User user = userOpt.get();
         if (passwordEncoder.matches(password, user.getPassword())) {
-            return user.getToken(); // 返回 token
+            return user.getToken(); // return token
         }
-        return null; // 密码错误
+        return null; // password is incorrect
     }
 
     public boolean isTokenValidForUser(String username, String token) {
@@ -77,4 +77,11 @@ public class UserService {
                 .orElseThrow(() -> new IllegalStateException("User not found"));
     }
 
+    public Optional<User> getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    public void saveUser(User user) {
+        userRepository.save(user);
+    }
 }

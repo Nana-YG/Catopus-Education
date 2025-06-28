@@ -14,7 +14,7 @@ import lombok.Data;
 @Entity
 @Table(name = "users")
 public class User {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,12 +24,22 @@ public class User {
 
     @Column(nullable = false)
     private String password;
-    
+
     @Column(unique = true, nullable = false, length = 32)
     private String token;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private AccountType accountType;
+
+    @Column(nullable = false, length = 300)
+    private byte[] profilePicture;
+
+    public User() {
+        this.profilePicture = new byte[300];
+        for (int i = 0; i < 300; i++) {
+            this.profilePicture[i] = (byte) 255;
+        }
+    }
 
 }

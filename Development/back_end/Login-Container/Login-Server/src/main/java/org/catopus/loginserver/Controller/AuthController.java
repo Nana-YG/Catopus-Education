@@ -1,9 +1,11 @@
 package org.catopus.loginserver.Controller;
 
+import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 
 import org.catopus.loginserver.Model.AccountType;
+import org.catopus.loginserver.Model.User;
 import org.catopus.loginserver.Model.UserInfo;
 import org.catopus.loginserver.Service.UserInfoService;
 import org.catopus.loginserver.Service.UserService;
@@ -127,4 +129,76 @@ public class AuthController {
 
         return ResponseEntity.ok(Map.of("message", "User info initialized successfully"));
     }
+
+    @GetMapping("/profile-picture")
+    public ResponseEntity<?> getProfilePictureHex(
+            @RequestHeader("Username") String username,
+            @RequestHeader("Token") String token) {
+
+        if (!userService.isTokenValidForUser(username, token)) {
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid token or username"));
+        }
+
+        Optional<User> userOpt = userService.getUserByUsername(username);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
+
+        byte[] profilePicture = userOpt.get().getProfilePicture();
+
+        StringBuilder hexBuilder = new StringBuilder(profilePicture.length * 2);
+        for (byte b : profilePicture) {
+            hexBuilder.append(String.format("%02X", b));
+        }
+
+        return ResponseEntity.ok(Map.of("profilePicture", hexBuilder.toString()));
+    }
+
+    @PostMapping("/profile-picture")
+    public ResponseEntity<?> updateProfilePicture(
+            @RequestHeader("Username") String username,
+            @RequestHeader("Token") String token,
+            @RequestBody Map<String, String> body) {
+
+        if (!userService.isTokenValidForUser(username, token)) {
+            return ResponseEntity.status(401).body(Map.of("error", "Invalid token or username"));
+        }
+
+        String data = body.get("profilePicture");
+        if (data == null || data.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Missing profilePicture"));
+        }
+
+        if (data.length() != 600) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Hex string must be exactly 600 characters"));
+        }
+
+        byte[] decoded;
+
+        try {
+            decoded = new byte[300];
+            for (int i = 0; i < 300; i++) {
+                decoded[i] = (byte) Integer.parseInt(data.substring(i * 2, i * 2 + 2), 16);
+            }
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid profilePicture format"));
+        }
+
+        if (decoded.length != 300) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Profile picture must be exactly 300 bytes (10x10 RGB)"));
+        }
+
+        Optional<User> userOpt = userService.getUserByUsername(username);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
+
+        User user = userOpt.get();
+        user.setProfilePicture(decoded);
+        userService.saveUser(user);
+
+        return ResponseEntity.ok(Map.of("message", "Profile picture updated successfully"));
+    }
+
 }
