@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/generated/app_localizations.dart';
+import 'package:flutter_project/pages/user_profile_page.dart';
 import 'package:flutter_project/utils/class_card.dart';
+import 'package:flutter_project/utils/color.dart';
 import 'package:flutter_project/utils/constant.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,14 +23,20 @@ class TeacherChooseClassPage extends StatefulWidget {
 class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
   List<dynamic> classes = [];
   bool isLoading = true;
-
-  String selectedPackage = 'BASIC'; // 默认值
-  final List<String> packageOptions = ['BASIC', 'MATH101', 'CHEM102'];
+  String username = '';
 
   @override
   void initState() {
     super.initState();
+    _loadUsername();
     _loadTeacherClasses();
+  }
+
+  Future<void> _loadUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString('username') ?? 'Teacher';
+    });
   }
 
   Future<void> _loadTeacherClasses() async {
@@ -47,10 +55,8 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
     if (!mounted) return;
 
     if (response.statusCode == 200) {
-      print("🧾 Raw response: ${response.body}");
       final result = jsonDecode(response.body);
       final courseList = result['courses'] as List;
-      print("📦 收到课程列表: $courseList");
 
       setState(() {
         classes = courseList
@@ -75,7 +81,6 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
   void _showCreateClassDialog() {
     final nameController = TextEditingController();
     final joinKeyController = TextEditingController();
-    final outerContext = context;
 
     showDialog(
       context: context,
@@ -91,26 +96,6 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.className,
                   ),
-                ),
-                const SizedBox(height: 10),
-                DropdownButtonFormField<String>(
-                  value: selectedPackage,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.coursePackage,
-                  ),
-                  items: packageOptions.map((pkg) {
-                    return DropdownMenuItem<String>(
-                      value: pkg,
-                      child: Text(pkg),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        selectedPackage = value;
-                      });
-                    }
-                  },
                 ),
                 const SizedBox(height: 10),
                 TextField(
@@ -133,7 +118,7 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
                 final key = joinKeyController.text.trim();
 
                 if (name.isEmpty || key.isEmpty) {
-                  ScaffoldMessenger.of(outerContext).showSnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
                           AppLocalizations.of(context)!.pleaseFillAllFields),
@@ -143,7 +128,7 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
                 }
 
                 Navigator.pop(dialogContext);
-                _createCourse(name, selectedPackage, key);
+                _createCourse(name, key);
               },
               child: Text(AppLocalizations.of(context)!.submit),
             ),
@@ -153,7 +138,7 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
     );
   }
 
-  Future<void> _createCourse(String name, String pkg, String joinKey) async {
+  Future<void> _createCourse(String name, String joinKey) async {
     final prefs = await SharedPreferences.getInstance();
     final username = prefs.getString('username') ?? '';
     final token = prefs.getString('token') ?? '';
@@ -161,7 +146,7 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
     final url = Uri.parse('$baseApiUrl/course/createClass');
     final body = {
       'className': name,
-      'coursePackage': pkg,
+      'coursePackage': 'BASIC',
       'joinKey': joinKey,
     };
 
@@ -179,42 +164,7 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
       final responseBody = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        final classId = responseBody['classId'] ?? 'N/A';
-        final className = responseBody['className'] ?? name;
-        final joinKeyReturned = responseBody['joinKey'] ?? joinKey;
-
-        if (!mounted) return;
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) {
-            return AlertDialog(
-              title: Text(AppLocalizations.of(context)!.success),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                      '${AppLocalizations.of(context)!.className}: $className'),
-                  const SizedBox(height: 8),
-                  Text('Class ID: $classId'),
-                  const SizedBox(height: 8),
-                  Text(
-                      '${AppLocalizations.of(context)!.joinKey}: $joinKeyReturned'),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    await _loadTeacherClasses();
-                  },
-                  child: const Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
+        await _loadTeacherClasses();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${responseBody['error']}')),
@@ -230,45 +180,130 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final crossAxisCount = (screenWidth / 200).floor();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-            '${AppLocalizations.of(context)!.teacherPrefix}: ${widget.teacherName}'),
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 3 / 4,
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // 顶部自定义 AppBar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              color: AppColors.background,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'Hello, $username!',
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 32,
+                                fontFamily: 'Manrope',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.notifications_none, size: 28),
+                          ],
+                        ),
+                        Text(
+                          widget.teacherName,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const UserProfilePage()),
+                          );
+                        },
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: const ShapeDecoration(
+                            color: Colors.white,
+                            shape: CircleBorder(),
+                            shadows: [
+                              BoxShadow(
+                                color: Color(0x33000000),
+                                blurRadius: 15,
+                                offset: Offset(0, 0),
+                              )
+                            ],
+                          ),
+                          child: const Icon(Icons.person, size: 28),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Profile',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'Manrope',
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  )
+                ],
               ),
-              itemCount: classes.length + 1,
-              itemBuilder: (context, index) {
-                if (index == classes.length) {
-                  return ClassCard(
-                    classData: {'isAddCard': true},
-                    onTap: _showCreateClassDialog,
-                  );
-                }
-
-                final classData = classes[index];
-                return ClassCard(
-                  classData: classData,
-                  isTeacher: true,
-                  onTap: () {
-                    final name = classData['name'];
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Selected: $name')),
-                    );
-                  },
-                );
-              },
             ),
+
+            // 卡片区域
+            Expanded(
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : GridView.builder(
+                      padding: const EdgeInsets.all(16),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: (screenWidth / 250).floor(),
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 1,
+                      ),
+                      itemCount: classes.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == classes.length) {
+                          return ClassCard(
+                            classData: {'isAddCard': true},
+                            onTap: _showCreateClassDialog,
+                            isTeacher: true,
+                          );
+                        }
+
+                        final classData = classes[index];
+                        return ClassCard(
+                          classData: classData,
+                          isTeacher: true,
+                          onTap: () {
+                            final name = classData['name'];
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Selected: $name')),
+                            );
+                          },
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
