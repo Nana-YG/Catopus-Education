@@ -6,11 +6,12 @@ import 'package:flutter_project/pages/register_page.dart';
 import 'package:flutter_project/pages/teacher_version/teacher_fill_info_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
-import 'package:flutter_project/utils/constant.dart'; // ✅ 引入 baseApiUrl
+import 'package:flutter_project/utils/constant.dart';
 import 'package:flutter_project/pages/student_version/student_choose_class.dart';
 import 'package:flutter_project/pages/teacher_version/teacher_choose_class.dart';
 import 'package:flutter_project/test.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // 引入 fetchLogin 方法
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_project/utils/color.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -23,6 +24,8 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
+
+  bool _passwordVisible = false;
 
   Future<void> _login() async {
     String username = _usernameController.text.trim();
@@ -74,7 +77,8 @@ class _LoginPageState extends State<LoginPage> {
               content: Text(AppLocalizations.of(context)!.loginSuccessful)),
         );
 
-        // **✅ 调用 check API，确保用户信息是否完整**
+// ✅ 等待 SnackBar 显示完成后再跳转
+        await Future.delayed(const Duration(milliseconds: 500));
         await _checkUserInfo(username, token, accountType);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -181,11 +185,15 @@ class _LoginPageState extends State<LoginPage> {
     // ✅ **UI 代码完全保留，不做任何修改**
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    double rightShift = screenWidth * 0.20; // 👈 向右偏移 25% 屏幕宽度
 
     double baseWidth = 2160;
     double baseHeight = 1080;
     double scaleX = screenWidth / baseWidth;
     double scaleY = screenHeight / baseHeight;
+    final double gap = 32 * scaleX;
+    final double buttonWidth = (screenWidth * 0.284 - gap) / 2;
+    double inputHeight = screenHeight * 0.08;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -193,11 +201,89 @@ class _LoginPageState extends State<LoginPage> {
         child: Container(
           width: screenWidth,
           height: screenHeight,
-          decoration: const BoxDecoration(color: Colors.white),
+          decoration: const BoxDecoration(color: AppColors.background),
           child: Stack(
             children: [
+              // 左侧三个斜叠容器
               Positioned(
-                left: 666 * scaleX,
+                left: (-240 * scaleX),
+                top: -80 * scaleY,
+                child: Container(
+                  transform: Matrix4.identity()..rotateZ(0.09),
+                  width: 1278.26 * scaleX,
+                  height: 1300.66 * scaleY,
+                  decoration: ShapeDecoration(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(side: BorderSide(width: 1.5)),
+                    shadows: [
+                      BoxShadow(
+                        color: Color(0x3F000000),
+                        blurRadius: 35,
+                        offset: Offset(4, 4),
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: -260 * scaleX,
+                top: -100 * scaleY,
+                child: Container(
+                  transform: Matrix4.identity()..rotateZ(0.09),
+                  width: 1278.26 * scaleX,
+                  height: 1300.66 * scaleY,
+                  decoration: ShapeDecoration(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(side: BorderSide(width: 1.5)),
+                    shadows: [
+                      BoxShadow(
+                        color: Color(0x3F000000),
+                        blurRadius: 35,
+                        offset: Offset(4, 4),
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: -280 * scaleX,
+                top: -125 * scaleY,
+                child: Container(
+                  transform: Matrix4.identity()..rotateZ(0.09),
+                  width: 1278.26 * scaleX,
+                  height: 1300.66 * scaleY,
+                  decoration: ShapeDecoration(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(side: BorderSide(width: 1.5)),
+                    shadows: [
+                      BoxShadow(
+                        color: Color(0x3F000000),
+                        blurRadius: 35,
+                        offset: Offset(4, 4),
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // ✅ 放在三层卡片的上方
+              Positioned(
+                left: -100 * scaleX, // 根据卡片整体偏移微调
+                top: 60 * scaleY,
+                child: SizedBox(
+                  width: 976 * scaleX,
+                  height: 976 * scaleY,
+                  child: Image.asset(
+                    'assets/images/circle.png', // ✅ 你的插图路径
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+
+              Positioned(
+                left: (855 * scaleX + rightShift),
                 top: 234 * scaleY,
                 child: Text(
                   AppLocalizations.of(context)!.login,
@@ -209,8 +295,9 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
+
               Positioned(
-                left: 855 * scaleX,
+                left: (855 * scaleX + rightShift),
                 top: 354 * scaleY,
                 child: Text(
                   AppLocalizations.of(context)!.name,
@@ -223,7 +310,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               Positioned(
-                left: 855 * scaleX,
+                left: (855 * scaleX + rightShift),
                 top: 515 * scaleY,
                 child: Text(
                   AppLocalizations.of(context)!.password,
@@ -236,18 +323,18 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               Positioned(
-                left: 855 * scaleX,
+                left: (855 * scaleX + rightShift),
                 top: 413 * scaleY,
                 child: SizedBox(
-                  width: 450 * scaleX,
-                  height: 68 * scaleY,
+                  width: screenWidth * 0.284,
+                  height: inputHeight,
                   child: TextField(
                     controller: _usernameController,
                     textAlignVertical: TextAlignVertical.center,
                     style: TextStyle(fontSize: 30 * scaleX),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color(0xFFECECEC),
+                      fillColor: AppColors.inputBackgroundColor,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
@@ -261,34 +348,74 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               Positioned(
-                left: 855 * scaleX,
+                left: (855 * scaleX + rightShift),
                 top: 573 * scaleY,
                 child: SizedBox(
-                  width: 450 * scaleX,
-                  height: 68 * scaleY,
-                  child: TextField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    textAlignVertical: TextAlignVertical.center,
-                    style: TextStyle(fontSize: 30 * scaleX),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: const Color(0xFFECECEC),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
+                  width: screenWidth * 0.284, // ✅ 同 username
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      SizedBox(
+                        height: inputHeight, // ✅ 同 username
+                        child: TextField(
+                          controller: _passwordController,
+                          obscureText: !_passwordVisible,
+                          textAlignVertical: TextAlignVertical.center,
+                          style: TextStyle(fontSize: 30 * scaleX),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: AppColors.inputBackgroundColor,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 20),
+                            hintText:
+                                AppLocalizations.of(context)!.enterYourPassword,
+                            hintStyle: const TextStyle(color: Colors.black45),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _passwordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Colors.grey,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _passwordVisible = !_passwordVisible;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
                       ),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 20),
-                      hintText: AppLocalizations.of(context)!.enterYourPassword,
-                      hintStyle: const TextStyle(color: Colors.black45),
-                    ),
+                      SizedBox(height: 20 * scaleY),
+                      GestureDetector(
+                        onTap: () {
+                          // TODO: 忘记密码逻辑
+                        },
+                        child: Text(
+                          AppLocalizations.of(context)!.forgotPassword,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 24 * scaleX,
+                            fontFamily: 'Manrope',
+                            fontWeight: FontWeight.w400,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
+// 👉 定义按钮宽度和间距
+
+// 注册按钮
               Positioned(
-                left: 753 * scaleX,
-                top: 707 * scaleY,
+                left: (855 * scaleX + rightShift),
+                top: 750 * scaleY,
                 child: GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -300,8 +427,8 @@ class _LoginPageState extends State<LoginPage> {
                     );
                   },
                   child: Container(
-                    width: 276 * scaleX,
-                    height: 69 * scaleY,
+                    width: buttonWidth,
+                    height: inputHeight,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
@@ -327,14 +454,16 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
+
+// 登录按钮（在注册按钮右边 + 间距）
               Positioned(
-                left: 1131 * scaleX,
-                top: 707 * scaleY,
+                left: (855 * scaleX + rightShift + buttonWidth + gap),
+                top: 750 * scaleY,
                 child: GestureDetector(
-                  onTap: _login, // ✅ **调用后端登录 API**
+                  onTap: _login,
                   child: Container(
-                    width: 276 * scaleX,
-                    height: 69 * scaleY,
+                    width: buttonWidth,
+                    height: inputHeight,
                     decoration: BoxDecoration(
                       color: const Color(0xFF292929),
                       borderRadius: BorderRadius.circular(8),
@@ -349,25 +478,6 @@ class _LoginPageState extends State<LoginPage> {
                           fontWeight: FontWeight.w400,
                         ),
                       ),
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 981 * scaleX,
-                top: 810 * scaleY,
-                child: GestureDetector(
-                  onTap: () {
-                    // TODO: 忘记密码逻辑
-                  },
-                  child: Text(
-                    AppLocalizations.of(context)!.forgotPassword,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 24 * scaleX,
-                      fontFamily: 'Manrope',
-                      fontWeight: FontWeight.w400,
-                      decoration: TextDecoration.underline,
                     ),
                   ),
                 ),

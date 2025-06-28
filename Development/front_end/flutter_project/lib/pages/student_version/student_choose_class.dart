@@ -2,11 +2,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/generated/app_localizations.dart';
 import 'package:flutter_project/pages/game_test.dart';
+import 'package:flutter_project/pages/test_ha_pages.dart';
+import 'package:flutter_project/pages/user_profile_page.dart';
+import 'package:flutter_project/utils/class_card.dart';
+import 'package:flutter_project/utils/color.dart';
 import 'package:flutter_project/utils/constant.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_project/utils/class_card.dart';
-import 'package:flutter_project/pages/test_ha_pages.dart';
 
 class StudentChooseClassPage extends StatefulWidget {
   final String studentName;
@@ -23,11 +25,20 @@ class StudentChooseClassPage extends StatefulWidget {
 class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
   List<dynamic> classes = [];
   bool isLoading = true;
+  String username = '';
 
   @override
   void initState() {
     super.initState();
+    _loadUsername();
     _loadClasses();
+  }
+
+  Future<void> _loadUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString('username') ?? 'Student';
+    });
   }
 
   Future<void> _loadClasses() async {
@@ -48,7 +59,6 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
     if (response.statusCode == 200) {
       final result = jsonDecode(response.body);
       final classNames = result['classNames'] as List;
-      print("📦 收到课程列表: $classNames");
 
       setState(() {
         classes = classNames.map((name) => {'name': name}).toList();
@@ -81,7 +91,7 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
           'Token': token,
         },
         body: jsonEncode({
-          'classId': classId, // ✅ 使用 classId
+          'classId': classId,
           'joinKey': joinKey,
         }),
       );
@@ -117,22 +127,22 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-         title: Text(AppLocalizations.of(context)!.joinClassTitle),
+          title: Text(AppLocalizations.of(context)!.joinClassTitle),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-  controller: classIdController,
-  decoration: InputDecoration(
-    labelText: AppLocalizations.of(context)!.classId,
-  ),
-),
-TextField(
-  controller: joinKeyController,
-  decoration: InputDecoration(
-    labelText: AppLocalizations.of(context)!.joinKey,
-  ),
-),
+                controller: classIdController,
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.classId,
+                ),
+              ),
+              TextField(
+                controller: joinKeyController,
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.joinKey,
+                ),
+              ),
             ],
           ),
           actions: [
@@ -146,13 +156,14 @@ TextField(
                 final joinKey = joinKeyController.text.trim();
 
                 if (classId.isEmpty || joinKey.isEmpty) {
-  ScaffoldMessenger.of(outerContext).showSnackBar(
-    SnackBar(
-      content: Text(AppLocalizations.of(context)!.pleaseFillAllFields),
-    ),
-  );
-  return;
-}
+                  ScaffoldMessenger.of(outerContext).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                          AppLocalizations.of(context)!.pleaseFillAllFields),
+                    ),
+                  );
+                  return;
+                }
 
                 Navigator.pop(dialogContext);
                 Future.microtask(() {
@@ -173,65 +184,137 @@ TextField(
     final crossAxisCount = (screenWidth / 200).floor();
 
     return Scaffold(
-      appBar: AppBar(
-   title: Text('${AppLocalizations.of(context)!.studentPrefix}: ${widget.studentName}'),
-
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.videogame_asset),
-            tooltip: 'Game Test',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const GameWebViewPage(), // ✅ 替换成你的游戏页面
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 3 / 4,
-              ),
-              itemCount: classes.isEmpty ? 1 : classes.length + 1,
-              itemBuilder: (context, index) {
-                if (classes.isEmpty || index == classes.length) {
-                  return ClassCard(
-                    classData: {'isAddCard': true},
-                    onTap: _showJoinClassDialog,
-                  );
-                }
-
-                final classData = classes[index];
-                final className = classData['name'];
-
-                return ClassCard(
-                  classData: classData,
-                  onTap: () {
-                    if (className == "Chemistry 303") {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const TestHaPage(),
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // 顶部区域
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              color: AppColors.background,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'Hello, $username!',
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 32,
+                                fontFamily: 'Manrope',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.notifications_none, size: 28),
+                          ],
                         ),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Selected: $className')),
-                      );
-                    }
-                  },
-                );
-              },
+                        Text(
+                          widget.studentName,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const UserProfilePage(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: const ShapeDecoration(
+                            color: Colors.white,
+                            shape: CircleBorder(),
+                            shadows: [
+                              BoxShadow(
+                                color: Color(0x33000000),
+                                blurRadius: 15,
+                                offset: Offset(0, 0),
+                              )
+                            ],
+                          ),
+                          child: const Icon(Icons.person, size: 28),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Profile',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'Manrope',
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
             ),
+
+            // 卡片区域
+            Expanded(
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : GridView.builder(
+                      padding: const EdgeInsets.all(16),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: (screenWidth / 250).floor(), // 每行显示卡片数
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 1, // 强制正方形
+                      ),
+                      itemCount: classes.isEmpty ? 1 : classes.length + 1,
+                      itemBuilder: (context, index) {
+                        if (classes.isEmpty || index == classes.length) {
+                          return ClassCard(
+                            classData: {'isAddCard': true},
+                            onTap: _showJoinClassDialog,
+                          );
+                        }
+
+                        final classData = classes[index];
+                        final className = classData['name'];
+
+                        return ClassCard(
+                          classData: classData,
+                          onTap: () {
+                            if (className == "Chemistry 303") {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const TestHaPage(),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Selected: $className')),
+                              );
+                            }
+                          },
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

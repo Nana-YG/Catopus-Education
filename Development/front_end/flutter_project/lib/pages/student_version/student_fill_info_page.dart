@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/pages/student_version/student_choose_class.dart';
 import 'package:flutter_project/pages/student_version/student_terms_page.dart';
 import 'package:flutter_project/pages/teacher_version/teacher_choose_class.dart';
+import 'package:flutter_project/utils/color.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_project/generated/app_localizations.dart';
 import 'package:flutter_project/utils/constant.dart';
@@ -274,7 +275,7 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
                     decoration: BoxDecoration(
                       color: _selectedSubjects.contains(subject)
                           ? Colors.blue
-                          : Colors.grey[300],
+                          : AppColors.inputBackgroundColor,
                       borderRadius: BorderRadius.circular(8 * scaleX),
                     ),
                     child: Center(
@@ -309,7 +310,7 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
         style: TextStyle(fontSize: fontSize),
         decoration: InputDecoration(
           filled: true,
-          fillColor: const Color(0xFFECECEC),
+          fillColor: AppColors.inputBackgroundColor,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8 * scaleX),
             borderSide: BorderSide.none,
@@ -335,7 +336,7 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
           child: Container(
             width: screenWidth,
             padding: EdgeInsets.symmetric(vertical: 20 * scaleX),
-            decoration: const BoxDecoration(color: Colors.white),
+            decoration: const BoxDecoration(color: AppColors.background),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
