@@ -90,7 +90,11 @@
 "studentPrefix": "Student",
 "teacherPrefix": "Teacher",
 "joinButton": "Join",
+"helloText": "Hello",
 "createClass":"Create Class",
-"coursePackage":"Course Package"
+"coursePackage":"Course Package",
+"profile":"Profile",
+
+"logout":"Logout"
 
 }

@@ -76,7 +76,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get confirmLogout => '确定要退出登录吗？';
 
   @override
-  String get profile => '个人资料';
+  String get profile => '我';
 
   @override
   String get updateProfile => '更新个人资料';
@@ -236,6 +236,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get joinButton => '加入';
+
+  @override
+  String get helloText => '你好';
 
   @override
   String get createClass => '创建课程';

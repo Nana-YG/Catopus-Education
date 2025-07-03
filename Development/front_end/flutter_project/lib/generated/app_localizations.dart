@@ -557,6 +557,12 @@ abstract class AppLocalizations {
   /// **'Join'**
   String get joinButton;
 
+  /// No description provided for @helloText.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello'**
+  String get helloText;
+
   /// No description provided for @createClass.
   ///
   /// In en, this message translates to:
