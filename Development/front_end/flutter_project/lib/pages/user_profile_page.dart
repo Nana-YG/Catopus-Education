@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project/pages/login.dart';
+import 'package:flutter_project/generated/app_localizations.dart';
+import 'package:flutter_project/pages/avatar_editor_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_project/utils/color.dart';
-// 替换成你的登录页路径
+import 'package:flutter_project/pages/login.dart';
+
 
 class UserProfilePage extends StatelessWidget {
   const UserProfilePage({super.key});
 
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // 清除所有存储的信息
+    await prefs.clear();
 
-    // 跳转回登录页并清除历史栈
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -19,34 +19,50 @@ class UserProfilePage extends StatelessWidget {
     );
   }
 
+  void _goToAvatarEditor(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AvatarEditorPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        title: const Text(
-          'User Profile',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
+        title: Text( AppLocalizations.of(context)!.profile,
+),
         centerTitle: true,
+        backgroundColor: Colors.grey[100],
+        elevation: 0,
       ),
-      body: Center(
-        child: ElevatedButton.icon(
-          onPressed: () => _logout(context),
-          icon: const Icon(Icons.logout),
-          label: const Text('Logout'),
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            backgroundColor: Colors.redAccent,
-            foregroundColor: Colors.white,
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // 🔵 头像圆圈显示
+          GestureDetector(
+            onTap: () => _goToAvatarEditor(context),
+            child: CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.grey[400],
+              child: const Icon(Icons.brush, size: 40, color: Colors.white),
+            ),
           ),
-        ),
+          const SizedBox(height: 40),
+
+
+          const SizedBox(height: 20),
+          ElevatedButton.icon(
+            onPressed: () => _logout(context),
+            icon: const Icon(Icons.logout),
+            label: Text(AppLocalizations.of(context)!.logout,),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }

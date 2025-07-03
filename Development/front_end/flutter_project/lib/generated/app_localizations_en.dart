@@ -238,6 +238,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get joinButton => 'Join';
 
   @override
+  String get helloText => 'Hello';
+
+  @override
   String get createClass => 'Create Class';
 
   @override

@@ -89,7 +89,11 @@
 "studentPrefix": "学生",
 "teacherPrefix": "教师",
 "joinButton": "加入",
+"helloText": "你好",
 "createClass":"创建课程",
-"coursePackage":"课程资源"
+"coursePackage":"课程资源",
+"profile":"我",
+
+"logout":"退出登录"
 
 }

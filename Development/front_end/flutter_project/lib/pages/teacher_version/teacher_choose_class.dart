@@ -200,7 +200,7 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
                         Row(
                           children: [
                             Text(
-                              'Hello, $username!',
+                               '${AppLocalizations.of(context)!.helloText}, $username!',
                               style: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 32,
@@ -211,14 +211,6 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
                             const SizedBox(width: 8),
                             const Icon(Icons.notifications_none, size: 28),
                           ],
-                        ),
-                        Text(
-                          widget.teacherName,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.black,
-                          ),
                         ),
                       ],
                     ),
@@ -251,9 +243,9 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        'Profile',
-                        style: TextStyle(
+                      Text(
+                        AppLocalizations.of(context)!.profile,
+                        style: const TextStyle(
                           fontSize: 12,
                           fontFamily: 'Manrope',
                           color: Colors.black,
