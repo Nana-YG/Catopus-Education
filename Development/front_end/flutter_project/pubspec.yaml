@@ -36,6 +36,7 @@ flutter:
 
   assets:
     - lib/temp_data/mock_login_data.json
+    - assets/images/
     - assets/images/孩子-哈！.png
     - assets/images/烧杯.png
     - assets/images/background/实验室-试剂选择场景-低饱和无氛围处理版.png

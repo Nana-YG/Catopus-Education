@@ -97,6 +97,9 @@ public class AuthController {
         }
         AccountType accountType = userService.getAccountTypeByUsername(username);
 
+        if (accountType == AccountType.TEACHER) {
+            return ResponseEntity.ok(Map.of("message", "Notice, now teachers do not need to fill the personal info"));
+        }
         Optional<UserInfo> userInfo = userInfoService.getUserInfoByToken(token);
         if (accountType == AccountType.STUDENT) {
             if (userInfo.isEmpty() || !userInfoService.isUserInfoComplete(userInfo.get())) {
@@ -131,7 +134,7 @@ public class AuthController {
     }
 
     @GetMapping("/profile-picture")
-    public ResponseEntity<?> getProfilePictureHex(
+    public ResponseEntity<?> getProfilePicture(
             @RequestHeader("Username") String username,
             @RequestHeader("Token") String token) {
 
@@ -144,14 +147,20 @@ public class AuthController {
             return ResponseEntity.status(404).body(Map.of("error", "User not found"));
         }
 
-        byte[] profilePicture = userOpt.get().getProfilePicture();
-
-        StringBuilder hexBuilder = new StringBuilder(profilePicture.length * 2);
-        for (byte b : profilePicture) {
-            hexBuilder.append(String.format("%02X", b));
+        byte[] picture = userOpt.get().getProfilePicture();
+        if (picture == null || picture.length != 300) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid profile picture length"));
         }
 
-        return ResponseEntity.ok(Map.of("profilePicture", hexBuilder.toString()));
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < picture.length; i += 3) {
+            int r = picture[i] & 0xFF;
+            int g = picture[i + 1] & 0xFF;
+            int b = picture[i + 2] & 0xFF;
+            sb.append(String.format("#%02X%02X%02X", r, g, b));
+        }
+
+        return ResponseEntity.ok(Map.of("profilePicture", sb.toString()));
     }
 
     @PostMapping("/profile-picture")
@@ -165,28 +174,17 @@ public class AuthController {
         }
 
         String data = body.get("profilePicture");
-        if (data == null || data.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Missing profilePicture"));
+        if (data == null || data.length() != 600 || !data.matches("[0-9a-fA-F]+")) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid hex string"));
         }
 
-        if (data.length() != 600) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Hex string must be exactly 600 characters"));
-        }
-
-        byte[] decoded;
-
+        byte[] decoded = new byte[300];
         try {
-            decoded = new byte[300];
             for (int i = 0; i < 300; i++) {
                 decoded[i] = (byte) Integer.parseInt(data.substring(i * 2, i * 2 + 2), 16);
             }
-
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid profilePicture format"));
-        }
-
-        if (decoded.length != 300) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Profile picture must be exactly 300 bytes (10x10 RGB)"));
         }
 
         Optional<User> userOpt = userService.getUserByUsername(username);

@@ -6,9 +6,10 @@ import 'package:flutter_project/pages/login.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_project/utils/constant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_project/utils/color.dart';
 
 class RegisterPage extends StatefulWidget {
-  final String userType; // 区分教师和学生
+  final String userType;
 
   const RegisterPage({super.key, required this.userType});
 
@@ -39,16 +40,12 @@ class _RegisterPageState extends State<RegisterPage> {
 
     var url = Uri.parse("$baseApiUrl/login/signup");
     var headers = {
-    "Username": username, // ✅ 传递 username
-    "Password": password, // ✅ 传递 password
-    "AccountType": widget.userType, // ✅ 传递用户类型（Teacher 或 Student）
-  };
-    var response = await http.post(
-      url,
-      headers: headers,
-    );
-    print("🔹 [REQUEST URL]: $url");
-  print("🔹 [HEADERS]: $headers");
+      "Username": username,
+      "Password": password,
+      "AccountType": widget.userType,
+    };
+
+    var response = await http.post(url, headers: headers);
 
     setState(() {
       _isLoading = false;
@@ -57,19 +54,17 @@ class _RegisterPageState extends State<RegisterPage> {
     var responseBody = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
-      String token = responseBody["token"]; // ✅ 获取 `token`
-
-      // **存储 `token` 到本地**
+      String token = responseBody["token"];
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', token);
       await prefs.setString('username', username);
+      print('🟢 注册成功，已存储的 token: $token');
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text(AppLocalizations.of(context).registrationSuccessful)),
       );
 
-      // ✅ 传递 `username` 和 `token` 进入 `FillUserInfoPage`
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -97,6 +92,10 @@ class _RegisterPageState extends State<RegisterPage> {
     double baseHeight = 1080;
     double scaleX = screenWidth / baseWidth;
     double scaleY = screenHeight / baseHeight;
+    double inputHeight = screenHeight * 0.08;
+    double rightShift = screenWidth * 0.20;
+    final double gap = 32 * scaleX;
+    final double buttonWidth = (screenWidth * 0.284 - gap) / 2;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -104,12 +103,90 @@ class _RegisterPageState extends State<RegisterPage> {
         child: Container(
           width: screenWidth,
           height: screenHeight,
-          decoration: const BoxDecoration(color: Colors.white),
+          decoration: const BoxDecoration(color: AppColors.background),
           child: Stack(
             children: [
-              // **页面标题**
+              // 背景三层卡片
               Positioned(
-                left: 666 * scaleX,
+                left: (-240 * scaleX),
+                top: -80 * scaleY,
+                child: Container(
+                  transform: Matrix4.identity()..rotateZ(0.09),
+                  width: 1278.26 * scaleX,
+                  height: 1300.66 * scaleY,
+                  decoration: ShapeDecoration(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(side: BorderSide(width: 1.5)),
+                    shadows: [
+                      BoxShadow(
+                        color: Color(0x3F000000),
+                        blurRadius: 35,
+                        offset: Offset(4, 4),
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: -260 * scaleX,
+                top: -100 * scaleY,
+                child: Container(
+                  transform: Matrix4.identity()..rotateZ(0.09),
+                  width: 1278.26 * scaleX,
+                  height: 1300.66 * scaleY,
+                  decoration: ShapeDecoration(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(side: BorderSide(width: 1.5)),
+                    shadows: [
+                      BoxShadow(
+                        color: Color(0x3F000000),
+                        blurRadius: 35,
+                        offset: Offset(4, 4),
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: -280 * scaleX,
+                top: -125 * scaleY,
+                child: Container(
+                  transform: Matrix4.identity()..rotateZ(0.09),
+                  width: 1278.26 * scaleX,
+                  height: 1300.66 * scaleY,
+                  decoration: ShapeDecoration(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(side: BorderSide(width: 1.5)),
+                    shadows: [
+                      BoxShadow(
+                        color: Color(0x3F000000),
+                        blurRadius: 35,
+                        offset: Offset(4, 4),
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // 插图
+              Positioned(
+                left: -100 * scaleX,
+                top: 60 * scaleY,
+                child: SizedBox(
+                  width: 976 * scaleX,
+                  height: 976 * scaleY,
+                  child: Image.asset(
+                    'assets/images/circle.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+
+              // 标题
+              Positioned(
+                left: (855 * scaleX + rightShift),
                 top: 234 * scaleY,
                 child: Text(
                   '${AppLocalizations.of(context).registerAs} ${widget.userType}',
@@ -122,9 +199,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
 
-              // **用户名**
+              // 用户名
               Positioned(
-                left: 855 * scaleX,
+                left: (855 * scaleX + rightShift),
                 top: 354 * scaleY,
                 child: Text(
                   AppLocalizations.of(context).name,
@@ -136,20 +213,19 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
               ),
-
               Positioned(
-                left: 855 * scaleX,
+                left: (855 * scaleX + rightShift),
                 top: 413 * scaleY,
                 child: SizedBox(
-                  width: 450 * scaleX,
-                  height: 68 * scaleY,
+                  width: screenWidth * 0.284,
+                  height: inputHeight,
                   child: TextField(
                     controller: _usernameController,
                     textAlignVertical: TextAlignVertical.center,
                     style: TextStyle(fontSize: 30 * scaleX),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color(0xFFECECEC),
+                      fillColor: AppColors.inputBackgroundColor,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
@@ -163,9 +239,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
 
-              // **密码**
+              // 密码
               Positioned(
-                left: 855 * scaleX,
+                left: (855 * scaleX + rightShift),
                 top: 515 * scaleY,
                 child: Text(
                   AppLocalizations.of(context).password,
@@ -177,13 +253,12 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
               ),
-
               Positioned(
-                left: 855 * scaleX,
+                left: (855 * scaleX + rightShift),
                 top: 573 * scaleY,
                 child: SizedBox(
-                  width: 450 * scaleX,
-                  height: 68 * scaleY,
+                  width: screenWidth * 0.284,
+                  height: inputHeight,
                   child: TextField(
                     controller: _passwordController,
                     obscureText: true,
@@ -191,7 +266,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     style: TextStyle(fontSize: 30 * scaleX),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color(0xFFECECEC),
+                      fillColor: AppColors.inputBackgroundColor,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
@@ -204,18 +279,48 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
               ),
-
-              // **返回按钮**
+              // ✅ 将“已有账号？登录” 放在密码输入框下方，右对齐
               Positioned(
-                left: 753 * scaleX,
-                top: 707 * scaleY,
+                left: (855 * scaleX + rightShift),
+                top: (573 * scaleY + inputHeight + 20 * scaleY),
+                child: SizedBox(
+                  width: screenWidth * 0.284,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const LoginPage()),
+                        );
+                      },
+                      child: Text(
+                        AppLocalizations.of(context).alreadyHaveAccount,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 24 * scaleX,
+                          fontFamily: 'Manrope',
+                          fontWeight: FontWeight.w400,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // 返回按钮
+              Positioned(
+                left: (855 * scaleX + rightShift),
+                top: 750 * scaleY,
                 child: GestureDetector(
                   onTap: () {
                     Navigator.pop(context);
                   },
                   child: Container(
-                    width: 276 * scaleX,
-                    height: 69 * scaleY,
+                    width: buttonWidth,
+                    height: inputHeight,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
@@ -242,15 +347,15 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
 
-              // **注册按钮**
+              // 注册按钮
               Positioned(
-                left: 1131 * scaleX,
-                top: 707 * scaleY,
+                left: (855 * scaleX + rightShift + buttonWidth + gap),
+                top: 750 * scaleY,
                 child: GestureDetector(
                   onTap: _register,
                   child: Container(
-                    width: 276 * scaleX,
-                    height: 69 * scaleY,
+                    width: buttonWidth,
+                    height: inputHeight,
                     decoration: BoxDecoration(
                       color: const Color(0xFF292929),
                       borderRadius: BorderRadius.circular(8),
@@ -267,32 +372,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // **已有账号？返回登录**
-              Positioned(
-                left: 880 * scaleX,
-                top: 810 * scaleY,
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginPage(),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    AppLocalizations.of(context).alreadyHaveAccount,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 24 * scaleX,
-                      fontFamily: 'Manrope',
-                      fontWeight: FontWeight.w400,
-                      decoration: TextDecoration.underline,
                     ),
                   ),
                 ),
