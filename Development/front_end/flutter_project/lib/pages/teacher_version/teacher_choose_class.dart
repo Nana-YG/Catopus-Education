@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/generated/app_localizations.dart';
+import 'package:flutter_project/pages/avatar_editor_page.dart';
 import 'package:flutter_project/pages/user_profile_page.dart';
 import 'package:flutter_project/utils/class_card.dart';
 import 'package:flutter_project/utils/color.dart';
@@ -24,12 +25,28 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
   List<dynamic> classes = [];
   bool isLoading = true;
   String username = '';
+  String? avatarString;
 
   @override
   void initState() {
     super.initState();
     _loadUsername();
     _loadTeacherClasses();
+    _loadAvatarString();
+  }
+
+  Future<String?> _loadAvatarString() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString('avatarString');
+    if (raw == null || raw.isEmpty) return null;
+
+    // 自动加上 #
+    final formatted = RegExp(r'^#').hasMatch(raw)
+        ? raw
+        : raw.replaceAllMapped(
+            RegExp(r'.{6}'), (match) => '#${match.group(0)}');
+
+    return formatted;
   }
 
   Future<void> _loadUsername() async {
@@ -200,7 +217,7 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
                         Row(
                           children: [
                             Text(
-                               '${AppLocalizations.of(context)!.helloText}, $username!',
+                              '${AppLocalizations.of(context)!.helloText}, $username!',
                               style: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 32,
@@ -218,12 +235,22 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
                   Column(
                     children: [
                       GestureDetector(
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async {
+                          final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => const UserProfilePage()),
                           );
+
+                          if (result == true) {
+                            final updatedAvatar =
+                                await _loadAvatarString(); // 加载新的头像
+                            print(
+                                '🖼️ 刷新后头像 avatarString: $updatedAvatar'); // ✅ 新增打印
+                            setState(() {
+                              avatarString = updatedAvatar; // ✅ 更新状态
+                            });
+                          }
                         },
                         child: Container(
                           width: 48,
@@ -239,7 +266,15 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
                               )
                             ],
                           ),
-                          child: const Icon(Icons.person, size: 28),
+                          child: ClipOval(
+                            child: avatarString != null
+                                ? CustomPaint(
+                                    key: ValueKey(avatarString),
+                                    painter: AvatarPainter(avatarString!),
+                                    size: const Size(48, 48),
+                                  )
+                                : const Icon(Icons.person, size: 28),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 4),

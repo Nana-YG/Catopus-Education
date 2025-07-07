@@ -28,12 +28,14 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
   List<dynamic> classes = [];
   bool isLoading = true;
   String username = '';
+  String? avatarString;
 
   @override
   void initState() {
     super.initState();
     _loadUsername();
     _loadClasses();
+    _loadAvatarString();
   }
 
   Future<String?> _loadAvatarString() async {
@@ -236,13 +238,22 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
                   Column(
                     children: [
                       GestureDetector(
-                        onTap: () {
-                          Navigator.push(
+                         onTap: () async {
+                          final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const UserProfilePage(),
-                            ),
+                                builder: (context) => const UserProfilePage()),
                           );
+
+                          if (result == true) {
+                            final updatedAvatar =
+                                await _loadAvatarString(); // 加载新的头像
+                            print(
+                                '🖼️ 刷新后头像 avatarString: $updatedAvatar'); // ✅ 新增打印
+                            setState(() {
+                              avatarString = updatedAvatar; // ✅ 更新状态
+                            });
+                          }
                         },
                         child: Container(
                           width: 48,
@@ -258,19 +269,14 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
                               )
                             ],
                           ),
-                          child: FutureBuilder<String?>(
-                            future: _loadAvatarString(),
-                            builder: (context, snapshot) {
-                              final avatarString = snapshot.data;
-                              final avatarWidget = avatarString != null
-                                  ? CustomPaint(
-                                      key: ValueKey(avatarString),
-                                      painter: AvatarPainter(avatarString),
-                                      size: const Size(48, 48),
-                                    )
-                                  : const Icon(Icons.person, size: 28);
-                              return ClipOval(child: avatarWidget);
-                            },
+                          child: ClipOval(
+                            child: avatarString != null
+                                ? CustomPaint(
+                                    key: ValueKey(avatarString),
+                                    painter: AvatarPainter(avatarString!),
+                                    size: const Size(48, 48),
+                                  )
+                                : const Icon(Icons.person, size: 28),
                           ),
                         ),
                       ),
