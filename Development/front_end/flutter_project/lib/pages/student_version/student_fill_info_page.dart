@@ -29,7 +29,6 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
 
-
   String _selectedGender = "";
 
   List<String> _selectedSubjects = [];
@@ -42,7 +41,7 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
         _schoolController.text.isEmpty ||
         _classController.text.isEmpty ||
         _studentIDController.text.isEmpty ||
-         _mobileController.text.isEmpty ||
+        _mobileController.text.isEmpty ||
         _ageController.text.isEmpty ||
         _selectedGender.isEmpty ||
         _selectedSubjects.isEmpty) {
@@ -88,7 +87,7 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
               MaterialPageRoute(
                 builder: (context) => StudentTermsPage(
                   username: widget.username,
-            token: widget.token,
+                  token: widget.token,
                 ),
               ),
             );
@@ -331,6 +330,25 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      //测试使用跳过fillinfo
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => StudentChooseClassPage(
+                  studentName: widget.username,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+      //结束
       body: Center(
         child: SingleChildScrollView(
           child: Container(
@@ -365,11 +383,10 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
                 _buildTextField(_studentIDController,
                     AppLocalizations.of(context).studentID, scaleX),
                 SizedBox(height: 20 * scaleX),
-_buildTextField(_mobileController, AppLocalizations.of(context).mobile, scaleX,
-    keyboardType: TextInputType.phone),
-
+                _buildTextField(_mobileController,
+                    AppLocalizations.of(context).mobile, scaleX,
+                    keyboardType: TextInputType.phone),
                 SizedBox(height: 20 * scaleX),
-
                 _buildTextField(
                     _ageController, AppLocalizations.of(context).age, scaleX,
                     keyboardType: TextInputType.number),

@@ -6,7 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class AvatarEditorPage extends StatefulWidget {
-  const AvatarEditorPage({super.key});
+  final String? initialAvatarString;
+
+  const AvatarEditorPage({super.key, this.initialAvatarString});
 
   @override
   State<AvatarEditorPage> createState() => _AvatarEditorPageState();
@@ -19,6 +21,27 @@ class _AvatarEditorPageState extends State<AvatarEditorPage> {
   Color currentColor = Colors.black;
   bool isDrawing = false;
   final GlobalKey _gridKey = GlobalKey();
+  @override
+  void initState() {
+    super.initState();
+
+    final str = widget.initialAvatarString;
+    print('🎯 Received initialAvatarString: $str');
+
+    if (str != null) {
+      final regex = RegExp(r'#([0-9a-fA-F]{6})');
+      final matches = regex.allMatches(str);
+      final colorList =
+          matches.map((m) => Color(int.parse('0xFF${m.group(1)}'))).toList();
+
+      if (colorList.length == gridSize * gridSize) {
+        pixels = colorList;
+        print("✅ 成功加载头像颜色，数量: ${colorList.length}");
+      } else {
+        print("❗颜色数量不对，只有 ${colorList.length} 个");
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,13 +53,18 @@ class _AvatarEditorPageState extends State<AvatarEditorPage> {
           IconButton(
             icon: const Icon(Icons.save),
             onPressed: () async {
-              final avatarString = pixels
+              final avatarStringForUpload = pixels
+                  .map((c) =>
+                      c.value.toRadixString(16).padLeft(8, '0').substring(2))
+                  .join();
+
+              final avatarStringForUI = pixels
                   .map((c) =>
                       '#${c.value.toRadixString(16).padLeft(8, '0').substring(2)}')
                   .join();
 
               final prefs = await SharedPreferences.getInstance();
-              await prefs.setString('avatarString', avatarString);
+              await prefs.setString('avatarString', avatarStringForUpload);
 
               final token = prefs.getString('token');
               final username = prefs.getString('username');
@@ -50,20 +78,20 @@ class _AvatarEditorPageState extends State<AvatarEditorPage> {
                     'Token': token,
                   },
                   body: jsonEncode({
-                    'profilePicture': avatarString,
+                    'profilePicture': avatarStringForUpload,
                   }),
                 );
 
                 if (response.statusCode == 200) {
                   print("头像上传成功");
                 } else {
-                  print("Upload failed: ${response.statusCode} ${response.body}");
-                  print("Sending avatarString: $avatarString");
-
+                  print(
+                      "Upload failed: ${response.statusCode} ${response.body}");
+                  print("Sending avatarString: $avatarStringForUpload");
                 }
               }
 
-              Navigator.pop(context, avatarString);
+              Navigator.pop(context, avatarStringForUI);
             },
           ),
         ],
@@ -86,7 +114,8 @@ class _AvatarEditorPageState extends State<AvatarEditorPage> {
                       ElevatedButton.icon(
                         onPressed: () {
                           setState(() {
-                            pixels = List.generate(gridSize * gridSize, (_) => Colors.white);
+                            pixels = List.generate(
+                                gridSize * gridSize, (_) => Colors.white);
                           });
                         },
                         icon: const Icon(Icons.clear),
@@ -95,7 +124,8 @@ class _AvatarEditorPageState extends State<AvatarEditorPage> {
                           backgroundColor: Colors.grey[700],
                           foregroundColor: Colors.white,
                           minimumSize: const Size(80, 36),
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                         ),
                       ),
                     ],
@@ -113,13 +143,19 @@ class _AvatarEditorPageState extends State<AvatarEditorPage> {
                       onPanEnd: (_) => setState(() => isDrawing = false),
                       onPanCancel: () => setState(() => isDrawing = false),
                       onPanUpdate: (details) {
-                        final box = _gridKey.currentContext!.findRenderObject() as RenderBox;
-                        final localPos = box.globalToLocal(details.globalPosition);
+                        final box = _gridKey.currentContext!.findRenderObject()
+                            as RenderBox;
+                        final localPos =
+                            box.globalToLocal(details.globalPosition);
 
                         final int x = localPos.dx ~/ squareSize;
                         final int y = localPos.dy ~/ squareSize;
 
-                        if (x >= 0 && x < gridSize && y >= 0 && y < gridSize && isDrawing) {
+                        if (x >= 0 &&
+                            x < gridSize &&
+                            y >= 0 &&
+                            y < gridSize &&
+                            isDrawing) {
                           int index = y * gridSize + x;
                           setState(() => pixels[index] = currentColor);
                         }
@@ -128,7 +164,8 @@ class _AvatarEditorPageState extends State<AvatarEditorPage> {
                         physics: const NeverScrollableScrollPhysics(),
                         padding: EdgeInsets.zero,
                         itemCount: gridSize * gridSize,
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: gridSize,
                         ),
                         itemBuilder: (context, index) {
