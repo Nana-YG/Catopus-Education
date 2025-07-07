@@ -1,38 +1,100 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/generated/app_localizations.dart';
 import 'package:flutter_project/pages/avatar_editor_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_project/pages/login.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_project/utils/constant.dart';
 
+import 'avatar_editor_page.dart';
 
-class UserProfilePage extends StatelessWidget {
+class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
 
-  Future<void> _logout(BuildContext context) async {
+  @override
+  State<UserProfilePage> createState() => _UserProfilePageState();
+}
+
+class _UserProfilePageState extends State<UserProfilePage> {
+  String? avatarString;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAvatarFromServer();
+  }
+
+  Future<void> _loadAvatarFromServer() async {
+    final prefs = await SharedPreferences.getInstance();
+    final username = prefs.getString('username');
+    final token = prefs.getString('token');
+
+    if (username != null && token != null) {
+      final response = await http.get(
+        Uri.parse('$baseApiUrl/login/profile-picture'),
+        headers: {
+          'Username': username,
+          'Token': token,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        setState(() {
+          avatarString = json['profilePicture'];
+        });
+      } else {
+        print("❌ 获取头像失败: ${response.statusCode} ${response.body}");
+      }
+    }
+  }
+
+  Future<void> _logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
 
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginPage()),
-      (route) => false,
-    );
+    if (!mounted) return;
+    Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(builder: (_) => const LoginPage()),
+);
+
   }
 
-  void _goToAvatarEditor(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AvatarEditorPage()),
-    );
+  void _goToAvatarEditor() async {
+  final result = await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) =>
+          AvatarEditorPage(initialAvatarString: avatarString),
+    ),
+  );
+
+  if (result != null && result is String) {
+    print('🎨 返回的新头像字符串: $result');
+    setState(() {
+      avatarString = result;
+    });
   }
+}
+
+
 
   @override
   Widget build(BuildContext context) {
+    final avatarWidget = avatarString != null
+        ? CustomPaint(
+          key: ValueKey(avatarString),
+            painter: AvatarPainter(avatarString!),
+            size: const Size(100, 100),
+          )
+        : const Icon(Icons.person, size: 50, color: Colors.white);
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: Text( AppLocalizations.of(context)!.profile,
-),
+        title: Text(AppLocalizations.of(context)!.profile),
         centerTitle: true,
         backgroundColor: Colors.grey[100],
         elevation: 0,
@@ -40,23 +102,19 @@ class UserProfilePage extends StatelessWidget {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // 🔵 头像圆圈显示
           GestureDetector(
-            onTap: () => _goToAvatarEditor(context),
+            onTap: _goToAvatarEditor,
             child: CircleAvatar(
               radius: 50,
               backgroundColor: Colors.grey[400],
-              child: const Icon(Icons.brush, size: 40, color: Colors.white),
+              child: ClipOval(child: avatarWidget),
             ),
           ),
           const SizedBox(height: 40),
-
-
-          const SizedBox(height: 20),
           ElevatedButton.icon(
-            onPressed: () => _logout(context),
+            onPressed: _logout,
             icon: const Icon(Icons.logout),
-            label: Text(AppLocalizations.of(context)!.logout,),
+            label: Text(AppLocalizations.of(context)!.logout),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
               foregroundColor: Colors.white,

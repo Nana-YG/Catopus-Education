@@ -23,46 +23,51 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isLoading = false;
 
   Future<void> _register() async {
-    String username = _usernameController.text;
-    String password = _passwordController.text;
+  String username = _usernameController.text.trim();
+  String password = _passwordController.text.trim();
 
-    if (username.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(AppLocalizations.of(context).pleaseFillAllFields)),
-      );
-      return;
-    }
+  if (username.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context).pleaseFillAllFields)),
+    );
+    return;
+  }
 
-    setState(() {
-      _isLoading = true;
-    });
+  setState(() {
+    _isLoading = true;
+  });
 
-    var url = Uri.parse("$baseApiUrl/login/signup");
-    var headers = {
-      "Username": username,
-      "Password": password,
-      "AccountType": widget.userType,
+  try {
+    final url = Uri.parse("$baseApiUrl/login/signup");
+
+    final headers = {
+      "username": username,
+      "password": password,
+      "accountType": widget.userType.toUpperCase(), // 确保是 STUDENT 或 TEACHER
     };
 
-    var response = await http.post(url, headers: headers);
+    // 🔍 可选调试输出
+    print("📤 正在发送注册请求 headers: $headers");
+
+    final response = await http.post(url, headers: headers);
 
     setState(() {
       _isLoading = false;
     });
 
-    var responseBody = jsonDecode(response.body);
+    print("🔵 Response (${response.statusCode}): ${response.body}");
+
+    final responseBody = jsonDecode(response.body);
 
     if (response.statusCode == 200) {
-      String token = responseBody["token"];
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = responseBody["token"];
+
+      final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', token);
       await prefs.setString('username', username);
-      print('🟢 注册成功，已存储的 token: $token');
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(AppLocalizations.of(context).registrationSuccessful)),
+        SnackBar(content: Text(AppLocalizations.of(context).registrationSuccessful)),
       );
 
       Navigator.push(
@@ -75,13 +80,21 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(responseBody["error"] ??
-                AppLocalizations.of(context).registrationFailed)),
-      );
+      // 注册失败，例如用户名已存在
+      final errorMsg = responseBody["message"] ?? AppLocalizations.of(context).registrationFailed;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMsg)));
     }
+  } catch (e) {
+    setState(() {
+      _isLoading = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Unexpected error: $e")),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

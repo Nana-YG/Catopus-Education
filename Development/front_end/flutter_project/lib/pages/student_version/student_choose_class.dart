@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/generated/app_localizations.dart';
+import 'package:flutter_project/pages/avatar_editor_page.dart';
 import 'package:flutter_project/pages/game_test.dart';
+import 'package:flutter_project/pages/student_version/student_course_detail_page.dart';
 import 'package:flutter_project/pages/test_ha_pages.dart';
 import 'package:flutter_project/pages/user_profile_page.dart';
 import 'package:flutter_project/utils/class_card.dart';
@@ -32,6 +34,20 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
     super.initState();
     _loadUsername();
     _loadClasses();
+  }
+
+  Future<String?> _loadAvatarString() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString('avatarString');
+    if (raw == null || raw.isEmpty) return null;
+
+    // 自动加上 #
+    final formatted = RegExp(r'^#').hasMatch(raw)
+        ? raw
+        : raw.replaceAllMapped(
+            RegExp(r'.{6}'), (match) => '#${match.group(0)}');
+
+    return formatted;
   }
 
   Future<void> _loadUsername() async {
@@ -242,7 +258,20 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
                               )
                             ],
                           ),
-                          child: const Icon(Icons.person, size: 28),
+                          child: FutureBuilder<String?>(
+                            future: _loadAvatarString(),
+                            builder: (context, snapshot) {
+                              final avatarString = snapshot.data;
+                              final avatarWidget = avatarString != null
+                                  ? CustomPaint(
+                                      key: ValueKey(avatarString),
+                                      painter: AvatarPainter(avatarString),
+                                      size: const Size(48, 48),
+                                    )
+                                  : const Icon(Icons.person, size: 28);
+                              return ClipOval(child: avatarWidget);
+                            },
+                          ),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -287,18 +316,13 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
                         return ClassCard(
                           classData: classData,
                           onTap: () {
-                            if (className == "Chemistry 303") {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const TestHaPage(),
-                                ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Selected: $className')),
-                              );
-                            }
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    CourseDetailPage(className: className),
+                              ),
+                            );
                           },
                         );
                       },
