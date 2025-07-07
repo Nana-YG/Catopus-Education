@@ -56,36 +56,33 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
     if (!mounted) return;
     Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(builder: (_) => const LoginPage()),
-);
-
+      context,
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+    );
   }
 
   void _goToAvatarEditor() async {
-  final result = await Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) =>
-          AvatarEditorPage(initialAvatarString: avatarString),
-    ),
-  );
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            AvatarEditorPage(initialAvatarString: avatarString),
+      ),
+    );
 
-  if (result != null && result is String) {
-    print('🎨 返回的新头像字符串: $result');
-    setState(() {
-      avatarString = result;
-    });
+    if (result != null && result is String) {
+      print('🎨 返回的新头像字符串: $result');
+      setState(() {
+        avatarString = result;
+      });
+    }
   }
-}
-
-
 
   @override
   Widget build(BuildContext context) {
     final avatarWidget = avatarString != null
         ? CustomPaint(
-          key: ValueKey(avatarString),
+            key: ValueKey(avatarString),
             painter: AvatarPainter(avatarString!),
             size: const Size(100, 100),
           )
@@ -94,6 +91,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, true); // ✅ 通知上层页面可以刷新头像
+          },
+        ),
         title: Text(AppLocalizations.of(context)!.profile),
         centerTitle: true,
         backgroundColor: Colors.grey[100],
