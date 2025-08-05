@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/utils/chapter_path_painter.dart';
+import 'package:flutter_project/widgets/comment_board.dart';
 
 class CourseDetailPage extends StatefulWidget {
-  final String className;
+  final String classId; // ✅ 新增
+  final String className; // 课程名称
+  final int taskCount; // ✅ 新增：任务数（章节数）
 
-  const CourseDetailPage({super.key, required this.className});
+  const CourseDetailPage({
+    super.key,
+    required this.className,
+    required this.classId,
+    required this.taskCount,
+  });
 
   @override
   State<CourseDetailPage> createState() => _CourseDetailPageState();
@@ -81,7 +89,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           ),
           Positioned(
             top: 100 * scaleY,
-            left: 800 * scaleX,
+            left: 650 * scaleX,
             child: _buildChapterPath(scaleX),
           ),
           Positioned(
@@ -105,6 +113,41 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showCommentBoard(int chapterNumber) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "Dismiss",
+      barrierColor: Colors.black.withOpacity(0.1),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (_, __, ___) => const SizedBox.shrink(),
+      transitionBuilder: (context, animation, secondaryAnimation, _) {
+        final media = MediaQuery.of(context);
+        final screenWidth = media.size.width;
+        final screenHeight = media.size.height;
+        final padding = media.padding;
+
+        final boardWidth = screenWidth * 0.7;
+        final boardHeight = screenHeight * 0.85;
+
+        return FadeTransition(
+          opacity: animation,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Container(
+              width: boardWidth,
+              height: boardHeight,
+              margin: EdgeInsets.only(
+                right: padding.right > 0 ? padding.right : 20,
+              ),
+              child: CommentBoard(chapterNumber: chapterNumber),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -194,93 +237,82 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   }
 
   Widget _buildChapterPath(double scaleX) {
-    const int chapterCount = 12;
+  const double mapScale = 1.2;
 
-   final rawPoints = [
-  Offset(50, 150),
-  Offset(130, 50),
-  Offset(180, 180),
-  Offset(260, 290),
-  Offset(350, 370),
-  Offset(470, 380),
-  Offset(580, 330),
-  Offset(660, 260),
-  Offset(750, 200),
-  Offset(850, 250),
-  Offset(940, 340),
-  Offset(1020, 400),
-];
+  final chapterPositions = [
+    Offset(60, 169),
+    Offset(212, 159),
+    Offset(282, 279),
+    Offset(202, 404),
+    Offset(157, 545),
+    Offset(335, 629),
+    Offset(543, 619),
+    Offset(710, 556),
+    Offset(864, 427),
+    Offset(1030, 436),
+  ];
 
-// 放缩
-final points = rawPoints.map((p) => Offset(p.dx * scaleX, p.dy * scaleX)).toList();
+  final limitedTaskCount = widget.taskCount.clamp(0, chapterPositions.length);
 
-// 构造 spline（不指定 startHandle/endHandle）
-final spline = CatmullRomSpline(points);
+  final points = chapterPositions
+      .take(limitedTaskCount)
+      .map((p) => Offset(p.dx * mapScale * scaleX, p.dy * mapScale * scaleX))
+      .toList();
 
-// 生成插值点，首尾直接用原始点
-final chapterPoints = [
-  points.first,
-  ...List.generate(
-    chapterCount - 2,
-    (i) => spline.transform((i + 1) / (chapterCount - 1)),
-  ),
-  points.last,
-];
-
-
-    return SizedBox(
-      width: 1200 * scaleX,
-      height: 600 * scaleX,
-      child: Stack(
-        children: [
-          // 曲线路径绘制
+  return SizedBox(
+    width: 1700 * scaleX,
+    height: 900 * scaleX,
+    child: Stack(
+      children: [
+        if (points.length >= 4)
           CustomPaint(
             size: Size(1200 * scaleX, 600 * scaleX),
             painter: ChapterPathPainter(points: points, scale: scaleX),
+          )
+        else
+          CustomPaint(
+            size: Size(1200 * scaleX, 600 * scaleX),
+            painter: SmoothLinePathPainter(points: points, scale: scaleX),
           ),
 
-          // 按钮在线上
-          ...List.generate(chapterCount, (index) {
-            final pos = chapterPoints[index];
-            final isUnlocked = index < 9;
+        ...List.generate(limitedTaskCount, (index) {
+          final pos = points[index];
+          final isUnlocked = index < 9;
 
-            return Positioned(
-              left: pos.dx - 12 * scaleX - 40 * scaleX, // 左移 10px（根据需要调节）
-
-              top: pos.dy - 12 * scaleX,
-              child: Column(
-                children: [
-                  GestureDetector(
-                    onTap: isUnlocked
-                        ? () => print('Tapped Chapter ${index + 1}')
-                        : null,
-                    child: Container(
-                      width: 24 * scaleX,
-                      height: 24 * scaleX,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isUnlocked ? Colors.white : Colors.grey[300],
-                        border: Border.all(color: Colors.black),
-                      ),
+          return Positioned(
+            left: pos.dx - 12 * scaleX - 60 * scaleX,
+            top: pos.dy - 12 * scaleX,
+            child: Column(
+              children: [
+                GestureDetector(
+                  onTap: isUnlocked ? () => _showCommentBoard(index + 1) : null,
+                  child: Container(
+                    width: 35 * scaleX,
+                    height: 35 * scaleX,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isUnlocked ? Colors.white : Colors.grey[300],
+                      border: Border.all(color: Colors.black),
                     ),
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Chapter ${index + 1}',
-                    style: TextStyle(
-                      fontSize: 20 * scaleX,
-                      fontWeight: FontWeight.w500,
-                      color: isUnlocked
-                          ? Colors.black
-                          : Colors.grey.withOpacity(0.5),
-                    ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Chapter ${index + 1}',
+                  style: TextStyle(
+                    fontSize: 28 * scaleX,
+                    fontWeight: FontWeight.w500,
+                    color: isUnlocked ? Colors.black : Colors.grey.withOpacity(0.5),
                   ),
-                ],
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    ),
+  );
+}
+
+
 }

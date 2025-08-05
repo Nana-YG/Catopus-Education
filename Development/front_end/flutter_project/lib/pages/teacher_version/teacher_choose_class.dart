@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/generated/app_localizations.dart';
 import 'package:flutter_project/pages/avatar_editor_page.dart';
 import 'package:flutter_project/pages/user_profile_page.dart';
-import 'package:flutter_project/utils/class_card.dart';
+import 'package:flutter_project/widgets/class_card.dart';
 import 'package:flutter_project/utils/color.dart';
 import 'package:flutter_project/utils/constant.dart';
 import 'package:http/http.dart' as http;
