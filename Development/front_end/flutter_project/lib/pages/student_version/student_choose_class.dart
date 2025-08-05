@@ -31,26 +31,54 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
   String? avatarString;
 
   @override
-  void initState() {
-    super.initState();
-    _loadUsername();
-    _loadClasses();
-    _loadAvatarString();
+void initState() {
+  super.initState();
+  _loadInitialData();
+}
+
+void _loadInitialData() async {
+  _loadUsername();
+  _loadClasses();
+  final updatedAvatar = await _loadAvatarString();
+  if (!mounted) return;
+  setState(() {
+    avatarString = updatedAvatar;
+  });
+}
+
+
+ Future<String?> _loadAvatarString() async {
+  final prefs = await SharedPreferences.getInstance();
+  final username = prefs.getString('username');
+  final token = prefs.getString('token');
+
+  if (username != null && token != null) {
+    final response = await http.get(
+      Uri.parse('$baseApiUrl/login/profile-picture'),
+      headers: {
+        'Username': username,
+        'Token': token,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      final raw = json['profilePicture'];
+
+      if (raw == null || raw.isEmpty) return null;
+
+      final formatted = RegExp(r'^#').hasMatch(raw)
+          ? raw
+          : raw.replaceAllMapped(RegExp(r'.{6}'), (match) => '#${match.group(0)}');
+
+      return formatted; // ✅ 现在返回字符串
+    } else {
+      print("❌ 获取头像失败: ${response.statusCode} ${response.body}");
+    }
   }
 
-  Future<String?> _loadAvatarString() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString('avatarString');
-    if (raw == null || raw.isEmpty) return null;
-
-    // 自动加上 #
-    final formatted = RegExp(r'^#').hasMatch(raw)
-        ? raw
-        : raw.replaceAllMapped(
-            RegExp(r'.{6}'), (match) => '#${match.group(0)}');
-
-    return formatted;
-  }
+  return null; // 请求失败时返回 null
+}
 
   Future<void> _loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
