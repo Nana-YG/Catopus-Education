@@ -83,6 +83,7 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
 
       for (final entry in classMap.entries) {
         final String classId = entry.key;
+        final Map<String, dynamic> classInfo = entry.value;
         final String subject = classInfo['subject'];
         final Map<String, dynamic> tasks = classInfo['tasks'];
 
