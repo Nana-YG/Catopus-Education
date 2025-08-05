@@ -19,70 +19,79 @@ class ClassCard extends StatelessWidget {
     final String name = classData['name'] ?? '';
     final String classId = classData['classId'] ?? '';
     final String joinKey = classData['joinKey'] ?? '';
+    final int progress = classData['progress'] ?? -1;
 
     return GestureDetector(
       onTap: onTap,
       child: AspectRatio(
-        aspectRatio: 1, // 强制正方形
+        aspectRatio: 1,
         child: Container(
-          decoration: isAddCard
-              ? ShapeDecoration(
-                  color: isAddCard
-                      ? AppColors.background
-                      : Colors.white, // ✅ 设置为白色
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(23.38), // ✅ 同课程卡
-                  ),
-                  shadows: const [
-                    // ✅ 添加阴影
-                    BoxShadow(
-                      color: Color(0x3F000000),
-                      blurRadius: 15,
-                      offset: Offset(0, 0),
-                    )
-                  ],
-                )
-              : ShapeDecoration(
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(23.38),
-                  ),
-                  shadows: const [
-                    BoxShadow(
-                      color: Color(0x3F000000),
-                      blurRadius: 15,
-                      offset: Offset(0, 0),
-                    )
-                  ],
-                ),
-          padding: const EdgeInsets.all(24),
+          decoration: ShapeDecoration(
+            color: isAddCard ? AppColors.background : Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            shadows: const [
+              BoxShadow(
+                color: Color(0x3F000000),
+                blurRadius: 8,
+                offset: Offset(0, 4),
+              )
+            ],
+          ),
+          padding: const EdgeInsets.all(20),
           child: isAddCard
               ? const Center(
                   child: Icon(Icons.add, size: 60, color: Colors.grey),
                 )
               : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    // 课程名
                     Text(
                       name,
                       style: const TextStyle(
-                        fontSize: 22,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
+                      textAlign: TextAlign.center,
                     ),
-                    if (isTeacher) ...[
-                      const SizedBox(height: 16),
-                      Text(
-                        'Class ID: $classId',
-                        style: const TextStyle(fontSize: 16),
+
+                    // 中间图标
+                    const Icon(
+                      Icons.science_outlined,
+                      size: 60,
+                      color: Colors.black,
+                    ),
+
+                    // 进度条
+                    if (!isTeacher && progress >= 0)
+                      Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("Progress",
+                                  style: TextStyle(fontSize: 14)),
+                              Text(
+                                "$progress%",
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: LinearProgressIndicator(
+                              value: progress / 100,
+                              backgroundColor: Colors.grey[300],
+                              color: Colors.green,
+                              minHeight: 10,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Join Key: $joinKey',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ],
                   ],
                 ),
         ),

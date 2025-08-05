@@ -65,7 +65,7 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
     final token = prefs.getString('token') ?? '';
 
     final response = await http.get(
-      Uri.parse('$baseApiUrl/course/joinedClassList'),
+      Uri.parse('$baseApiUrl/progress/$username'),
       headers: {
         'Username': username,
         'Token': token,
@@ -77,10 +77,44 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
 
     if (response.statusCode == 200) {
       final result = jsonDecode(response.body);
-      final classNames = result['classNames'] as List;
+      final Map<String, dynamic> classMap = result['classes'] ?? {};
+
+      final List<Map<String, dynamic>> classList = [];
+
+      for (final entry in classMap.entries) {
+        final String classId = entry.key;
+        final String subject = classInfo['subject'];
+        final Map<String, dynamic> tasks = classInfo['tasks'];
+
+        // ✅ 存储 classId -> subject
+        await prefs.setString('class_$classId', subject);
+
+        int completedTasks = 0;
+        final totalTasks = tasks.length;
+
+        for (final taskEntry in tasks.entries) {
+          final String taskId = taskEntry.key;
+          final int status = taskEntry.value;
+
+          // ✅ 存储每个 task 状态
+          await prefs.setInt('task_${classId}_$taskId', status);
+
+          if (status == 1) completedTasks++;
+        }
+
+        final int progress =
+            totalTasks > 0 ? ((completedTasks / totalTasks) * 100).round() : 0;
+
+        classList.add({
+          'classId': classId,
+          'name': subject,
+          'progress': progress,
+          'taskCount': totalTasks
+        });
+      }
 
       setState(() {
-        classes = classNames.map((name) => {'name': name}).toList();
+        classes = classList;
         isLoading = false;
       });
     } else {
@@ -316,9 +350,7 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
                             onTap: _showJoinClassDialog,
                           );
                         }
-
                         final classData = classes[index];
-                        final className = classData['name'];
 
                         return ClassCard(
                           classData: classData,
@@ -326,8 +358,11 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    CourseDetailPage(className: className),
+                                builder: (context) => CourseDetailPage(
+                                  className: classData['name'],
+                                  classId: classData['classId'],
+                                  taskCount: classData['taskCount'], // ✅ 传进去
+                                ),
                               ),
                             );
                           },

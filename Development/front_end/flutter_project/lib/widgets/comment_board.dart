@@ -1,9 +1,9 @@
+// 🎯 整合版 CommentBoard：comments 顶部展示，颜色只变输入框
 import 'package:flutter/material.dart';
-import 'package:flutter_project/widgets/clip_board_clip.dart'; // 根据你的实际路径修改
+import 'package:flutter_project/widgets/clip_board_clip.dart';
 
 class CommentBoard extends StatefulWidget {
   final int chapterNumber;
-
   const CommentBoard({super.key, required this.chapterNumber});
 
   @override
@@ -21,6 +21,7 @@ const Map<CommentType, Color> commentColors = {
 
 class _CommentBoardState extends State<CommentBoard> {
   CommentType? selectedType;
+  bool isViewingNoteDetail = false;
 
   String _getHintText() {
     switch (selectedType) {
@@ -67,7 +68,6 @@ class _CommentBoardState extends State<CommentBoard> {
                       ),
                     ),
                   ),
-                  // 主咖啡色板子（右移）
                   Positioned(
                     left: extraLeftSpace,
                     child: Container(
@@ -80,7 +80,7 @@ class _CommentBoardState extends State<CommentBoard> {
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
-                          // 白纸或变色纸区域
+                          // 白纸区域（背景固定白色）
                           Positioned(
                             top: 10,
                             left: 10,
@@ -88,8 +88,9 @@ class _CommentBoardState extends State<CommentBoard> {
                             bottom: 10,
                             child: Container(
                               decoration: BoxDecoration(
-                                color: selectedType != null
-                                    ? commentColors[selectedType]!
+                                color: selectedType != null &&
+                                        !isViewingNoteDetail
+                                    ? commentColors[selectedType]! // ✅ 仅写评论时变色
                                     : Colors.white,
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
@@ -101,13 +102,49 @@ class _CommentBoardState extends State<CommentBoard> {
                                 ],
                               ),
                               padding: const EdgeInsets.all(20),
-                              child: selectedType == null
-                                  ? _buildDefaultView()
-                                  : _buildCommentEditor(),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildHeader(),
+                                  const SizedBox(height: 12),
+                                  Expanded(
+                                    child: selectedType == null
+                                        ? _buildDefaultView()
+                                        : isViewingNoteDetail
+                                            ? _buildNoteDetailView()
+                                            : _buildCommentEditor(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 12,
+                            left: 12,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  if (selectedType != null &&
+                                      isViewingNoteDetail) {
+                                    // 之前只关掉 isViewingNoteDetail，现在连 type 一起清掉
+                                    isViewingNoteDetail = false;
+                                    selectedType = null;
+                                  } else if (selectedType != null) {
+                                    selectedType = null;
+                                  } else {
+                                    Navigator.of(context).pop();
+                                  }
+                                });
+                              },
+                              child: const CircleAvatar(
+                                radius: 22,
+                                backgroundColor: Colors.white,
+                                child:
+                                    Icon(Icons.arrow_back, color: Colors.black),
+                              ),
                             ),
                           ),
 
-                          // 板夹夹子
                           Align(
                             alignment: Alignment.topCenter,
                             child: Transform.translate(
@@ -116,7 +153,6 @@ class _CommentBoardState extends State<CommentBoard> {
                             ),
                           ),
 
-                          // 加号按钮（初始显示）
                           if (selectedType == null)
                             Positioned(
                               bottom: 30,
@@ -138,12 +174,9 @@ class _CommentBoardState extends State<CommentBoard> {
                       ),
                     ),
                   ),
-
-                  // 左侧外扩标签栏
-                  // 左侧标签栏，贴在咖啡色大板的左边缘
-                  if (selectedType != null)
+                  if (selectedType != null && !isViewingNoteDetail)
                     Positioned(
-                      left: 60 - 50, // extraLeftSpace - tab 宽度
+                      left: 10,
                       top: 50,
                       child: _buildVerticalTabs(),
                     ),
@@ -156,44 +189,41 @@ class _CommentBoardState extends State<CommentBoard> {
     );
   }
 
-  Widget _buildDefaultView() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildHeader() {
+    return Row(
       children: [
-        Row(
-          children: [
-            const CircleAvatar(radius: 20, backgroundColor: Color(0xFFE7D9FF)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'Comments for Chapter ${widget.chapterNumber}\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX？',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
+        const CircleAvatar(radius: 20, backgroundColor: Color(0xFFE7D9FF)),
+        const SizedBox(width: 12),
         Expanded(
-          child: GridView.count(
-            crossAxisCount: 2,
-            childAspectRatio: 0.9,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            children: List.generate(4, (index) {
-              final colors = [
-                Colors.yellow,
-                Colors.lightBlueAccent,
-                Colors.redAccent,
-                Colors.grey,
-              ];
-              return _buildNoteCard(colors[index]);
-            }),
+          child: Text(
+            'Comments for Chapter ${widget.chapterNumber}\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX？',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDefaultView() {
+    return GridView.count(
+      crossAxisCount: 2,
+      children: List.generate(4, (index) {
+        final colors = [
+          Colors.yellow,
+          Colors.lightBlueAccent,
+          Colors.redAccent,
+          Colors.grey
+        ];
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedType = CommentType.random;
+              isViewingNoteDetail = true;
+            });
+          },
+          child: _buildNoteCard(colors[index]),
+        );
+      }),
     );
   }
 
@@ -201,103 +231,195 @@ class _CommentBoardState extends State<CommentBoard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            const CircleAvatar(radius: 20, backgroundColor: Color(0xFFE7D9FF)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'Comments for Chapter ${widget.chapterNumber}\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX？',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        const Text(
-          '留下你的新评论吧',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 16),
         Expanded(
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
+              // ✅ 背景固定褐色
+              color: const Color(0xFFF4F4F4),
               border: Border.all(color: Colors.black),
               borderRadius: BorderRadius.circular(6),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white, // ✅ 输入区域始终白色
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      maxLines: null,
+                      decoration: InputDecoration(
+                        hintText: _getHintText(),
+                        filled: true, // ✅ 填充背景
+                        fillColor: Colors.white, // ✅ 填充为白色
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: ElevatedButton(
+                      onPressed: () => setState(() => selectedType = null),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text("发表"),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNoteDetailView() {
+    return Row(
+      children: [
+        // 左侧：主评论 + 所有回复（略缩小）
+        Expanded(
+          flex: 4,
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black),
+              borderRadius: BorderRadius.circular(8),
               color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.25),
+                  blurRadius: 12,
+                  offset: Offset(4, 4),
+                ),
+              ],
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // 主评论（带头像）
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    CircleAvatar(
+                        radius: 16, backgroundColor: Color(0xFFE7D9FF)),
+                    SizedBox(width: 8),
+                    Expanded(child: Text('主评论：XXX XXXX XXXX')),
+                  ],
+                ),
+                const Divider(),
+                const Text('所有回复：'),
+                const SizedBox(height: 8),
                 Expanded(
-                  child: TextField(
-                    maxLines: null,
-                    decoration: InputDecoration.collapsed(
-                      hintText: _getHintText(),
+                  child: ListView(
+                    children: List.generate(
+                      3,
+                      (i) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const CircleAvatar(
+                                radius: 14, backgroundColor: Colors.grey),
+                            const SizedBox(width: 8),
+                            Expanded(child: Text('回复 ${i + 1}：XXXXX XXXX')),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      print('发布评论：当前类型 $selectedType');
-                      // 可切换为退出模式：
-                      // setState(() => selectedType = null);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text("发表"),
-                  ),
-                )
               ],
             ),
           ),
         ),
-      ],
-    );
-  }
 
-  Widget _buildVerticalTabs() {
-    return Column(
-      children: [
-        _buildTab(CommentType.random, Icons.note, Colors.white),
-        _buildTab(CommentType.idea, Icons.lightbulb, Colors.amber),
-        _buildTab(CommentType.objection, Icons.block, Colors.redAccent),
-        _buildTab(
-            CommentType.supplement, Icons.add_comment, Colors.lightBlueAccent),
-      ],
-    );
-  }
+        const SizedBox(width: 10),
 
-  Widget _buildTab(CommentType type, IconData icon, Color color) {
-    final isSelected = selectedType == type;
-    return GestureDetector(
-      onTap: () {
-        print("点击切换为：$type");
-        setState(() {
-          selectedType = type;
-        });
-      },
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        width: 50,
-        height: 60,
-        decoration: BoxDecoration(
-          color: color.withOpacity(isSelected ? 1.0 : 0.7),
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(10),
-            bottomLeft: Radius.circular(10),
+        // 右侧：回复输入区域（略放大）
+        Expanded(
+          flex: 5,
+          child: Column(
+            children: [
+              // 标签栏贴顶，按钮变小
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildTrapezoidTab(CommentType.random, Colors.white),
+                    _buildTrapezoidTab(CommentType.idea, Colors.amber),
+                    _buildTrapezoidTab(CommentType.objection, Colors.redAccent),
+                    _buildTrapezoidTab(
+                        CommentType.supplement, Colors.lightBlueAccent),
+                  ],
+                ),
+              ),
+
+              // 回复输入框
+              // 回复输入框（保持白底，输入框内部变色）
+              // 回复输入框外层（加阴影）
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.25),
+                        blurRadius: 15,
+                        offset: const Offset(6, 6),
+                      ),
+                    ],
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white, // 保持输入框白色
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            maxLines: null,
+                            decoration: InputDecoration.collapsed(
+                              hintText: _getHintText(),
+                            ),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                selectedType = null;
+                                isViewingNoteDetail = false;
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black,
+                              foregroundColor: Colors.white,
+                              elevation: 4, // ✅ 按钮也带轻微阴影
+                              shadowColor: Colors.black.withOpacity(0.2),
+                            ),
+                            child: const Text("发表"),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            ],
           ),
-          border: isSelected ? Border.all(color: Colors.black, width: 2) : null,
         ),
-        child: Icon(icon, size: 20, color: Colors.white),
-      ),
+      ],
     );
   }
 
@@ -312,26 +434,79 @@ class _CommentBoardState extends State<CommentBoard> {
       child: Stack(
         children: [
           Positioned(
-            top: 0,
-            left: 0,
-            child: CircleAvatar(
-              radius: 8,
-              backgroundColor: dotColor,
-            ),
-          ),
+              top: 0,
+              left: 0,
+              child: CircleAvatar(radius: 8, backgroundColor: dotColor)),
           const Positioned(
-            bottom: 0,
-            right: 0,
-            child: Icon(Icons.chat_bubble_outline, size: 18),
-          ),
+              bottom: 0,
+              right: 0,
+              child: Icon(Icons.chat_bubble_outline, size: 18)),
           const Padding(
             padding: EdgeInsets.only(top: 16, right: 20),
-            child: Text(
-              'XXXXXXXXXXXX XXXXXXXXXXXXXX XXXXXXXXXXXXX XXXXXXXXXXX',
-              style: TextStyle(fontSize: 12),
-            ),
+            child: Text('XXXXXXXXXXXX XXXXXXXXXXXXXX XXXXXXXXXXXXX XXXXXXXXXXX',
+                style: TextStyle(fontSize: 12)),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildVerticalTabs() {
+    return Column(
+      children: [
+        _buildSideTab(CommentType.random, Icons.note, Colors.white),
+        _buildSideTab(CommentType.idea, Icons.lightbulb, Colors.amber),
+        _buildSideTab(CommentType.objection, Icons.block, Colors.redAccent),
+        _buildSideTab(
+            CommentType.supplement, Icons.add_comment, Colors.lightBlueAccent),
+      ],
+    );
+  }
+
+  Widget _buildSideTab(CommentType type, IconData icon, Color color) {
+    final isSelected = selectedType == type;
+    return GestureDetector(
+      onTap: () => setState(() => selectedType = type),
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        width: 50,
+        height: 60,
+        decoration: BoxDecoration(
+          color: color.withOpacity(isSelected ? 1.0 : 0.7),
+          borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(10), bottomLeft: Radius.circular(10)),
+          border: isSelected ? Border.all(color: Colors.black, width: 2) : null,
+        ),
+        child: Icon(icon, size: 20, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildTrapezoidTab(CommentType type, Color color) {
+    final isSelected = selectedType == type;
+    return GestureDetector(
+      onTap: () => setState(() => selectedType = type),
+      child: Container(
+        margin: const EdgeInsets.only(right: 6),
+        width: 40,
+        height: 30,
+        decoration: BoxDecoration(
+          color: color.withOpacity(isSelected ? 1.0 : 0.6),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(8),
+            topRight: Radius.circular(8),
+          ),
+          border: isSelected ? Border.all(color: Colors.black, width: 2) : null,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 8,
+              offset: Offset(2, 2),
+            )
+          ],
+        ),
+        alignment: Alignment.center,
+        child: const Icon(Icons.edit, color: Colors.white, size: 20),
       ),
     );
   }
