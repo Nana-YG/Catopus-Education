@@ -6,7 +6,7 @@ import 'package:flutter_project/pages/game_test.dart';
 import 'package:flutter_project/pages/student_version/student_course_detail_page.dart';
 import 'package:flutter_project/pages/test_ha_pages.dart';
 import 'package:flutter_project/pages/user_profile_page.dart';
-import 'package:flutter_project/utils/class_card.dart';
+import 'package:flutter_project/widgets/class_card.dart';
 import 'package:flutter_project/utils/color.dart';
 import 'package:flutter_project/utils/constant.dart';
 import 'package:http/http.dart' as http;
@@ -73,6 +73,7 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
     );
 
     if (!mounted) return;
+    print('🧾 Raw response: ${response.body}');
 
     if (response.statusCode == 200) {
       final result = jsonDecode(response.body);
@@ -238,7 +239,7 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
                   Column(
                     children: [
                       GestureDetector(
-                         onTap: () async {
+                        onTap: () async {
                           final result = await Navigator.push(
                             context,
                             MaterialPageRoute(

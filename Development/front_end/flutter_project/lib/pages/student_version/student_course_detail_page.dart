@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project/utils/chapter_path_painter.dart';
+import 'package:flutter_project/widgets/comment_board.dart';
 
 class CourseDetailPage extends StatefulWidget {
   final String className;
@@ -108,6 +109,41 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     );
   }
 
+  void _showCommentBoard(int chapterNumber) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: "Dismiss",
+      barrierColor: Colors.black.withOpacity(0.1),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (_, __, ___) => const SizedBox.shrink(),
+      transitionBuilder: (context, animation, secondaryAnimation, _) {
+        final media = MediaQuery.of(context);
+        final screenWidth = media.size.width;
+        final screenHeight = media.size.height;
+        final padding = media.padding;
+
+        final boardWidth = screenWidth * 0.7;
+        final boardHeight = screenHeight * 0.85;
+
+        return FadeTransition(
+          opacity: animation,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Container(
+              width: boardWidth,
+              height: boardHeight,
+              margin: EdgeInsets.only(
+                right: padding.right > 0 ? padding.right : 20,
+              ),
+              child: CommentBoard(chapterNumber: chapterNumber),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildStickyNotesColumn(double scaleX) {
     return SizedBox(
       width: 260 * scaleX,
@@ -196,37 +232,37 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   Widget _buildChapterPath(double scaleX) {
     const int chapterCount = 12;
 
-   final rawPoints = [
-  Offset(50, 150),
-  Offset(130, 50),
-  Offset(180, 180),
-  Offset(260, 290),
-  Offset(350, 370),
-  Offset(470, 380),
-  Offset(580, 330),
-  Offset(660, 260),
-  Offset(750, 200),
-  Offset(850, 250),
-  Offset(940, 340),
-  Offset(1020, 400),
-];
+    final rawPoints = [
+      Offset(50, 150),
+      Offset(130, 50),
+      Offset(180, 180),
+      Offset(260, 290),
+      Offset(350, 370),
+      Offset(470, 380),
+      Offset(580, 330),
+      Offset(660, 260),
+      Offset(750, 200),
+      Offset(850, 250),
+      Offset(940, 340),
+      Offset(1020, 400),
+    ];
 
 // 放缩
-final points = rawPoints.map((p) => Offset(p.dx * scaleX, p.dy * scaleX)).toList();
+    final points =
+        rawPoints.map((p) => Offset(p.dx * scaleX, p.dy * scaleX)).toList();
 
 // 构造 spline（不指定 startHandle/endHandle）
-final spline = CatmullRomSpline(points);
+    final spline = CatmullRomSpline(points);
 
 // 生成插值点，首尾直接用原始点
-final chapterPoints = [
-  points.first,
-  ...List.generate(
-    chapterCount - 2,
-    (i) => spline.transform((i + 1) / (chapterCount - 1)),
-  ),
-  points.last,
-];
-
+    final chapterPoints = [
+      points.first,
+      ...List.generate(
+        chapterCount - 2,
+        (i) => spline.transform((i + 1) / (chapterCount - 1)),
+      ),
+      points.last,
+    ];
 
     return SizedBox(
       width: 1200 * scaleX,
@@ -251,9 +287,8 @@ final chapterPoints = [
               child: Column(
                 children: [
                   GestureDetector(
-                    onTap: isUnlocked
-                        ? () => print('Tapped Chapter ${index + 1}')
-                        : null,
+                    onTap:
+                        isUnlocked ? () => _showCommentBoard(index + 1) : null,
                     child: Container(
                       width: 24 * scaleX,
                       height: 24 * scaleX,
