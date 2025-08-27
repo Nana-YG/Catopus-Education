@@ -185,14 +185,17 @@ public class CourseController {
             return ResponseEntity.status(403).body(Map.of("error", "Only students can access this"));
         }
 
-        List<String> joinedClassNames = courseService.findAll().stream()
+        List<Map<String, String>> joinedClasses = courseService.findAll().stream()
                 .filter(course -> Arrays.stream(course.getStudents().split(","))
                 .map(String::trim)
                 .anyMatch(s -> s.equals(username)))
-                .map(CourseRegistration::getClassName)
+                .map(course -> Map.of(
+                "classId", course.getClassId(),
+                "className", course.getClassName()
+        ))
                 .toList();
 
-        return ResponseEntity.ok(Map.of("classNames", joinedClassNames));
+        return ResponseEntity.ok(Map.of("classes", joinedClasses));
     }
 
     @GetMapping("/createdClassList")

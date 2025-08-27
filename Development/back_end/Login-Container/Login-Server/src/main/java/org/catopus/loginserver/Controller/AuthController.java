@@ -135,13 +135,7 @@ public class AuthController {
 
     @GetMapping("/profile-picture")
     public ResponseEntity<?> getProfilePicture(
-            @RequestHeader("Username") String username,
-            @RequestHeader("Token") String token) {
-
-        if (!userService.isTokenValidForUser(username, token)) {
-            return ResponseEntity.status(401).body(Map.of("error", "Invalid token or username"));
-        }
-
+            @RequestHeader("Username") String username) {
         Optional<User> userOpt = userService.getUserByUsername(username);
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(404).body(Map.of("error", "User not found"));
