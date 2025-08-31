@@ -33,7 +33,8 @@ public class AuthController {
     public ResponseEntity<?> register(
             @RequestHeader(value = "Username", required = false) String username,
             @RequestHeader(value = "Password", required = false) String password,
-            @RequestHeader(value = "AccountType", required = false) String accountTypeStr) {
+            @RequestHeader(value = "AccountType", required = false) String accountTypeStr,
+            @RequestHeader(value = "Magicword", required = false) String magicWord) {
 
         if (username == null || password == null || accountTypeStr == null || username.isBlank() || password.isBlank() || accountTypeStr.isBlank()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Username, password and account type are required"));
@@ -41,14 +42,15 @@ public class AuthController {
 
         AccountType accountType = AccountType.valueOf(accountTypeStr.toUpperCase());
 
-        boolean success = userService.register(username, password, accountType);
+        boolean success = userService.register(username, password, accountType, magicWord);
         if (success) {
             String token = userService.getTokenByUsername(username);
             return ResponseEntity.ok(Map.of(
                     "message", "Register successful",
                     "username", username,
                     "token", token,
-                    "accountType", accountType.name()
+                    "accountType", accountType.name(),
+                    "magicWord", magicWord
             ));
         } else {
             return ResponseEntity.badRequest().body(Map.of("error", "User already exists"));
@@ -80,6 +82,31 @@ public class AuthController {
         } else {
             return ResponseEntity.status(401).body(Map.of("error", "Invalid username or password"));
         }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(
+            @RequestHeader(value = "Username", required = false) String username,
+            @RequestHeader(value = "Magicword", required = false) String magicword,
+            @RequestBody Map<String, String> body) {
+
+        if (username == null || magicword == null || username.isBlank() || magicword.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Username and Magicword are required"));
+        }
+
+        String newPassword = body.get("newPassword");
+        if (newPassword == null || newPassword.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "NewPassword is required"));
+        }
+        boolean success = userService.resetPasswordByMagicword(username, magicword, newPassword);
+        if (!success) {
+            return ResponseEntity.status(401).body(Map.of("error", "Unauthorized: invalid username or magicword"));
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Password reset successful",
+                "username", username
+        ));
     }
 
     @GetMapping("/check")

@@ -36,7 +36,7 @@ public class UserService {
         return userOpt.map(User::getToken).orElse(null);
     }
 
-    public boolean register(String username, String password, AccountType accountType) {
+    public boolean register(String username, String password, AccountType accountType, String magicWord) {
         if (userRepository.findByUsername(username).isPresent()) {
             return false; // user already exists
         }
@@ -45,7 +45,23 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(password)); // encrypt password
         user.setToken(generateToken()); // generate random token
         user.setAccountType(accountType);
+        user.setMagicWord(magicWord);
         userRepository.save(user);
+        return true;
+    }
+
+    public boolean resetPasswordByMagicword(String username, String magicword, String newPassword) {
+        Optional<User> uOpt = userRepository.findByUsername(username);
+        if (uOpt.isEmpty()) {
+            return false;
+        }
+        User u = uOpt.get();
+        if (!magicword.equals(u.getMagicWord())) {
+            return false;
+        }
+
+        u.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(u);
         return true;
     }
 

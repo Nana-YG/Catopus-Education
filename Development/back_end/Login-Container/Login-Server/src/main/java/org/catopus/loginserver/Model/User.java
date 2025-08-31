@@ -34,6 +34,9 @@ public class User {
 
     @Column(nullable = false, length = 300)
     private byte[] profilePicture;
+    
+    @Column(name = "magic_word", nullable = false, length = 100)
+    private String magicWord;
 
     public User() {
         this.profilePicture = new byte[300];
