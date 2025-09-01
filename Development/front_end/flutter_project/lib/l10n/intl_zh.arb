@@ -13,6 +13,10 @@
   "signUp": "注册",
   "signIn": "登录",
   "forgotPassword": "忘记密码？",
+  "magicWord": "Magic Word（口令）",
+  "enterYourMagicWord": "请输入口令",
+  "usernameTaken": "用户名已被占用",
+
 
   "loginSuccessful": "登录成功",
   "loginFailed": "登录失败",
@@ -78,22 +82,34 @@
   "literature": "文学",
   "other": "其他",
 
-   "studentTermsTitle": "学生用户协议",
+  "resetPassword": "重置密码",
+  "newPassword": "新密码",
+  "confirmPassword": "确认密码",
+  "enterYourNewPassword": "输入新密码",
+  "enterYourConfirmPassword": "再次输入新密码",
+  "passwordMismatch": "两次输入的密码不一致",
+  "reset": "重置",
+  "resetSuccess": "密码重置成功",
+  "resetFailed": "密码重置失败",
+  "unauthorizedInvalid": "未授权：用户名或口令错误",
+
+
+  "studentTermsTitle": "学生用户协议",
   "studentTermsContent": "作为 Catopus 教育平台的学生，您必须遵守平台的指南和行为准则。任何违规行为可能导致账户暂停...",
   "agreeStudentTerms": "我同意学生用户协议",
   "continueButton": "继续",
 
-"joinClassTitle": "加入课程",
-"classId": "课程ID",
-"joinKey": "加入码",
-"studentPrefix": "学生",
-"teacherPrefix": "教师",
-"joinButton": "加入",
-"helloText": "你好",
-"createClass":"创建课程",
-"coursePackage":"课程资源",
-"profile":"我",
+  "joinClassTitle": "加入课程",
+  "classId": "课程ID",
+  "joinKey": "加入码",
+  "studentPrefix": "学生",
+  "teacherPrefix": "教师",
+  "joinButton": "加入",
+  "helloText": "你好",
+  "createClass":"创建课程",
+  "coursePackage":"课程资源",
+  "profile":"我",
 
-"logout":"退出登录"
+  "logout":"退出登录"
 
 }

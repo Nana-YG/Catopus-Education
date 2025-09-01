@@ -43,6 +43,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forgotPassword => 'Forgot password?';
 
   @override
+  String get magicWord => 'Magic Word';
+
+  @override
+  String get enterYourMagicWord => 'Enter the magic word';
+
+  @override
+  String get usernameTaken => 'Username already taken';
+
+  @override
   String get loginSuccessful => 'Login successful';
 
   @override
@@ -206,6 +215,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get other => 'Other';
+
+  @override
+  String get resetPassword => 'Reset Password';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get confirmPassword => 'Confirm Password';
+
+  @override
+  String get enterYourNewPassword => 'Enter your new password';
+
+  @override
+  String get enterYourConfirmPassword => 'Re-enter the new password';
+
+  @override
+  String get passwordMismatch => 'Passwords do not match';
+
+  @override
+  String get reset => 'Reset';
+
+  @override
+  String get resetSuccess => 'Password reset successful';
+
+  @override
+  String get resetFailed => 'Password reset failed';
+
+  @override
+  String get unauthorizedInvalid => 'Unauthorized: invalid username or magicword';
 
   @override
   String get studentTermsTitle => 'Student Terms and Conditions';

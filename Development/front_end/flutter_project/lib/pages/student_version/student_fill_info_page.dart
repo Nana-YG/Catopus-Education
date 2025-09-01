@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_project/pages/login.dart';
 import 'package:flutter_project/pages/student_version/student_choose_class.dart';
 import 'package:flutter_project/pages/student_version/student_terms_page.dart';
 import 'package:flutter_project/pages/teacher_version/teacher_choose_class.dart';
@@ -206,117 +207,146 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
     });
   }
 
-  Widget _buildGenderSelector(double scaleX) {
-    double fontSize = 20 * scaleX;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(AppLocalizations.of(context).gender,
-            style: TextStyle(fontSize: fontSize)),
-        Wrap(
-          spacing: 20 * scaleX, // 控制选项之间的间距
-          runSpacing: 10 * scaleX, // 防止换行时紧贴
-          children: [
-            _buildGenderOption(
-                AppLocalizations.of(context).male, fontSize, scaleX),
-            _buildGenderOption(
-                AppLocalizations.of(context).female, fontSize, scaleX),
-            _buildGenderOption(
-                AppLocalizations.of(context).preferNotToSay, fontSize, scaleX),
-          ],
-        ),
-      ],
-    );
-  }
+ Widget _buildGenderDropdown(double scaleX) {
+  final double fontSize = 30 * scaleX;
+  final double fieldHeight = 92 * scaleX;
+  final double vPad = 18 * scaleX;
 
-  Widget _buildGenderOption(String gender, double fontSize, double scaleX) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 5 * scaleX), // 让每个选项都有适当的间距
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Transform.scale(
-            scale: scaleX, // 让Radio按钮随着屏幕大小缩放
-            child: Radio(
-              value: gender,
-              groupValue: _selectedGender,
-              onChanged: (value) {
-                setState(() {
-                  _selectedGender = value.toString();
-                });
-              },
-            ),
-          ),
-          Text(gender, style: TextStyle(fontSize: fontSize)),
-        ],
+  final items = <String>[
+    AppLocalizations.of(context).male,
+    AppLocalizations.of(context).female,
+    AppLocalizations.of(context).preferNotToSay,
+  ];
+  final String? value = _selectedGender.isEmpty ? null : _selectedGender;
+
+  return SizedBox(
+    width: 600 * scaleX,
+    height: fieldHeight,
+    child: DropdownButtonFormField<String>(
+      value: value,
+      items: items
+          .map((g) => DropdownMenuItem(
+                value: g,
+                child: Text(g, style: TextStyle(fontSize: fontSize)),
+              ))
+          .toList(),
+      onChanged: (v) => setState(() => _selectedGender = v ?? ""),
+      dropdownColor: Colors.white,  // ✅ 下拉菜单背景色改为白色
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: AppColors.inputBackgroundColor,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10 * scaleX),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 20 * scaleX,
+          vertical: vPad,
+        ),
+        labelText: AppLocalizations.of(context).gender,
+        labelStyle: TextStyle(fontSize: fontSize),
+        floatingLabelStyle: TextStyle(
+          fontSize: (fontSize * 1.15),
+          fontWeight: FontWeight.w700,
+          color: Colors.black87,
+        ),
+        floatingLabelBehavior: FloatingLabelBehavior.auto,
+        isDense: false,
       ),
-    );
-  }
+      isExpanded: true,
+      icon: const Icon(Icons.keyboard_arrow_down),
+      style: TextStyle(fontSize: fontSize, color: Colors.black),
+    ),
+  );
+}
+
 
   Widget _buildSubjectButtons(double scaleX) {
-    if (_subjects.isEmpty) {
-      return CircularProgressIndicator(); // ✅ 防止 UI 访问空数组导致崩溃
-    }
-    double fontSize = 18 * scaleX;
+    if (_subjects.isEmpty) return const CircularProgressIndicator();
+
+    final double fontSize = 34 * scaleX;
+
     return SizedBox(
-      width: 450 * scaleX, // 让科目选项和输入框宽度一致
-      child: Wrap(
-        alignment: WrapAlignment.start, // 让选项对齐左侧
-        spacing: 10 * scaleX, // 控制选项之间的水平间距
-        runSpacing: 10 * scaleX, // 控制换行间距
-        children: _subjects
-            .map((subject) => GestureDetector(
-                  onTap: () => _toggleSubject(subject),
-                  child: Container(
-                    width: 140 * scaleX, // 控制每个科目按钮的宽度，避免超出换行
-                    padding: EdgeInsets.symmetric(
-                        vertical: 10 * scaleX, horizontal: 10 * scaleX),
-                    decoration: BoxDecoration(
-                      color: _selectedSubjects.contains(subject)
-                          ? Colors.blue
-                          : AppColors.inputBackgroundColor,
-                      borderRadius: BorderRadius.circular(8 * scaleX),
-                    ),
-                    child: Center(
-                      child: Text(
-                        subject,
-                        style: TextStyle(
-                          color: _selectedSubjects.contains(subject)
-                              ? Colors.white
-                              : Colors.black,
-                          fontSize: fontSize,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
+      width: 600 * scaleX, // 建议与上面的输入框同宽
+      child: GridView.count(
+        crossAxisCount: 4, // ← 一行 4 个
+        crossAxisSpacing: 12 * scaleX, // 水平间距
+        mainAxisSpacing: 12 * scaleX, // 垂直间距
+        shrinkWrap: true, // 放在外层的 SingleChildScrollView 里
+        physics: const NeverScrollableScrollPhysics(), // 交给外层滚动
+        childAspectRatio: 1.6, // 宽高比(可按需微调 1.8~2.6)
+        children: _subjects.map((subject) {
+          final bool selected = _selectedSubjects.contains(subject);
+          return GestureDetector(
+            onTap: () => _toggleSubject(subject),
+            child: Container(
+              // Grid 会自动算宽高，这里不需要再写 width / height
+              padding: EdgeInsets.symmetric(
+                vertical: 16 * scaleX,
+                horizontal: 12 * scaleX,
+              ),
+              decoration: BoxDecoration(
+                color: selected ? Colors.blue : AppColors.inputBackgroundColor,
+                borderRadius: BorderRadius.circular(12 * scaleX),
+              ),
+              child: Center(
+                child: Text(
+                  subject,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: selected ? Colors.white : Colors.black,
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w600,
                   ),
-                ))
-            .toList(),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
 
   Widget _buildTextField(
-      TextEditingController controller, String label, double scaleX,
-      {TextInputType keyboardType = TextInputType.text}) {
-    double fontSize = 20 * scaleX;
+    TextEditingController controller,
+    String label,
+    double scaleX, {
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    final double fontSize = 30 * scaleX;
+    final double fieldHeight = 92 * scaleX; // ← 比原来 75*scaleX 高一截
+    final double vPad = 20 * scaleX; // ← 上下内边距，直接决定高度
+
     return SizedBox(
-      width: 450 * scaleX,
-      height: 68 * scaleX,
+      width: 600 * scaleX,
+      height: fieldHeight,
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
         style: TextStyle(fontSize: fontSize),
+        textAlignVertical: TextAlignVertical.center, // ← 垂直居中
         decoration: InputDecoration(
           filled: true,
           fillColor: AppColors.inputBackgroundColor,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8 * scaleX),
+            borderRadius: BorderRadius.circular(10 * scaleX),
             borderSide: BorderSide.none,
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 20 * scaleX),
+          // 关键：上下 padding 增大 → 输入框更高
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 20 * scaleX,
+            vertical: vPad,
+          ),
           labelText: label,
           labelStyle: TextStyle(fontSize: fontSize),
+          floatingLabelStyle: TextStyle(
+            fontSize: (fontSize * 1.15),
+            fontWeight: FontWeight.w700,
+            color: Colors.black87,
+          ),
+          floatingLabelBehavior: FloatingLabelBehavior.auto,
+          isDense: false, // 确保不压缩高度
         ),
       ),
     );
@@ -327,10 +357,12 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
     double screenWidth = MediaQuery.of(context).size.width;
     double baseWidth = 2160;
     double scaleX = screenWidth / baseWidth;
+    final double vGap = 32 * scaleX;
 
     return Scaffold(
       backgroundColor: Colors.white,
       //测试使用跳过fillinfo
+      /*
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
@@ -348,6 +380,22 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
           },
         ),
       ),
+      */
+      appBar: AppBar(
+  backgroundColor: AppColors.background,
+  elevation: 0,
+  leading: IconButton(
+    icon: const Icon(Icons.arrow_back, color: Colors.black),
+    onPressed: () {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+        (route) => false, // 清空导航栈，防止再返回
+      );
+    },
+  ),
+),
+
       //结束
       body: Center(
         child: SingleChildScrollView(
@@ -367,44 +415,44 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                SizedBox(height: 20 * scaleX),
+                SizedBox(height: vGap),
                 _buildTextField(_nicknameController,
                     AppLocalizations.of(context).nickname, scaleX),
-                SizedBox(height: 20 * scaleX),
+                SizedBox(height: vGap),
                 _buildTextField(_realNameController,
                     AppLocalizations.of(context).realName, scaleX),
-                SizedBox(height: 20 * scaleX),
+                SizedBox(height: vGap),
                 _buildTextField(_schoolController,
                     AppLocalizations.of(context).school, scaleX),
-                SizedBox(height: 20 * scaleX),
+                SizedBox(height: vGap),
                 _buildTextField(_classController,
                     AppLocalizations.of(context).className, scaleX),
-                SizedBox(height: 20 * scaleX),
+                SizedBox(height: vGap),
                 _buildTextField(_studentIDController,
                     AppLocalizations.of(context).studentID, scaleX),
-                SizedBox(height: 20 * scaleX),
+                SizedBox(height: vGap),
                 _buildTextField(_mobileController,
                     AppLocalizations.of(context).mobile, scaleX,
                     keyboardType: TextInputType.phone),
-                SizedBox(height: 20 * scaleX),
+                SizedBox(height: vGap),
                 _buildTextField(
                     _ageController, AppLocalizations.of(context).age, scaleX,
                     keyboardType: TextInputType.number),
-                SizedBox(height: 20 * scaleX),
+                SizedBox(height: vGap),
                 SizedBox(
-                  width: 450 * scaleX,
-                  child: _buildGenderSelector(scaleX),
+                  width: 600 * scaleX,
+                  child: _buildGenderDropdown(scaleX),
                 ),
-                SizedBox(height: 20 * scaleX),
+                SizedBox(height: vGap),
                 SizedBox(
-                  width: 450 * scaleX, // 确保和输入框对齐
+                  width: 600 * scaleX, // 确保和输入框对齐
                   child: Text(
                     AppLocalizations.of(context).selectSubjects,
-                    style: TextStyle(fontSize: 20 * scaleX),
+                    style: TextStyle(fontSize: 30 * scaleX),
                     textAlign: TextAlign.left,
                   ),
                 ),
-                SizedBox(height: 10 * scaleX),
+                SizedBox(height: vGap * 0.6),
                 _buildSubjectButtons(scaleX),
                 SizedBox(height: 40 * scaleX),
                 ElevatedButton(
@@ -419,7 +467,7 @@ class _FillUserInfoPageState extends State<StudentUserInfoPage> {
                   ),
                   child: Text(AppLocalizations.of(context).submit,
                       style: TextStyle(
-                          color: Colors.white, fontSize: 20 * scaleX)),
+                          color: Colors.white, fontSize: 40 * scaleX)),
                 ),
               ],
             ),
