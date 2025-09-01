@@ -217,6 +217,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get other => '其他';
 
   @override
+  String get resetPassword => '重置密码';
+
+  @override
+  String get newPassword => '新密码';
+
+  @override
+  String get confirmPassword => '确认密码';
+
+  @override
+  String get enterYourNewPassword => '输入新密码';
+
+  @override
+  String get enterYourConfirmPassword => '再次输入新密码';
+
+  @override
+  String get passwordMismatch => '两次输入的密码不一致';
+
+  @override
+  String get reset => '重置';
+
+  @override
+  String get resetSuccess => '密码重置成功';
+
+  @override
+  String get resetFailed => '密码重置失败';
+
+  @override
+  String get unauthorizedInvalid => '未授权：用户名或口令错误';
+
+  @override
   String get studentTermsTitle => '学生用户协议';
 
   @override

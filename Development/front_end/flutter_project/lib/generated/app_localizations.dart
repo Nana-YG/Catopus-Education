@@ -515,6 +515,66 @@ abstract class AppLocalizations {
   /// **'Other'**
   String get other;
 
+  /// No description provided for @resetPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Password'**
+  String get resetPassword;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get confirmPassword;
+
+  /// No description provided for @enterYourNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your new password'**
+  String get enterYourNewPassword;
+
+  /// No description provided for @enterYourConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter the new password'**
+  String get enterYourConfirmPassword;
+
+  /// No description provided for @passwordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordMismatch;
+
+  /// No description provided for @reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
+
+  /// No description provided for @resetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset successful'**
+  String get resetSuccess;
+
+  /// No description provided for @resetFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset failed'**
+  String get resetFailed;
+
+  /// No description provided for @unauthorizedInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Unauthorized: invalid username or magicword'**
+  String get unauthorizedInvalid;
+
   /// No description provided for @studentTermsTitle.
   ///
   /// In en, this message translates to:

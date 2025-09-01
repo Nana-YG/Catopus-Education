@@ -217,6 +217,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get other => 'Other';
 
   @override
+  String get resetPassword => 'Reset Password';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get confirmPassword => 'Confirm Password';
+
+  @override
+  String get enterYourNewPassword => 'Enter your new password';
+
+  @override
+  String get enterYourConfirmPassword => 'Re-enter the new password';
+
+  @override
+  String get passwordMismatch => 'Passwords do not match';
+
+  @override
+  String get reset => 'Reset';
+
+  @override
+  String get resetSuccess => 'Password reset successful';
+
+  @override
+  String get resetFailed => 'Password reset failed';
+
+  @override
+  String get unauthorizedInvalid => 'Unauthorized: invalid username or magicword';
+
+  @override
   String get studentTermsTitle => 'Student Terms and Conditions';
 
   @override

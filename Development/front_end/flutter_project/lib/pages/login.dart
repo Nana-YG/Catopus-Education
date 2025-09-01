@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/generated/app_localizations.dart';
+import 'package:flutter_project/pages/forgot_password_page.dart';
 import 'package:flutter_project/pages/register_page.dart';
 import 'package:flutter_project/pages/student_version/student_fill_info_page.dart';
 import 'package:flutter_project/pages/teacher_version/teacher_fill_info_page.dart';
@@ -417,7 +418,12 @@ class _LoginPageState extends State<LoginPage> {
                                     SizedBox(height: 20 * scaleY),
                                     GestureDetector(
                                       onTap: () {
-                                        // TODO: 忘记密码逻辑
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const ForgotPasswordPage()),
+                                        );
                                       },
                                       child: Text(
                                         AppLocalizations.of(context)!
