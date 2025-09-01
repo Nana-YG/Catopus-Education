@@ -28,55 +28,54 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
   String? avatarString;
 
   @override
-void initState() {
-  super.initState();
-  _loadInitialData();
-}
-
-void _loadInitialData() async {
-  _loadUsername();
-  _loadTeacherClasses();
-  final updatedAvatar = await _loadAvatarString();
-  if (!mounted) return;
-  setState(() {
-    avatarString = updatedAvatar;
-  });
-}
-
-
-  Future<String?> _loadAvatarString() async {
-  final prefs = await SharedPreferences.getInstance();
-  final username = prefs.getString('username');
-  final token = prefs.getString('token');
-
-  if (username != null && token != null) {
-    final response = await http.get(
-      Uri.parse('$baseApiUrl/login/profile-picture'),
-      headers: {
-        'Username': username,
-        'Token': token,
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
-      final raw = json['profilePicture'];
-
-      if (raw == null || raw.isEmpty) return null;
-
-      final formatted = RegExp(r'^#').hasMatch(raw)
-          ? raw
-          : raw.replaceAllMapped(RegExp(r'.{6}'), (match) => '#${match.group(0)}');
-
-      return formatted;
-    } else {
-      print("❌ 获取头像失败: ${response.statusCode} ${response.body}");
-    }
+  void initState() {
+    super.initState();
+    _loadInitialData();
   }
 
-  return null;
-}
+  void _loadInitialData() async {
+    _loadUsername();
+    _loadTeacherClasses();
+    final updatedAvatar = await _loadAvatarString();
+    if (!mounted) return;
+    setState(() {
+      avatarString = updatedAvatar;
+    });
+  }
 
+  Future<String?> _loadAvatarString() async {
+    final prefs = await SharedPreferences.getInstance();
+    final username = prefs.getString('username');
+    final token = prefs.getString('token');
+
+    if (username != null && token != null) {
+      final response = await http.get(
+        Uri.parse('$baseApiUrl/login/profile-picture'),
+        headers: {
+          'Username': username,
+          'Token': token,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        final raw = json['profilePicture'];
+
+        if (raw == null || raw.isEmpty) return null;
+
+        final formatted = RegExp(r'^#').hasMatch(raw)
+            ? raw
+            : raw.replaceAllMapped(
+                RegExp(r'.{6}'), (match) => '#${match.group(0)}');
+
+        return formatted;
+      } else {
+        print("❌ 获取头像失败: ${response.statusCode} ${response.body}");
+      }
+    }
+
+    return null;
+  }
 
   Future<void> _loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
@@ -90,6 +89,10 @@ void _loadInitialData() async {
     final username = prefs.getString('username') ?? '';
     final token = prefs.getString('token') ?? '';
 
+    print("📡 发起课程列表请求...");
+    print("➡️ 请求地址: $baseApiUrl/course/createdClassList");
+    print("➡️ 请求Header: Username=$username, Token=$token");
+
     final response = await http.get(
       Uri.parse('$baseApiUrl/course/createdClassList'),
       headers: {
@@ -100,21 +103,112 @@ void _loadInitialData() async {
 
     if (!mounted) return;
 
+    print("✅ 响应状态: ${response.statusCode}");
+    print("🧾 响应内容: ${response.body}");
+
     if (response.statusCode == 200) {
       final result = jsonDecode(response.body);
       final courseList = result['courses'] as List;
 
+      print("📘 课程总数: ${courseList.length}");
+
+      List<Map<String, dynamic>> updatedClasses = [];
+
+      for (var course in courseList) {
+        final classId = course['classId'];
+        final className = course['className'];
+        final joinKey = course['joinKey'];
+
+        print("🔹 课程: $className ($classId), Join Key: $joinKey");
+
+        // 获取学生列表
+        final studentListRes = await http.get(
+          Uri.parse('$baseApiUrl/course/inClassStudents'),
+          headers: {
+            'Username': username,
+            'Token': token,
+            'classId': classId,
+          },
+        );
+        print("📤 发起学生列表请求: $baseApiUrl/course/inclassstudents");
+        print("➡️ Header 内容:");
+        print("   Username: $username");
+        print("   Token: $token");
+        print("   ClassId: $classId");
+
+        print("👥 请求学生列表状态: ${studentListRes.statusCode}");
+        print("👥 学生响应内容: ${studentListRes.body}");
+
+        List<String?> studentAvatars = [];
+        if (studentListRes.statusCode == 200) {
+          final studentJson = jsonDecode(studentListRes.body);
+          final List<dynamic> students = studentJson['studentList'] ?? [];
+
+          print("👶 学生数: ${students.length}");
+
+          List<String?> studentAvatars = [];
+
+for (int i = 0; i < students.length; i++) {
+  final studentUsername = students[i];
+  print("🎯 获取头像: $studentUsername");
+
+  final avatarRes = await http.get(
+    Uri.parse('$baseApiUrl/login/profile-picture'),
+    headers: {
+      'Username': studentUsername,
+      'Token': token,
+    },
+  );
+
+  print("🖼️ 头像状态: ${avatarRes.statusCode}");
+
+  if (avatarRes.statusCode == 200) {
+    final avatarJson = jsonDecode(avatarRes.body);
+    final raw = avatarJson['profilePicture'];
+    print("🧾 原始头像字符串: $raw");
+
+    if (raw != null && raw.toString().isNotEmpty) {
+      final formatted = RegExp(r'^#').hasMatch(raw)
+          ? raw
+          : raw.replaceAllMapped(
+              RegExp(r'.{6}'),
+              (match) => '#${match.group(0)}',
+            );
+      print("🎨 格式化颜色: $formatted");
+      studentAvatars.add(formatted);
+    } else {
+      print("⚠️ 没头像，添加 null");
+      studentAvatars.add(null);
+    }
+  } else {
+    print("⚠️ 获取头像失败，添加 null");
+    studentAvatars.add(null);
+  }
+}
+
+
+          updatedClasses.add({
+            'name': className,
+            'classId': classId,
+            'joinKey': joinKey,
+            'studentAvatars': studentAvatars,
+            'studentTotal': students.length,
+          });
+
+          print("✅ 完成课程卡片信息添加: $className");
+        } else {
+          print("❌ 获取学生列表失败 for classId=$classId");
+        }
+      }
+
       setState(() {
-        classes = courseList
-            .map((course) => {
-                  'name': course['className'],
-                  'classId': course['classId'],
-                  'joinKey': course['joinKey'],
-                })
-            .toList();
+        classes = updatedClasses;
         isLoading = false;
       });
+
+      print("🎉 所有课程加载完成 ✅");
     } else {
+      print("❌ 课程列表请求失败");
       setState(() {
         isLoading = false;
       });
