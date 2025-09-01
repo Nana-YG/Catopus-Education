@@ -31,54 +31,54 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
   String? avatarString;
 
   @override
-void initState() {
-  super.initState();
-  _loadInitialData();
-}
-
-void _loadInitialData() async {
-  _loadUsername();
-  _loadClasses();
-  final updatedAvatar = await _loadAvatarString();
-  if (!mounted) return;
-  setState(() {
-    avatarString = updatedAvatar;
-  });
-}
-
-
- Future<String?> _loadAvatarString() async {
-  final prefs = await SharedPreferences.getInstance();
-  final username = prefs.getString('username');
-  final token = prefs.getString('token');
-
-  if (username != null && token != null) {
-    final response = await http.get(
-      Uri.parse('$baseApiUrl/login/profile-picture'),
-      headers: {
-        'Username': username,
-        'Token': token,
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
-      final raw = json['profilePicture'];
-
-      if (raw == null || raw.isEmpty) return null;
-
-      final formatted = RegExp(r'^#').hasMatch(raw)
-          ? raw
-          : raw.replaceAllMapped(RegExp(r'.{6}'), (match) => '#${match.group(0)}');
-
-      return formatted; // ✅ 现在返回字符串
-    } else {
-      print("❌ 获取头像失败: ${response.statusCode} ${response.body}");
-    }
+  void initState() {
+    super.initState();
+    _loadInitialData();
   }
 
-  return null; // 请求失败时返回 null
-}
+  void _loadInitialData() async {
+    _loadUsername();
+    _loadClasses();
+    final updatedAvatar = await _loadAvatarString();
+    if (!mounted) return;
+    setState(() {
+      avatarString = updatedAvatar;
+    });
+  }
+
+  Future<String?> _loadAvatarString() async {
+    final prefs = await SharedPreferences.getInstance();
+    final username = prefs.getString('username');
+    final token = prefs.getString('token');
+
+    if (username != null && token != null) {
+      final response = await http.get(
+        Uri.parse('$baseApiUrl/login/profile-picture'),
+        headers: {
+          'Username': username,
+          'Token': token,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        final raw = json['profilePicture'];
+
+        if (raw == null || raw.isEmpty) return null;
+
+        final formatted = RegExp(r'^#').hasMatch(raw)
+            ? raw
+            : raw.replaceAllMapped(
+                RegExp(r'.{6}'), (match) => '#${match.group(0)}');
+
+        return formatted; // ✅ 现在返回字符串
+      } else {
+        print("❌ 获取头像失败: ${response.statusCode} ${response.body}");
+      }
+    }
+
+    return null; // 请求失败时返回 null
+  }
 
   Future<void> _loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
@@ -92,31 +92,59 @@ void _loadInitialData() async {
     final username = prefs.getString('username') ?? '';
     final token = prefs.getString('token') ?? '';
 
-    final response = await http.get(
-      Uri.parse('$baseApiUrl/progress/$username'),
-      headers: {
-        'Username': username,
-        'Token': token,
-      },
-    );
+    try {
+      // 1️⃣ 获取课程列表
+      final classListResponse = await http.get(
+        Uri.parse('$baseApiUrl/course/joinedClassList'),
+        headers: {
+          'Username': username,
+          'Token': token,
+        },
+      );
+      print('🟢 joinedclassList 响应状态: ${classListResponse.statusCode}');
+      print('📦 joinedclassList 响应体: ${classListResponse.body}');
 
-    if (!mounted) return;
-    print('🧾 Raw response: ${response.body}');
+      if (classListResponse.statusCode != 200) {
+        throw Exception('无法获取课程列表: ${classListResponse.body}');
+      }
 
-    if (response.statusCode == 200) {
-      final result = jsonDecode(response.body);
-      final Map<String, dynamic> classMap = result['classes'] ?? {};
+      final classListRaw = jsonDecode(classListResponse.body);
+      final List<dynamic> joinedClasses = classListRaw['classes'] ?? [];
+
+      // 2️⃣ 获取进度信息
+      final progressResponse = await http.get(
+        Uri.parse('$baseApiUrl/progress/$username'),
+        headers: {
+          'Username': username,
+          'Token': token,
+        },
+      );
+
+      Map<String, dynamic> progressData = {};
+      if (progressResponse.statusCode == 200) {
+        print('📊 progress 响应状态: ${progressResponse.statusCode}');
+        print('📊 progress 响应体: ${progressResponse.body}');
+
+        final progressJson = jsonDecode(progressResponse.body);
+        progressData = progressJson['classes'] ?? {};
+      } else {
+        print('❌ 获取 progress 失败: ${progressResponse.statusCode}');
+      }
 
       final List<Map<String, dynamic>> classList = [];
 
-      for (final entry in classMap.entries) {
-        final String classId = entry.key;
-        final Map<String, dynamic> classInfo = entry.value;
-        final String subject = classInfo['subject'];
-        final Map<String, dynamic> tasks = classInfo['tasks'];
+      for (final joinedClass in joinedClasses) {
+        final String classId = joinedClass['classId'];
+        final String subject = joinedClass['className'];
+        print('📘 当前课程: $classId - $subject');
 
         // ✅ 存储 classId -> subject
         await prefs.setString('class_$classId', subject);
+
+        // 从进度数据中获取任务
+        final Map<String, dynamic> classProgress = progressData[classId] ?? {};
+        final Map<String, dynamic> tasks = classProgress['tasks'] ?? {};
+        print('📌 任务列表: ${jsonEncode(tasks)}');
 
         int completedTasks = 0;
         final totalTasks = tasks.length;
@@ -138,20 +166,22 @@ void _loadInitialData() async {
           'classId': classId,
           'name': subject,
           'progress': progress,
-          'taskCount': totalTasks
+          'taskCount': totalTasks,
         });
       }
 
+      if (!mounted) return;
       setState(() {
         classes = classList;
         isLoading = false;
       });
-    } else {
+    } catch (e) {
+      if (!mounted) return;
       setState(() {
         isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to load classes')),
+        SnackBar(content: Text('加载课程失败: $e')),
       );
     }
   }
