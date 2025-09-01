@@ -43,6 +43,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forgotPassword => 'Forgot password?';
 
   @override
+  String get magicWord => 'Magic Word';
+
+  @override
+  String get enterYourMagicWord => 'Enter the magic word';
+
+  @override
+  String get usernameTaken => 'Username already taken';
+
+  @override
   String get loginSuccessful => 'Login successful';
 
   @override

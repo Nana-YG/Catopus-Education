@@ -43,6 +43,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get forgotPassword => '忘记密码？';
 
   @override
+  String get magicWord => 'Magic Word（口令）';
+
+  @override
+  String get enterYourMagicWord => '请输入口令';
+
+  @override
+  String get usernameTaken => '用户名已被占用';
+
+  @override
   String get loginSuccessful => '登录成功';
 
   @override

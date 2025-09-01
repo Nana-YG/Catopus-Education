@@ -13,6 +13,10 @@
   "signUp": "注册",
   "signIn": "登录",
   "forgotPassword": "忘记密码？",
+  "magicWord": "Magic Word（口令）",
+  "enterYourMagicWord": "请输入口令",
+  "usernameTaken": "用户名已被占用",
+
 
   "loginSuccessful": "登录成功",
   "loginFailed": "登录失败",

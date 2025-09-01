@@ -167,6 +167,24 @@ abstract class AppLocalizations {
   /// **'Forgot password?'**
   String get forgotPassword;
 
+  /// No description provided for @magicWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Magic Word'**
+  String get magicWord;
+
+  /// No description provided for @enterYourMagicWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the magic word'**
+  String get enterYourMagicWord;
+
+  /// No description provided for @usernameTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'Username already taken'**
+  String get usernameTaken;
+
   /// No description provided for @loginSuccessful.
   ///
   /// In en, this message translates to:
