@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/generated/app_localizations.dart';
 import 'package:flutter_project/pages/avatar_editor_page.dart';
+import 'package:flutter_project/pages/teacher_version/teacher_course_detail_page.dart';
 import 'package:flutter_project/pages/user_profile_page.dart';
 import 'package:flutter_project/widgets/class_card.dart';
 import 'package:flutter_project/utils/color.dart';
@@ -130,7 +131,7 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
             'classId': classId,
           },
         );
-        print("📤 发起学生列表请求: $baseApiUrl/course/inclassstudents");
+        print("📤 发起学生列表请求: $baseApiUrl/course/inClassStudents");
         print("➡️ Header 内容:");
         print("   Username: $username");
         print("   Token: $token");
@@ -146,46 +147,44 @@ class _TeacherChooseClassPageState extends State<TeacherChooseClassPage> {
 
           print("👶 学生数: ${students.length}");
 
-          List<String?> studentAvatars = [];
 
-for (int i = 0; i < students.length; i++) {
-  final studentUsername = students[i];
-  print("🎯 获取头像: $studentUsername");
+          for (int i = 0; i < students.length; i++) {
+            final studentUsername = students[i];
+            print("🎯 获取头像: $studentUsername");
 
-  final avatarRes = await http.get(
-    Uri.parse('$baseApiUrl/login/profile-picture'),
-    headers: {
-      'Username': studentUsername,
-      'Token': token,
-    },
-  );
-
-  print("🖼️ 头像状态: ${avatarRes.statusCode}");
-
-  if (avatarRes.statusCode == 200) {
-    final avatarJson = jsonDecode(avatarRes.body);
-    final raw = avatarJson['profilePicture'];
-    print("🧾 原始头像字符串: $raw");
-
-    if (raw != null && raw.toString().isNotEmpty) {
-      final formatted = RegExp(r'^#').hasMatch(raw)
-          ? raw
-          : raw.replaceAllMapped(
-              RegExp(r'.{6}'),
-              (match) => '#${match.group(0)}',
+            final avatarRes = await http.get(
+              Uri.parse('$baseApiUrl/login/profile-picture'),
+              headers: {
+                'Username': studentUsername,
+                'Token': token,
+              },
             );
-      print("🎨 格式化颜色: $formatted");
-      studentAvatars.add(formatted);
-    } else {
-      print("⚠️ 没头像，添加 null");
-      studentAvatars.add(null);
-    }
-  } else {
-    print("⚠️ 获取头像失败，添加 null");
-    studentAvatars.add(null);
-  }
-}
 
+            print("🖼️ 头像状态: ${avatarRes.statusCode}");
+
+            if (avatarRes.statusCode == 200) {
+              final avatarJson = jsonDecode(avatarRes.body);
+              final raw = avatarJson['profilePicture'];
+              print("🧾 原始头像字符串: $raw");
+
+              if (raw != null && raw.toString().isNotEmpty) {
+                final formatted = RegExp(r'^#').hasMatch(raw)
+                    ? raw
+                    : raw.replaceAllMapped(
+                        RegExp(r'.{6}'),
+                        (match) => '#${match.group(0)}',
+                      );
+                print("🎨 格式化颜色: $formatted");
+                studentAvatars.add(formatted);
+              } else {
+                print("⚠️ 没头像，添加 null");
+                studentAvatars.add(null);
+              }
+            } else {
+              print("⚠️ 获取头像失败，添加 null");
+              studentAvatars.add(null);
+            }
+          }
 
           updatedClasses.add({
             'name': className,
@@ -429,6 +428,7 @@ for (int i = 0; i < students.length; i++) {
                       ),
                       itemCount: classes.length + 1,
                       itemBuilder: (context, index) {
+                        // ✅ 新增卡片：只负责创建班级
                         if (index == classes.length) {
                           return ClassCard(
                             classData: {'isAddCard': true},
@@ -437,20 +437,35 @@ for (int i = 0; i < students.length; i++) {
                           );
                         }
 
+                        // ✅ 普通卡片：进入课程详情
                         final classData = classes[index];
                         return ClassCard(
                           classData: classData,
                           isTeacher: true,
                           onTap: () {
-                            final name = classData['name'];
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Selected: $name')),
+                            final classId = classData['classId'] as String;
+                            final className = classData['name'] as String;
+
+                            // 任务数：后端若暂时没有返回，用一个默认值（如 6）
+                            final taskCount = (classData['taskCount'] ??
+                                classData['tasks'] ??
+                                6) as int;
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => TeacherCourseDetailPage(
+                                  classId: classId,
+                                  className: className,
+                                  taskCount: taskCount,
+                                ),
+                              ),
                             );
                           },
                         );
                       },
                     ),
-            ),
+            )
           ],
         ),
       ),

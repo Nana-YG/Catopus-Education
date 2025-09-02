@@ -712,6 +712,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to save avatar'**
   String get avatarUploadFailed;
+
+  /// No description provided for @courseDetail_classManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Class Management'**
+  String get courseDetail_classManagement;
+
+  /// No description provided for @removeStudentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove this student from the class?'**
+  String get removeStudentTitle;
+
+  /// No description provided for @removeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeConfirm;
+
+  /// No description provided for @common_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get common_cancel;
+
+  /// No description provided for @removedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed successfully'**
+  String get removedSuccess;
+
+  /// No description provided for @removeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove failed'**
+  String get removeFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

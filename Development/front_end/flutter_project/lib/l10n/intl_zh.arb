@@ -128,6 +128,15 @@
   "editAvatar": "编辑头像",
   "clear": "清空",
   "avatarUploadSuccess": "头像已保存",
-  "avatarUploadFailed": "头像保存失败"
+  "avatarUploadFailed": "头像保存失败",
+
+   "courseDetail_classManagement": "管理班级",
+  "courseDetail_commentBoard": "评论板",
+  "courseDetail_settings": "Settings",
+  "removeStudentTitle": "确定要将这个学生移除本班级吗？",
+  "removeConfirm": "确定移除",
+  "common_cancel": "取消",
+  "removedSuccess": "已移除该学生",
+  "removeFailed": "移除失败"
 
 }

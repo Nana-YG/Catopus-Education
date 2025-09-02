@@ -129,6 +129,15 @@
   "editAvatar": "Edit Avatar",
   "clear": "Clear",
   "avatarUploadSuccess": "Avatar saved successfully",
-  "avatarUploadFailed": "Failed to save avatar"
+  "avatarUploadFailed": "Failed to save avatar",
+
+   "courseDetail_classManagement": "Class Management",
+  "courseDetail_commentBoard": "Comment Board",
+  "courseDetail_settings": "Settings",
+  "removeStudentTitle": "Are you sure you want to remove this student from the class?",
+  "removeConfirm": "Remove",
+  "common_cancel": "Cancel",
+  "removedSuccess": "Removed successfully",
+  "removeFailed": "Remove failed"
 
 }

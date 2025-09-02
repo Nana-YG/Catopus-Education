@@ -292,7 +292,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get courseDetail_commentBoard => '评论板';
 
   @override
-  String get courseDetail_settings => '设置';
+  String get courseDetail_settings => 'Settings';
 
   @override
   String courseDetail_chapterN(int n) {
@@ -316,4 +316,22 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get avatarUploadFailed => '头像保存失败';
+
+  @override
+  String get courseDetail_classManagement => '管理班级';
+
+  @override
+  String get removeStudentTitle => '确定要将这个学生移除本班级吗？';
+
+  @override
+  String get removeConfirm => '确定移除';
+
+  @override
+  String get common_cancel => '取消';
+
+  @override
+  String get removedSuccess => '已移除该学生';
+
+  @override
+  String get removeFailed => '移除失败';
 }

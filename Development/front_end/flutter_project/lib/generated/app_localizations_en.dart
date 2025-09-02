@@ -316,4 +316,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get avatarUploadFailed => 'Failed to save avatar';
+
+  @override
+  String get courseDetail_classManagement => 'Class Management';
+
+  @override
+  String get removeStudentTitle => 'Are you sure you want to remove this student from the class?';
+
+  @override
+  String get removeConfirm => 'Remove';
+
+  @override
+  String get common_cancel => 'Cancel';
+
+  @override
+  String get removedSuccess => 'Removed successfully';
+
+  @override
+  String get removeFailed => 'Remove failed';
 }
