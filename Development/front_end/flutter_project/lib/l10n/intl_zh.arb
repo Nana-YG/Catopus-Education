@@ -1,4 +1,6 @@
 {
+   "@@locale": "zh",
+
   "appName": "Catopus 教育",
 
   "welcomeText": "欢迎来到 Catopus-Education",
@@ -110,6 +112,22 @@
   "coursePackage":"课程资源",
   "profile":"我",
 
-  "logout":"退出登录"
+  "logout":"退出登录",
+
+  "courseDetail_materials": "课程任务",
+  "courseDetail_commentBoard": "评论板",
+  "courseDetail_settings": "设置",
+  "courseDetail_chapterN": "第 {n} 章",
+  "@courseDetail_chapterN": {
+    "description": "章节点下方的标签",
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "common_back": "返回",
+  "common_dismiss": "关闭",
+
+  "editAvatar": "编辑头像",
+  "clear": "清空",
+  "avatarUploadSuccess": "头像已保存",
+  "avatarUploadFailed": "头像保存失败"
 
 }

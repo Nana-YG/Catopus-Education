@@ -284,4 +284,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get coursePackage => 'Course Package';
+
+  @override
+  String get courseDetail_materials => 'Materials';
+
+  @override
+  String get courseDetail_commentBoard => 'Comment Board';
+
+  @override
+  String get courseDetail_settings => 'Settings';
+
+  @override
+  String courseDetail_chapterN(int n) {
+    return 'Chapter $n';
+  }
+
+  @override
+  String get common_back => 'Back';
+
+  @override
+  String get common_dismiss => 'Dismiss';
+
+  @override
+  String get editAvatar => 'Edit Avatar';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get avatarUploadSuccess => 'Avatar saved successfully';
+
+  @override
+  String get avatarUploadFailed => 'Failed to save avatar';
 }

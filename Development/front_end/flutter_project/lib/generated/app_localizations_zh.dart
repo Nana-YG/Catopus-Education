@@ -284,4 +284,36 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get coursePackage => '课程资源';
+
+  @override
+  String get courseDetail_materials => '课程任务';
+
+  @override
+  String get courseDetail_commentBoard => '评论板';
+
+  @override
+  String get courseDetail_settings => '设置';
+
+  @override
+  String courseDetail_chapterN(int n) {
+    return '第 $n 章';
+  }
+
+  @override
+  String get common_back => '返回';
+
+  @override
+  String get common_dismiss => '关闭';
+
+  @override
+  String get editAvatar => '编辑头像';
+
+  @override
+  String get clear => '清空';
+
+  @override
+  String get avatarUploadSuccess => '头像已保存';
+
+  @override
+  String get avatarUploadFailed => '头像保存失败';
 }
