@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/generated/app_localizations.dart';
 import 'package:flutter_project/pages/avatar_editor_page.dart';
 import 'package:flutter_project/pages/login.dart';
+import 'package:flutter_project/utils/color.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_project/utils/constant.dart';
@@ -18,6 +19,7 @@ class UserProfilePage extends StatefulWidget {
 
 class _UserProfilePageState extends State<UserProfilePage> {
   String? avatarString;
+  String? username;
 
   @override
   void initState() {
@@ -27,14 +29,17 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Future<void> _loadAvatarFromServer() async {
     final prefs = await SharedPreferences.getInstance();
-    final username = prefs.getString('username');
+    final savedUsername = prefs.getString('username');
     final token = prefs.getString('token');
+    setState(() {
+      username = savedUsername; // ✅ 保存到 state
+    });
 
     if (username != null && token != null) {
       final response = await http.get(
         Uri.parse('$baseApiUrl/login/profile-picture'),
         headers: {
-          'Username': username,
+          'Username': savedUsername!,
           'Token': token,
         },
       );
@@ -89,7 +94,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         : const Icon(Icons.person, size: 50, color: Colors.white);
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor:  AppColors.background,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -99,31 +104,66 @@ class _UserProfilePageState extends State<UserProfilePage> {
         ),
         title: Text(AppLocalizations.of(context)!.profile),
         centerTitle: true,
-        backgroundColor: Colors.grey[100],
+        backgroundColor:  AppColors.background,
         elevation: 0,
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GestureDetector(
-            onTap: _goToAvatarEditor,
-            child: CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.grey[400],
-              child: ClipOval(child: avatarWidget),
+      // 2) body：在头像上方插入 username
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (username != null && username!.isNotEmpty) ...[
+              Text(
+                username!,
+                style: const TextStyle(
+                  fontSize: 26, // ✅ 字号更大
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87, // ✅ 更清晰
+                  letterSpacing: 1.2, // ✅ 增加字间距（可选）
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+            GestureDetector(
+              onTap: _goToAvatarEditor,
+              child: CircleAvatar(
+                radius: 50,
+                backgroundColor: Colors.grey[400],
+                child: ClipOval(
+                  child: avatarString != null
+                      ? SizedBox(
+                          width: 100,
+                          height: 100,
+                          child: CustomPaint(
+                            key: ValueKey(avatarString),
+                            painter: AvatarPainter(avatarString!),
+                            size: const Size(100, 100),
+                          ),
+                        )
+                      : const SizedBox(
+                          width: 100,
+                          height: 100,
+                          child: Center(
+                            child: Icon(Icons.person,
+                                size: 50, color: Colors.white),
+                          ),
+                        ),
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 40),
-          ElevatedButton.icon(
-            onPressed: _logout,
-            icon: const Icon(Icons.logout),
-            label: Text(AppLocalizations.of(context)!.logout),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
+            const SizedBox(height: 40),
+            ElevatedButton.icon(
+              onPressed: _logout,
+              icon: const Icon(Icons.logout),
+              label: Text(AppLocalizations.of(context)!.logout),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

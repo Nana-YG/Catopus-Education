@@ -652,6 +652,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Course Package'**
   String get coursePackage;
+
+  /// No description provided for @courseDetail_materials.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials'**
+  String get courseDetail_materials;
+
+  /// No description provided for @courseDetail_commentBoard.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment Board'**
+  String get courseDetail_commentBoard;
+
+  /// No description provided for @courseDetail_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get courseDetail_settings;
+
+  /// Label under each chapter node
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter {n}'**
+  String courseDetail_chapterN(int n);
+
+  /// No description provided for @common_back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get common_back;
+
+  /// No description provided for @common_dismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get common_dismiss;
+
+  /// No description provided for @editAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Avatar'**
+  String get editAvatar;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// No description provided for @avatarUploadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Avatar saved successfully'**
+  String get avatarUploadSuccess;
+
+  /// No description provided for @avatarUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save avatar'**
+  String get avatarUploadFailed;
+
+  /// No description provided for @courseDetail_classManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Class Management'**
+  String get courseDetail_classManagement;
+
+  /// No description provided for @removeStudentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove this student from the class?'**
+  String get removeStudentTitle;
+
+  /// No description provided for @removeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeConfirm;
+
+  /// No description provided for @common_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get common_cancel;
+
+  /// No description provided for @removedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed successfully'**
+  String get removedSuccess;
+
+  /// No description provided for @removeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove failed'**
+  String get removeFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

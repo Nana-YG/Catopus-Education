@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project/widgets/clip_board_clip.dart';
 
 class CommentBoard extends StatefulWidget {
-  final int chapterNumber;
-  const CommentBoard({super.key, required this.chapterNumber});
+
+  const CommentBoard({super.key});
 
   @override
   State<CommentBoard> createState() => _CommentBoardState();
@@ -196,7 +196,7 @@ class _CommentBoardState extends State<CommentBoard> {
         const SizedBox(width: 12),
         Expanded(
           child: Text(
-            'Comments for Chapter ${widget.chapterNumber}\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX？',
+            'Comments for Chapter \nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX？',
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
         ),

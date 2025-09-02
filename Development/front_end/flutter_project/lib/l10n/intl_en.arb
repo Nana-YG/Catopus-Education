@@ -1,4 +1,6 @@
 {
+  "@@locale": "en",
+
   "appName": "Catopus Education",
 
   "welcomeText": "Welcome to Catopus-Education",
@@ -111,6 +113,31 @@
   "coursePackage":"Course Package",
   "profile":"Profile",
 
-  "logout":"Logout"
+  "logout":"Logout",
+
+  "courseDetail_materials": "Materials",
+  "courseDetail_commentBoard": "Comment Board",
+  "courseDetail_settings": "Settings",
+  "courseDetail_chapterN": "Chapter {n}",
+  "@courseDetail_chapterN": {
+    "description": "Label under each chapter node",
+    "placeholders": { "n": { "type": "int" } }
+  },
+  "common_back": "Back",
+  "common_dismiss": "Dismiss",
+
+  "editAvatar": "Edit Avatar",
+  "clear": "Clear",
+  "avatarUploadSuccess": "Avatar saved successfully",
+  "avatarUploadFailed": "Failed to save avatar",
+
+   "courseDetail_classManagement": "Class Management",
+  "courseDetail_commentBoard": "Comment Board",
+  "courseDetail_settings": "Settings",
+  "removeStudentTitle": "Are you sure you want to remove this student from the class?",
+  "removeConfirm": "Remove",
+  "common_cancel": "Cancel",
+  "removedSuccess": "Removed successfully",
+  "removeFailed": "Remove failed"
 
 }

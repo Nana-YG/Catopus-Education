@@ -1,6 +1,8 @@
 // avatar_editor_page.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_project/generated/app_localizations.dart';
+import 'package:flutter_project/utils/color.dart';
 import 'package:flutter_project/utils/constant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -46,11 +48,14 @@ class _AvatarEditorPageState extends State<AvatarEditorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Edit Avatar'),
+        title: Text(AppLocalizations.of(context)!.editAvatar),
         centerTitle: true,
+        backgroundColor: AppColors.background,
         actions: [
           IconButton(
+            tooltip: MaterialLocalizations.of(context).saveButtonLabel,
             icon: const Icon(Icons.save),
             onPressed: () async {
               final avatarStringForUpload = pixels
@@ -82,13 +87,20 @@ class _AvatarEditorPageState extends State<AvatarEditorPage> {
                   }),
                 );
 
-                if (response.statusCode == 200) {
-                  print("头像上传成功");
-                } else {
-                  print(
-                      "Upload failed: ${response.statusCode} ${response.body}");
-                  print("Sending avatarString: $avatarStringForUpload");
-                }
+               if (response.statusCode == 200) {
+            // 可选：用 SnackBar 展示多语言提示
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(AppLocalizations.of(context)!.avatarUploadSuccess)),
+              );
+            }
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(AppLocalizations.of(context)!.avatarUploadFailed)),
+              );
+            }
+          }
               }
 
               Navigator.pop(context, avatarStringForUI);
@@ -119,9 +131,9 @@ class _AvatarEditorPageState extends State<AvatarEditorPage> {
                           });
                         },
                         icon: const Icon(Icons.clear),
-                        label: const Text("Clear"),
+                        label: Text(AppLocalizations.of(context)!.clear),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[700],
+                          backgroundColor: Colors.red[700],
                           foregroundColor: Colors.white,
                           minimumSize: const Size(80, 36),
                           padding: const EdgeInsets.symmetric(
