@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/models/comment_models.dart';
+import 'package:flutter_project/pages/comment_reply_detail_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math' as math;
@@ -135,171 +136,216 @@ class _CommentBoardDetailPageState extends State<CommentBoardDetailPage> {
   }
 
   /* ===== UI ===== */
-@override
-Widget build(BuildContext context) {
-  final title = widget.boardTitle.isNotEmpty ? widget.boardTitle : '评论板主题';
+  @override
+  Widget build(BuildContext context) {
+    final title = widget.boardTitle.isNotEmpty ? widget.boardTitle : '评论板主题';
 
-  return Scaffold(
-    backgroundColor: kCanvasBrown,
+    return Scaffold(
+      backgroundColor: kCanvasBrown,
 
-    // 让 body 不跟随键盘缩放；输入区我们自己用 AnimatedPadding 处理
-    resizeToAvoidBottomInset: false,
+      // 让 body 不跟随键盘缩放；输入区我们自己用 AnimatedPadding 处理
+      resizeToAvoidBottomInset: false,
 
-    // 去掉 body 的 bottom inset，避免键盘再影响 body 尺寸
-    body: MediaQuery.removeViewInsets(
-      context: context,
-      removeBottom: true,
-      child: SafeArea(
-        top: true,
-        bottom: false,
-        child: CustomScrollView(
-          // 让列表在键盘出现时仍可滚到顶部标题，避免挤爆
-          slivers: [
-            // ===== 顶部栏（白色纸张标题）=====
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Material(
-                      color: Colors.white,
-                      shape: const CircleBorder(),
-                      child: InkWell(
-                        customBorder: const CircleBorder(),
-                        onTap: () => Navigator.pop(context),
-                        child: const Padding(
-                          padding: EdgeInsets.all(10),
-                          child: Icon(Icons.arrow_back, color: Colors.black),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Flexible(
-                      child: Transform.rotate(
-                        angle: -0.06,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            boxShadow: [BoxShadow(color: Color(0x33000000), blurRadius: 10, offset: Offset(0, 4))],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Text('# ', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20)),
-                              Flexible(
-                                child: Text(
-                                  title,
-                                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Colors.black),
-                                  softWrap: true,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (_isTeacher)
-                      PopupMenuButton<String>(
+      // 去掉 body 的 bottom inset，避免键盘再影响 body 尺寸
+      body: MediaQuery.removeViewInsets(
+        context: context,
+        removeBottom: true,
+        child: SafeArea(
+          top: true,
+          bottom: false,
+          child: CustomScrollView(
+            // 让列表在键盘出现时仍可滚到顶部标题，避免挤爆
+            slivers: [
+              // ===== 顶部栏（白色纸张标题）=====
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Material(
                         color: Colors.white,
-                        onSelected: (v) { if (v == 'delete_board') _deleteBoard(); },
-                        itemBuilder: (_) => const [
-                          PopupMenuItem(value: 'delete_board', child: Text('删除评论板')),
-                        ],
+                        shape: const CircleBorder(),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () => Navigator.pop(context),
+                          child: const Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Icon(Icons.arrow_back, color: Colors.black),
+                          ),
+                        ),
                       ),
-                  ],
-                ),
-              ),
-            ),
-
-            // ===== 列表区域（会占据“剩余空间”，不足也不溢出）=====
-            SliverFillRemaining(
-              hasScrollBody: true,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: FutureBuilder<BoardDetail>(
-                  future: _future,
-                  builder: (context, snap) {
-                    if (snap.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (snap.hasError) {
-                      return Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('加载失败：${snap.error}', style: const TextStyle(color: Colors.white)),
-                            const SizedBox(height: 12),
-                            FilledButton(onPressed: _retry, child: const Text('重试')),
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Transform.rotate(
+                          angle: -0.06,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 10),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Color(0x33000000),
+                                    blurRadius: 10,
+                                    offset: Offset(0, 4))
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text('# ',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 20)),
+                                Flexible(
+                                  child: Text(
+                                    title,
+                                    style: const TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.black),
+                                    softWrap: true,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (_isTeacher)
+                        PopupMenuButton<String>(
+                          color: Colors.white,
+                          onSelected: (v) {
+                            if (v == 'delete_board') _deleteBoard();
+                          },
+                          itemBuilder: (_) => const [
+                            PopupMenuItem(
+                                value: 'delete_board', child: Text('删除评论板')),
                           ],
                         ),
-                      );
-                    }
-
-                    final data = snap.data!;
-                    final comments = data.comments;
-                    final repliesMap = _countReplies(comments);
-
-                    if (comments.isEmpty) {
-                      return ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.only(bottom: 80),
-                        children: const [
-                          SizedBox(height: 200),
-                          Center(child: Text('还没有评论，来发一条吧～', style: TextStyle(color: Colors.white))),
-                        ],
-                      );
-                    }
-
-                    // 用 ListView 显示评论（外层已在 SliverFillRemaining 里）
-                    return ListView.separated(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.only(bottom: 80), // 给底部输入条留空间
-                      itemCount: comments.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (_, i) {
-                        final c = comments[i];
-                        final t = wireToType(c.attitude);
-                        final count = repliesMap[c.commentId] ?? 0;
-                        return CommentCard(comment: c, type: t, repliesCount: count);
-                      },
-                    );
-                  },
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+
+              // ===== 列表区域（会占据“剩余空间”，不足也不溢出）=====
+              SliverFillRemaining(
+                hasScrollBody: true,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: FutureBuilder<BoardDetail>(
+                    future: _future,
+                    builder: (context, snap) {
+                      if (snap.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (snap.hasError) {
+                        return Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('加载失败：${snap.error}',
+                                  style: const TextStyle(color: Colors.white)),
+                              const SizedBox(height: 12),
+                              FilledButton(
+                                  onPressed: _retry, child: const Text('重试')),
+                            ],
+                          ),
+                        );
+                      }
+
+                      final data = snap.data!;
+                      final all = data.comments;
+
+// 1) 统计各顶层评论的回复数（保持你原来的实现也可以）
+                      final repliesMap = _countReplies(all);
+
+// 2) 只保留“顶层评论”（replyTo 为空或 null）
+                      final topLevel = all
+                          .where((c) => c.replyTo == null || c.replyTo!.isEmpty)
+                          .toList();
+
+// 3) 用顶层评论渲染列表
+                      if (topLevel.isEmpty) {
+                        return ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.only(bottom: 80),
+                          children: const [
+                            SizedBox(height: 200),
+                            Center(
+                                child: Text('还没有评论，来发一条吧～',
+                                    style: TextStyle(color: Colors.white))),
+                          ],
+                        );
+                      }
+
+                      return ListView.separated(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.only(bottom: 80),
+                        itemCount: topLevel.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemBuilder: (_, i) {
+                          final c = topLevel[i]; // ✅ 注意这里改成用 topLevel
+                          final t = wireToType(c.attitude);
+                          final count = repliesMap[c.commentId] ?? 0;
+
+                          return InkWell(
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => CommentReplyDetailPage(
+                                    boardId: widget.boardId,
+                                    parent: c,
+                                  ),
+                                ),
+                              );
+                              // 回来后刷新本板评论
+                              setState(() {
+                                _future = _fetchBoard();
+                              });
+                            },
+                            child: CommentCard(
+                              comment: c,
+                              type: t,
+                              repliesCount: count, // 仍显示“回复数”
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    ),
 
-    // ===== 底部输入栏：跟随键盘上移 =====
-  bottomNavigationBar: AnimatedPadding(
-  duration: const Duration(milliseconds: 160),
-  curve: Curves.easeOut,
-  padding: EdgeInsets.only(
-    bottom: () {
-      final kb = MediaQuery.of(context).viewInsets.bottom;
-      if (kb > 0) {
-        return math.max(0.0, kb - 8.0); // 键盘时，贴紧但保留 8px
-      } else {
-        return 16.0; // 没键盘时留 16px 空隙
-      }
-    }(),
-  ),
-  child: ComposerBar(
-    current: _current,
-    onChanged: (t) => setState(() => _current = t),
-    onSend: _postComment,
-    controller: _controller,
-  ),
-),
-
-  );
-}
-
-
+      // ===== 底部输入栏：跟随键盘上移 =====
+      bottomNavigationBar: AnimatedPadding(
+        duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.only(
+          bottom: () {
+            final kb = MediaQuery.of(context).viewInsets.bottom;
+            if (kb > 0) {
+              return math.max(0.0, kb - 8.0); // 键盘时，贴紧但保留 8px
+            } else {
+              return 16.0; // 没键盘时留 16px 空隙
+            }
+          }(),
+        ),
+        child: ComposerBar(
+          current: _current,
+          onChanged: (t) => setState(() => _current = t),
+          onSend: _postComment,
+          controller: _controller,
+        ),
+      ),
+    );
+  }
 
   Future<void> _deleteBoard() async {
     final ok = await showDialog<bool>(

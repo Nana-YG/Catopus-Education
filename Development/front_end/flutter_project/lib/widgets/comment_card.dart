@@ -5,14 +5,14 @@ import 'package:flutter_project/pages/avatar_editor_page.dart'; // AvatarPainter
 
 class CommentCard extends StatelessWidget {
   final Comment comment;
-  final CommentType type;
-  final int repliesCount; // 右下角显示
+  final CommentType type; // 右下角显示
+  final int? repliesCount;
 
   const CommentCard({
     super.key,
     required this.comment,
     required this.type,
-    required this.repliesCount,
+    this.repliesCount,
   });
 
   @override
@@ -23,7 +23,10 @@ class CommentCard extends StatelessWidget {
         color: Colors.white,
         border: Border.all(color: color, width: 2),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: const [BoxShadow(color: Color(0x22000000), blurRadius: 10, offset: Offset(0, 4))],
+        boxShadow: const [
+          BoxShadow(
+              color: Color(0x22000000), blurRadius: 10, offset: Offset(0, 4))
+        ],
       ),
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       constraints: const BoxConstraints(minHeight: 80, maxHeight: 120),
@@ -45,7 +48,12 @@ class CommentCard extends StatelessWidget {
                 ),
                 child: ClipOval(
                   child: (snap.connectionState == ConnectionState.waiting)
-                      ? Center(child: SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: color)))
+                      ? Center(
+                          child: SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: color)))
                       : (hex != null && hex.isNotEmpty)
                           ? CustomPaint(painter: AvatarPainter(hex))
                           : Icon(Icons.person, size: 22, color: color),
@@ -67,9 +75,13 @@ class CommentCard extends StatelessWidget {
                     Expanded(
                       child: Text('@${comment.username}',
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w600)),
+                          style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontWeight: FontWeight.w600)),
                     ),
-                    Text(_fmt(comment.timestamp), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                    Text(_fmt(comment.timestamp),
+                        style: TextStyle(
+                            fontSize: 12, color: Colors.grey.shade600)),
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -84,19 +96,29 @@ class CommentCard extends StatelessWidget {
                 Row(
                   children: [
                     const Spacer(),
-                    Text('Replies', style: TextStyle(color: Colors.grey.shade700, fontSize: 13)),
-                    const SizedBox(width: 6),
-                    Container(
-                      width: 22,
-                      height: 22,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.grey.shade500, width: 1),
+                    if (repliesCount != null) ...[
+                      // 👈 只在非空时显示
+                      Text('Replies',
+                          style: TextStyle(
+                              color: Colors.grey.shade700, fontSize: 13)),
+                      const SizedBox(width: 6),
+                      Container(
+                        width: 22,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          shape: BoxShape.circle,
+                          border:
+                              Border.all(color: Colors.grey.shade500, width: 1),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '$repliesCount',
+                          style: const TextStyle(
+                              fontSize: 11, fontWeight: FontWeight.w700),
+                        ),
                       ),
-                      alignment: Alignment.center,
-                      child: Text('$repliesCount', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
-                    ),
+                    ],
                   ],
                 ),
               ],
@@ -132,7 +154,9 @@ class _TagPill extends StatelessWidget {
         border: Border.all(color: color, width: 2),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(text, style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 12)),
+      child: Text(text,
+          style: TextStyle(
+              color: color, fontWeight: FontWeight.w800, fontSize: 12)),
     );
   }
 }

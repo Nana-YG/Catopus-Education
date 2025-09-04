@@ -48,17 +48,34 @@ class _CommentBoardsAreaState extends State<CommentBoardsArea> {
       debugPrint('peek failed: $boardId -> ${res.statusCode} ${res.body}');
       return const [];
     }
+
     final map = jsonDecode(res.body) as Map<String, dynamic>;
     final List list = (map['comments'] as List? ?? []);
-    // 仅取前 4 条，按时间新→旧（后端如已排序可省略）
-    final previews = list.take(4).map((e) {
+
+    // ✅ 只保留顶层评论（不是回复）
+    final topLevel = list.where((e) {
+      final m = e as Map<String, dynamic>;
+      final r = m['replyTo'];
+      return r == null || (r is String && r.isEmpty);
+    }).toList();
+
+    // ✅ 按时间倒序（如果后端未排序）
+    topLevel.sort((a, b) {
+      final ta = DateTime.tryParse((a['timestamp'] ?? '').toString()) ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      final tb = DateTime.tryParse((b['timestamp'] ?? '').toString()) ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      return tb.compareTo(ta); // 新在前
+    });
+
+    // 只预览前 4 条
+    return topLevel.take(4).map((e) {
       final m = e as Map<String, dynamic>;
       return _CommentPreview(
         commentId: m['commentId'] ?? '',
         content: (m['content'] ?? '').toString(),
       );
     }).toList();
-    return previews;
   }
 
   @override
@@ -225,18 +242,24 @@ class _CommentBoardsAreaState extends State<CommentBoardsArea> {
     }
   }
 
-  void _openBoard(_BoardBrief board) {
-    // 跳转到评论板详情页
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => CommentBoardDetailPage(
-          boardId: board.boardId,
-          boardTitle: board.title,
-        ),
+  void _openBoard(_BoardBrief board) async {
+  await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => CommentBoardDetailPage(
+        boardId: board.boardId,
+        boardTitle: board.title,
       ),
-    );
-  }
+    ),
+  );
+
+  // 回来后刷新：清除该板子的预览缓存 + 重新拉列表
+  setState(() {
+    _peekCache.remove(board.boardId);  // 让预览重拉
+    _future = _fetchBoards();          // 刷新板子列表
+  });
+}
+
 
   Future<void> _onPullRefresh() async {
     setState(() => _future = _fetchBoards());
