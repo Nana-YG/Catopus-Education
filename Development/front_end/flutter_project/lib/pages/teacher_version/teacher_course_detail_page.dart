@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_project/generated/app_localizations.dart';
 import 'package:flutter_project/pages/avatar_editor_page.dart';
+import 'package:flutter_project/pages/comment_boards_area.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_project/utils/constant.dart'; // baseApiUrl
@@ -28,6 +29,17 @@ class TeacherCourseDetailPage extends StatefulWidget {
 
 class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
   String? selectedNote; // 左侧便签高亮状态
+  @override
+  void initState() {
+    super.initState();
+    // 这里设置默认值
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final l10n = AppLocalizations.of(context)!;
+      setState(() {
+        selectedNote = l10n.courseDetail_classManagement; // 默认选中“班级管理”
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,16 +103,12 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
           ),
           // 右侧主体：按你给的图，居中标题 + 头像网格 + 最后一个是虚线“+”
           Positioned(
-            top: 100 * scaleY,
-            left: 650 * scaleX,
+            top: 50 * scaleY,
+            left: 600 * scaleX,
             child: SizedBox(
               width: 1300 * scaleX,
-              height: 1000 * scaleX,
-              child: _RightPlainStudentArea(
-                // 顶部标题为“管理班级”
-                title: l10n.courseDetail_classManagement,
-                classId: widget.classId,
-              ),
+              height: 1350 * scaleY,
+              child: _buildRightArea(l10n), // 👈 改为调用一个方法
             ),
           ),
         ],
@@ -250,6 +258,59 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildRightArea(AppLocalizations l10n) {
+    // 防御：如果 selectedNote 还没初始化，默认显示班级管理
+    final note = selectedNote ?? l10n.courseDetail_classManagement;
+
+    if (note == l10n.courseDetail_classManagement) {
+      // 班级管理（你原来的区域）
+      return _RightPlainStudentArea(
+        title: l10n.courseDetail_classManagement,
+        classId: widget.classId,
+      );
+    } else if (note == l10n.courseDetail_commentBoard) {
+      // 评论板（使用你独立文件里的 CommentBoardsArea）
+      return const DecoratedBox(
+        decoration: BoxDecoration(color: Colors.transparent),
+        child: Padding(
+          padding: EdgeInsets.only(top: 0), // 需要可微调
+          child: _CommentBoardsHolder(), // 👈 包一层以便热切换动画
+        ),
+      );
+    } else if (note == l10n.courseDetail_settings) {
+      // 设置页（先占位，后续你再填）
+      return Center(
+        child: Text(
+          l10n.courseDetail_settings,
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+        ),
+      );
+    }
+
+    // 兜底：还是显示班级管理
+    return _RightPlainStudentArea(
+      title: l10n.courseDetail_classManagement,
+      classId: widget.classId,
+    );
+  }
+}
+
+class _CommentBoardsHolder extends StatelessWidget {
+  const _CommentBoardsHolder();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final parentState =
+        context.findAncestorStateOfType<_TeacherCourseDetailPageState>();
+    final classId = parentState?.widget.classId ?? '';
+
+    return CommentBoardsArea(
+      classId: classId,
+      title: l10n.courseDetail_commentBoard, // 顶部标题
     );
   }
 }
