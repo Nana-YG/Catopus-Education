@@ -1,10 +1,12 @@
 package org.catopus.Contentserver.Comment.Model;
 
 public class Comment {
-    private String commentId; // 新增字段
+    private String commentId;
     private String username;
-    private String timestamp;
+    private String attitude;
     private String content;
+    private String timestamp;
+    private String replyTo;
 
     public Comment() {}
 
@@ -25,12 +27,12 @@ public class Comment {
         this.username = username;
     }
 
-    public String getTimestamp() {
-        return timestamp;
+    public String getAttitude() {
+        return attitude;
     }
 
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
+    public void setAttitude(String attitude) {
+        this.attitude = attitude;
     }
 
     public String getContent() {
@@ -39,5 +41,21 @@ public class Comment {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getReplyTo() {
+        return replyTo;
+    }
+
+    public void setReplyTo(String replyTo) {
+        this.replyTo = replyTo;
     }
 }

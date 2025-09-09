@@ -1,9 +1,12 @@
 package org.catopus.Contentserver.Comment.Controller;
 
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import org.catopus.Contentserver.Comment.Model.Comment;
-import org.catopus.Contentserver.Comment.Model.CommentThread;
+import org.catopus.Contentserver.Comment.Model.CommentBoard;
 import org.catopus.Contentserver.Comment.Model.CommentRequest;
-import org.catopus.Contentserver.Comment.Repository.CommentRepository;
+import org.catopus.Contentserver.Comment.Repository.CommentBoardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,118 +15,132 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/comments")
 public class CommentController {
 
     @Autowired
-    private CommentRepository commentRepository;
+    private CommentBoardRepository commentBoardRepository;
 
-    // ========== GET: 获取任务的所有评论 ==========
-    @GetMapping("/{classId}/{taskId}")
-    public ResponseEntity<CommentThread> getComments(
-            @PathVariable String classId,
-            @PathVariable String taskId
-    ) {
-        String id = classId + "-" + taskId;
+    // 创建评论板（老师专用，自动生成 boardId）
+    @PostMapping("/newboard/{classId}")
+    public ResponseEntity<?> createBoard(@PathVariable String classId,
+                                         @RequestParam String title,
+                                         @RequestHeader("username") String username) {
+        // 自动生成唯一的 boardId
+        String boardId = UUID.randomUUID().toString();
 
-        Optional<CommentThread> optional = commentRepository.findById(id);
-        if (optional.isPresent()) {
-            return ResponseEntity.ok(optional.get());
-        } else {
-            // 没有则返回空评论列表（但带上 ID）
-            CommentThread empty = new CommentThread(id);
-            return ResponseEntity.ok(empty);
-        }
-    }
+        // 构造评论板对象
+        CommentBoard board = new CommentBoard();
+        board.setBoardId(boardId);
+        board.setClassId(classId); // ← 正确设置 classId
+        board.setTitle(title);
+        board.setComments(new ArrayList<>());
 
-    // ========== POST: 添加一条评论 ==========
-    @PostMapping("/{classId}/{taskId}")
-    public ResponseEntity<String> addComment(
-            @PathVariable String classId,
-            @PathVariable String taskId,
-            @RequestHeader("username") String headerUsername,
-            @RequestBody CommentRequest request) {
+        // 保存到数据库
+        commentBoardRepository.save(board);
 
-        // 1. 检查请求体中的 username 和 header 中的一致性
-        if (!request.getUsername().equals(headerUsername)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Username mismatch");
-        }
+        // 返回成功消息和 boardId
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Board created.");
+        response.put("boardId", boardId);
 
-        // 2. 构造评论内容
-        Comment newComment = new Comment();
-        newComment.setUsername(request.getUsername());
-        newComment.setTimestamp(request.getTimestamp());
-        newComment.setContent(request.getContent());
-
-        // 3. 查询数据库中是否已有对应文档
-        String docId = classId + "-" + taskId;
-        Optional<CommentThread> optionalDoc = commentRepository.findById(docId);
-
-        if (optionalDoc.isPresent()) {
-            // 4.1 如果已存在，追加评论
-            CommentThread existingDoc = optionalDoc.get();
-            int count = existingDoc.getComments().size();
-            newComment.setCommentId("comment-" + (count + 1));
-            existingDoc.getComments().add(newComment);
-            commentRepository.save(existingDoc);
-        } else {
-            // 4.2 如果不存在，创建新文档
-            newComment.setCommentId("comment-1");
-            CommentThread newDoc = new CommentThread(docId);
-            List<Comment> commentList = new ArrayList<>();
-            commentList.add(newComment);
-            newDoc.setComments(commentList);
-            commentRepository.save(newDoc);
-        }
-
-        return ResponseEntity.ok("Comment added successfully");
-    }
-
-    // ========== DELETE: 删除添加一条评论 ==========
-    @DeleteMapping("/{classId}/{taskId}/{commentId}")
-    public ResponseEntity<String> deleteComment(
-            @PathVariable String classId,
-            @PathVariable String taskId,
-            @PathVariable String commentId,
-            @RequestHeader("username") String headerUsername
-    ) {
-        String docId = classId + "-" + taskId;
-        Optional<CommentThread> optional = commentRepository.findById(docId);
-
-        if (optional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No comment thread found");
-        }
-
-        CommentThread thread = optional.get();
-        List<Comment> comments = thread.getComments();
-
-        boolean removed = false;
-
-        for (int i = 0; i < comments.size(); i++) {
-            Comment c = comments.get(i);
-            // 1. 跳过没有 commentId 的旧评论
-            if (c.getCommentId() == null) {
-                continue;
-            }
-
-            // 2. 检查是否匹配要删除的 commentId 且是本人
-            if (c.getCommentId().equals(commentId) && c.getUsername().equals(headerUsername)) {
-                comments.remove(i);
-                removed = true;
-                break;
-            }
-        }
-
-        if (!removed) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Comment not found or not owned by user");
-        }
-
-        commentRepository.save(thread);
-        return ResponseEntity.ok("Comment deleted successfully");
+        return ResponseEntity.ok(response);
     }
 
 
+    @GetMapping("/boards/{classId}")
+    public ResponseEntity<?> getBoardsByClassId(@PathVariable String classId) {
+        List<CommentBoard> boards = commentBoardRepository.findByClassId(classId);
+        List<Map<String, String>> simplified = boards.stream()
+            .map(board -> {
+                Map<String, String> map = new HashMap<>();
+                map.put("boardId", board.getBoardId());
+                map.put("title", board.getTitle());
+                return map;
+            })
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(simplified);
+    }
 
+    // 添加评论
+    @PostMapping("/post-comment/{boardId}")
+    public ResponseEntity<String> addComment(@PathVariable String boardId,
+                                             @RequestBody CommentRequest request,
+                                             @RequestHeader("username") String username) {
+        Optional<CommentBoard> optionalBoard = commentBoardRepository.findById(boardId);
+        if (optionalBoard.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Board not found.");
+        }
+
+        CommentBoard board = optionalBoard.get();
+
+        Comment comment = new Comment();
+        comment.setCommentId(UUID.randomUUID().toString());
+        comment.setUsername(username);
+        comment.setAttitude(request.getAttitude());
+        comment.setContent(request.getContent());
+        comment.setTimestamp(request.getTimestamp());
+        comment.setReplyTo(request.getReplyTo());
+
+        board.getComments().add(comment);
+        commentBoardRepository.save(board);
+
+        return ResponseEntity.ok("Comment added.");
+    }
+
+    // 获取全部评论
+    @GetMapping("/get-comments/{boardId}")
+    public ResponseEntity<?> getComments(@PathVariable String boardId) {
+        Optional<CommentBoard> optionalBoard = commentBoardRepository.findById(boardId);
+        return optionalBoard.<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Board not found."));
+    }
+
+    // 删除整个评论板（仅限老师）
+    @DeleteMapping("/board/{boardId}")
+    public ResponseEntity<String> deleteBoard(@PathVariable String boardId,
+                                              @RequestHeader("username") String username) {
+        if (!commentBoardRepository.existsById(boardId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Board not found.");
+        }
+
+        commentBoardRepository.deleteById(boardId);
+        return ResponseEntity.ok("Board deleted.");
+    }
+
+    // 删除某条评论（仅限本人或老师）
+    @DeleteMapping("/{boardId}/delete/{commentId}")
+    public ResponseEntity<String> deleteComment(@PathVariable String boardId,
+                                                @PathVariable String commentId,
+                                                @RequestHeader("username") String username,
+                                                @RequestHeader("role") String role) {
+        Optional<CommentBoard> optionalBoard = commentBoardRepository.findById(boardId);
+        if (optionalBoard.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Board not found.");
+        }
+
+        CommentBoard board = optionalBoard.get();
+        List<Comment> comments = board.getComments();
+        Optional<Comment> commentToDelete = comments.stream()
+                .filter(c -> c.getCommentId().equals(commentId))
+                .findFirst();
+
+        if (commentToDelete.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Comment not found.");
+        }
+
+        Comment comment = commentToDelete.get();
+        if (!comment.getUsername().equals(username) && !role.equals("teacher")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to delete this comment.");
+        }
+
+        comments.remove(comment);
+        board.setComments(comments);
+        commentBoardRepository.save(board);
+        return ResponseEntity.ok("Comment deleted.");
+    }
 }
