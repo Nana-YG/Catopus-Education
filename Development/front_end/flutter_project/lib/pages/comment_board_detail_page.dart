@@ -45,7 +45,18 @@ class _CommentBoardDetailPageState extends State<CommentBoardDetailPage> {
     final prefs = await SharedPreferences.getInstance();
     final accountType = (prefs.getString('accountType') ?? '').toUpperCase();
     final role = (prefs.getString('role') ?? '').toLowerCase();
-    _isTeacher = accountType == 'TEACHER' || role == 'teacher';
+
+    // 👇 缓存当前登录用户名，供 _canDelete 使用
+    _cachedUsername = prefs.getString('username') ?? '';
+
+    // 计算教师身份
+    final isTeacher = accountType == 'TEACHER' || role == 'teacher';
+
+    if (mounted) {
+      setState(() {
+        _isTeacher = isTeacher;
+      });
+    }
   }
 
   /* ===== 拉取详情 ===== */
@@ -116,13 +127,19 @@ class _CommentBoardDetailPageState extends State<CommentBoardDetailPage> {
   }
 
   /* ===== 工具 ===== */
-  Future<void> _onPullRefresh() async {
-    final next = _fetchBoard();
-    setState(() => _future = next);
-    await next;
+  void _retry() {
+    setState(() {
+      _future = _fetchBoard();
+    });
   }
 
-  void _retry() => setState(() => _future = _fetchBoard());
+  Future<void> _onPullRefresh() async {
+    final next = _fetchBoard();
+    setState(() {
+      _future = next;
+    });
+    await next;
+  }
 
   // 统计每条评论的回复数：replyTo == 该 commentId
   Map<String, int> _countReplies(List<Comment> list) {
@@ -133,6 +150,77 @@ class _CommentBoardDetailPageState extends State<CommentBoardDetailPage> {
       map[parent] = (map[parent] ?? 0) + 1;
     }
     return map;
+  }
+
+  // 谁可以删除：老师任意；学生仅限本人
+  bool _canDelete(Comment c) {
+    if (_isTeacher) return true;
+    final me = _cachedUsername ?? '';
+    return me.isNotEmpty && c.username == me;
+  }
+
+// 可选：把 username 缓存一下，避免每次读 SharedPreferences
+  String? _cachedUsername;
+  Future<void> _ensureUsername() async {
+    if (_cachedUsername != null) return;
+    final prefs = await SharedPreferences.getInstance();
+    _cachedUsername = prefs.getString('username') ?? '';
+  }
+
+// 删除评论
+  Future<void> _deleteComment(Comment c) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('删除评论'),
+        content: const Text('确认删除这条评论吗？此操作不可恢复。'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('取消')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('删除')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+
+    await _ensureUsername();
+    final prefs = await SharedPreferences.getInstance();
+    final username = _cachedUsername ?? '';
+    final token = prefs.getString('token') ?? '';
+
+    final uri = Uri.parse(
+        '$baseApiUrl/comments/${widget.boardId}/delete/${c.commentId}');
+    final res = await http.delete(
+      uri,
+      headers: {
+        'Username': username,
+        'role': _isTeacher ? 'teacher' : 'student',
+        'Token': token, // 若网关不用可去掉
+      },
+    );
+
+    if (!mounted) return;
+
+    if (res.statusCode == 200) {
+      // 直接刷新本页评论列表
+      // ✅ 回调不返回值
+      final next = _fetchBoard();
+      setState(() {
+        _future = next;
+      });
+      await next;
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('已删除')));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('删除失败：${res.statusCode} ${res.body}')),
+      );
+    }
   }
 
   /* ===== UI ===== */
@@ -301,7 +389,6 @@ class _CommentBoardDetailPageState extends State<CommentBoardDetailPage> {
                                   ),
                                 ),
                               );
-                              // 回来后刷新本板评论
                               setState(() {
                                 _future = _fetchBoard();
                               });
@@ -309,7 +396,10 @@ class _CommentBoardDetailPageState extends State<CommentBoardDetailPage> {
                             child: CommentCard(
                               comment: c,
                               type: t,
-                              repliesCount: count, // 仍显示“回复数”
+                              repliesCount: count,
+                              showDelete: _canDelete(c),
+                              onDelete: () => _deleteComment(c),
+                              actionsInline: true, // ✅ 列表页需要“并排在右下角”
                             ),
                           );
                         },

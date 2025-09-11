@@ -116,6 +116,78 @@ class _CommentReplyDetailPageState extends State<CommentReplyDetailPage> {
     }
   }
 
+  // 谁可以删除：老师任意；学生仅限本人
+  bool _canDelete(Comment c) {
+    if (_isTeacher) return true;
+    final u = _username ?? '';
+    return u.isNotEmpty && c.username == u;
+  }
+
+// 删除评论
+  Future<void> _deleteComment(Comment c) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('删除评论'),
+        content: const Text('确认删除这条评论吗？此操作不可恢复。'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('取消')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('删除')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final username = prefs.getString('username') ?? '';
+    final token = prefs.getString('token') ?? '';
+
+    // 如果你的后端删除路由不同，请把下面这行改成你实际的接口
+    final uri = Uri.parse(
+      '$baseApiUrl/comments/${widget.boardId}/delete/${c.commentId}',
+    );
+
+// 后端需要 username 和 role；保留 Token 也可以（若你网关要用）
+    final roleHeader = _isTeacher ? 'teacher' : 'student';
+    final res = await http.delete(
+      uri,
+      headers: {
+        'Username': username,
+        'role': roleHeader,
+        'Token': token, // 如果你网关用不到也可去掉
+      },
+    );
+    if (!mounted) return;
+
+    if (res.statusCode == 200) {
+      // 删的是父评论：直接返回上一页
+      if (c.commentId == widget.parent.commentId) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('已删除该评论')));
+        return;
+      }
+      // 否则仅刷新当前回复列表
+      final next = _fetchReplies();
+      setState(() {
+        // ✅ 块级闭包，不返回任何值
+        _futureReplies = next;
+      });
+      await next; // （可选）等刷新完成再提示
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('已删除')));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('删除失败：${res.statusCode} ${res.body}')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final parent = widget.parent;
@@ -125,59 +197,15 @@ class _CommentReplyDetailPageState extends State<CommentReplyDetailPage> {
       backgroundColor: kCanvasBrown,
       resizeToAvoidBottomInset: false,
 
+      // === 整页一个滚动区域 + 悬浮返回按钮 ===
       body: Stack(
-  children: [
-    // === 主体内容 ===
-    MediaQuery.removeViewInsets(
-      context: context,
-      removeBottom: true,
-      child: SafeArea(
-        top: true,
-        bottom: false,
-        child: CustomScrollView(
-          slivers: [
-            // 父评论卡片（与回复列表对齐）
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                child: CommentCard(
-                  comment: parent,
-                  type: parentType,
-                  repliesCount: null, // 顶部不显示“Replies”
-                ),
-              ),
-            ),
-
-            // “回复 n”
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
-                child: Row(
-                  children: [
-                    const Text(
-                      '回复',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    FutureBuilder<List<Comment>>(
-                      future: _futureReplies,
-                      builder: (_, snap) {
-                        final n = snap.hasData ? snap.data!.length : 0;
-                        return _Bubble(text: '$n');
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // 回复列表
-            SliverFillRemaining(
-              hasScrollBody: true,
+        children: [
+          MediaQuery.removeViewInsets(
+            context: context,
+            removeBottom: true,
+            child: SafeArea(
+              top: true,
+              bottom: false,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: FutureBuilder<List<Comment>>(
@@ -188,39 +216,57 @@ class _CommentReplyDetailPageState extends State<CommentReplyDetailPage> {
                     }
                     if (snap.hasError) {
                       return Center(
-                        child: Text(
-                          '加载失败：${snap.error}',
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      );
-                    }
-                    final list = snap.data ?? const <Comment>[];
-                    if (list.isEmpty) {
-                      return ListView(
-                        padding: const EdgeInsets.only(bottom: 80),
-                        children: const [
-                          SizedBox(height: 160),
-                          Center(
-                            child: Text(
-                              '还没有回复，来发表一个吧～',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ],
+                        child: Text('加载失败：${snap.error}',
+                            style: const TextStyle(color: Colors.white)),
                       );
                     }
 
+                    final replies = snap.data ?? const <Comment>[];
+                    // 统一放进一个 ListView：0=父评论，1=“回复 n”标题，2..=回复项
+                    final total = replies.length + 2;
+
                     return ListView.separated(
-                      padding: const EdgeInsets.only(bottom: 80),
-                      itemCount: list.length,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      itemCount: total,
                       separatorBuilder: (_, __) => const SizedBox(height: 10),
-                      itemBuilder: (_, i) {
-                        final c = list[i];
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          // 父评论
+                          return CommentCard(
+                            comment: parent,
+                            type: parentType,
+                            repliesCount: null,
+                            showDelete: _canDelete(parent),
+                            onDelete: () => _deleteComment(parent),
+                          );
+                        }
+                        if (index == 1) {
+                          // “回复 n” 标题
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              const Text(
+                                '回复',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              _Bubble(text: '${replies.length}'),
+                            ],
+                          );
+                        }
+                        // 回复项
+                        final c = replies[index - 2];
                         final t = wireToType(c.attitude);
                         return CommentCard(
                           comment: c,
                           type: t,
-                          repliesCount: null, // 回复页不展示“回复数”
+                          repliesCount: null,
+                          showDelete: _canDelete(c),
+                          onDelete: () => _deleteComment(c),
                         );
                       },
                     );
@@ -228,37 +274,33 @@ class _CommentReplyDetailPageState extends State<CommentReplyDetailPage> {
                 ),
               ),
             ),
-          ],
-        ),
-      ),
-    ),
+          ),
 
-    // === 悬浮返回按钮 ===
-    Positioned(
-      left: 12,
-      top: 8 + MediaQuery.of(context).padding.top, // 避开状态栏
-      child: SizedBox(
-        width: 44,
-        height: 44,
-        child: Material(
-          color: Colors.white,
-          shape: const CircleBorder(),
-          elevation: 2,
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: () => Navigator.pop(context),
-            child: const Center(
-              child: Icon(Icons.arrow_back, color: Colors.black),
+          // 悬浮返回按钮（位置不变，可点）
+          Positioned(
+            left: 12,
+            top: 8 + MediaQuery.of(context).padding.top,
+            child: SizedBox(
+              width: 44,
+              height: 44,
+              child: Material(
+                color: Colors.white,
+                shape: const CircleBorder(),
+                elevation: 2,
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () => Navigator.pop(context),
+                  child: const Center(
+                    child: Icon(Icons.arrow_back, color: Colors.black),
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       ),
-    ),
-  ],
-),
 
-
-      // 底部输入：随键盘上移
+      // === 底部输入栏（原样保留） ===
       bottomNavigationBar: AnimatedPadding(
         duration: const Duration(milliseconds: 160),
         curve: Curves.easeOut,
