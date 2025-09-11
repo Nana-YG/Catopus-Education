@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/pages/comment_boards_area.dart';
 import 'package:flutter_project/utils/chapter_path_painter.dart';
-import 'package:flutter_project/widgets/comment_board.dart';
 import 'package:flutter_project/generated/app_localizations.dart';
 
 class CourseDetailPage extends StatefulWidget {
-  final String classId; // ✅ 新增
+  final String classId;   // 班级ID
   final String className; // 课程名称
-  final int taskCount; // ✅ 新增：任务数（章节数）
+  final int taskCount;    // 章节/任务数量
 
   const CourseDetailPage({
     super.key,
@@ -20,30 +20,44 @@ class CourseDetailPage extends StatefulWidget {
 }
 
 class _CourseDetailPageState extends State<CourseDetailPage> {
-  String? selectedNote; // 当前选中的贴纸
+  String? selectedNote; // 当前选中的便签
+
+  @override
+  void initState() {
+    super.initState();
+    // 默认显示课程任务（地图）
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final l10n = AppLocalizations.of(context)!;
+      setState(() => selectedNote = l10n.courseDetail_materials);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-    double baseWidth = 2160;
-    double baseHeight = 1440;
+    final size = MediaQuery.of(context).size;
+    final screenWidth = size.width;
+    final screenHeight = size.height;
 
-    double scaleX = screenWidth / baseWidth;
-    double scaleY = screenHeight / baseHeight;
+    const baseWidth = 2160.0;
+    const baseHeight = 1440.0;
+    final scaleX = screenWidth / baseWidth;
+    final scaleY = screenHeight / baseHeight;
 
     return Scaffold(
       backgroundColor: const Color(0xFFFDF9EC),
       body: Stack(
         children: [
+          // 背景
           Positioned.fill(
             child: Image.asset(
               'assets/images/bg_combined.png',
-              fit: BoxFit.cover, // 或者 contain，看你的合成图比例
-              alignment: Alignment.topLeft, // 合成图以左上为基准
+              fit: BoxFit.cover,
+              alignment: Alignment.topLeft,
             ),
           ),
+
+          // 左上：班级名 + 便签列
           Positioned(
             top: 100 * scaleY,
             left: 130 * scaleX,
@@ -65,112 +79,83 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                 SizedBox(height: 40 * scaleY),
                 Transform.translate(
                   offset: Offset(-85 * scaleX, 0),
-                  child: _buildStickyNotesColumn(scaleX),
+                  child: _buildStickyNotesColumn(scaleX, l10n),
                 ),
               ],
             ),
           ),
+
+          // 左上返回
           Positioned(
             top: 40 * scaleY,
             left: 40 * scaleX,
             child: IconButton(
               icon: Icon(Icons.arrow_back, size: 36 * scaleX),
-              tooltip: l10n.common_back, // ← 本地化
+              tooltip: l10n.common_back,
               onPressed: () => Navigator.pop(context),
             ),
           ),
+
+          // 右侧主体区域：根据选中的便签切换（评论板 或 地图 或 设置）
           Positioned(
-            top: 100 * scaleY,
-            left: 650 * scaleX,
-            child: _buildChapterPath(scaleX),
+            top: 50 * scaleY,
+            left: 600 * scaleX,
+            child: SizedBox(
+              width: 1300 * scaleX,
+              height: 1350 * scaleY,
+              child: _buildRightArea(l10n, scaleX),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _showCommentBoard(int chapterNumber) {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: AppLocalizations.of(context)!.common_dismiss,
-      barrierColor: Colors.black.withOpacity(0.1),
-      transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (_, __, ___) => const SizedBox.shrink(),
-      transitionBuilder: (context, animation, secondaryAnimation, _) {
-        final media = MediaQuery.of(context);
-        final screenWidth = media.size.width;
-        final screenHeight = media.size.height;
-        final padding = media.padding;
-
-        final boardWidth = screenWidth * 0.7;
-        final boardHeight = screenHeight * 0.85;
-
-        return FadeTransition(
-          opacity: animation,
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: Container(
-              width: boardWidth,
-              height: boardHeight,
-              margin: EdgeInsets.only(
-                right: padding.right > 0 ? padding.right : 20,
-              ),
-              child: CommentBoard(),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildStickyNotesColumn(double scaleX) {
-    final l10n = AppLocalizations.of(context)!;
+  /* =======================================================================
+   * 左侧便签列（Materials / Comment Board / Settings）
+   * ======================================================================= */
+  Widget _buildStickyNotesColumn(double scaleX, AppLocalizations l10n) {
     return SizedBox(
       width: 260 * scaleX,
       height: 500 * scaleX,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
+          // 课程任务（地图）
           Positioned(
             top: 0,
             left: 0 * scaleX,
-            child: _buildStickyNoteImage(
+            child: _sticky(
               imagePath: 'assets/images/sticky_yellow.png',
               label: l10n.courseDetail_materials,
               textRotation: -0.19,
               scaleX: scaleX,
-              onTap: () {
-                // 课程任务被点击：此处保留现状（地图本来就显示）
-                // 需要行为的话写在这里（比如滚动到地图区域）
-              },
+              onTap: () => setState(() => selectedNote = l10n.courseDetail_materials),
+              textOffset: Offset(4 * scaleX, 8 * scaleX),
             ),
           ),
+          // 评论板（与老师一致，右侧内嵌，去掉“评论板”标题）
           Positioned(
             top: 185 * scaleX,
             left: 90 * scaleX,
-            child: _buildStickyNoteImage(
+            child: _sticky(
               imagePath: 'assets/images/sticky_red.png',
               label: l10n.courseDetail_commentBoard,
               textRotation: 0.26,
               scaleX: scaleX,
-              onTap: () {
-                // 评论板被点击：直接打开评论板（不通过章节按钮）
-                _showCommentBoard(0); // 约定 0 代表“全局/不指定章节”
-              },
+              onTap: () => setState(() => selectedNote = l10n.courseDetail_commentBoard),
             ),
           ),
+          // 设置（占位）
           Positioned(
             top: 360 * scaleX,
             left: 26 * scaleX,
-            child: _buildStickyNoteImage(
+            child: _sticky(
               imagePath: 'assets/images/sticky_blue.png',
               label: l10n.courseDetail_settings,
               textRotation: -0.26,
               scaleX: scaleX,
-              onTap: () {
-                // TODO: 打开设置页（未来再接）
-              },
+              onTap: () => setState(() => selectedNote = l10n.courseDetail_settings),
             ),
           ),
         ],
@@ -178,16 +163,33 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     );
   }
 
-  Widget _buildStickyNoteImage({
+  Widget _sticky({
     required String imagePath,
     required String label,
     required double textRotation,
     required double scaleX,
-    VoidCallback? onTap, // ← 新增
+    required VoidCallback onTap,
+    Offset? textOffset,
+    double textWidthFactor = 0.72,
   }) {
     final isSelected = selectedNote == label;
     final double hitWidth = 370 * scaleX;
     final double hitHeight = 300 * scaleX;
+
+    String _autoBreak(String s) {
+      if (!s.contains(' ')) return s;
+      final mid = (s.length / 2).round();
+      int bestIdx = -1, bestDist = 1 << 30;
+      for (int i = 0; i < s.length; i++) {
+        if (s[i] == ' ') {
+          final d = (i - mid).abs();
+          if (d < bestDist) { bestDist = d; bestIdx = i; }
+        }
+      }
+      return bestIdx == -1 ? s : '${s.substring(0, bestIdx)}\n${s.substring(bestIdx + 1)}';
+    }
+
+    final displayLabel = _autoBreak(label);
 
     return SizedBox(
       width: hitWidth,
@@ -195,12 +197,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            // 保留原高亮逻辑
-            setState(() => selectedNote = (isSelected ? null : label));
-            // 调用自定义回调（用于打开评论板/其他）
-            if (onTap != null) onTap(); // ← 调用外部传入
-          },
+          onTap: onTap,
           borderRadius: BorderRadius.circular(12),
           child: Stack(
             alignment: Alignment.center,
@@ -213,15 +210,27 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                   child: Image.asset(imagePath),
                 ),
               ),
-              Transform.rotate(
-                angle: textRotation,
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 42 * scaleX,
-                    fontFamily: 'Manrope',
-                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w400,
-                    color: Colors.black,
+              Transform.translate(
+                offset: textOffset ?? Offset.zero,
+                child: Transform.rotate(
+                  angle: textRotation,
+                  child: SizedBox(
+                    width: hitWidth * textWidthFactor,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        displayLabel,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        softWrap: true,
+                        style: TextStyle(
+                          fontSize: 42 * scaleX,
+                          fontFamily: 'Manrope',
+                          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w400,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -232,36 +241,118 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     );
   }
 
-  Widget _buildChapterPath(double scaleX) {
+  /* =======================================================================
+   * 右侧区域：根据便签选择切换内容
+   * - Materials：显示地图（章节路径）
+   * - Comment Board：显示与老师一致的评论板（去掉“评论板”标题）
+   * - Settings：占位
+   * ======================================================================= */
+  Widget _buildRightArea(AppLocalizations l10n, double scaleX) {
+    final note = selectedNote ?? l10n.courseDetail_materials;
+
+    if (note == l10n.courseDetail_commentBoard) {
+      // ✅ 学生端评论板与教师一致：右侧内嵌 + 无“评论板”标题
+      return _RightCommentBoardsPane(classId: widget.classId);
+    }
+
+    if (note == l10n.courseDetail_settings) {
+      return const Center(
+        child: Text(
+          'Settings',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+        ),
+      );
+    }
+
+    // 默认：课程任务（地图）
+    return _RightTasksMap(
+      taskCount: widget.taskCount,
+      scaleX: scaleX,
+      title: l10n.courseDetail_materials,
+    );
+  }
+}
+
+/* ========================= 右侧：评论板（与老师一致，无标题） ========================= */
+class _RightCommentBoardsPane extends StatelessWidget {
+  final String classId;
+  const _RightCommentBoardsPane({required this.classId});
+
+  @override
+  Widget build(BuildContext context) {
+    return CommentBoardsArea(
+      classId: classId,
+      title: '',                    // ← 去掉“评论板”字样
+      outerControlsHorizontal: true // ← 保持侧边布局的适配
+    );
+  }
+}
+
+/* ========================= 右侧：课程任务地图（水平直线+节点） ========================= */
+class _RightTasksMap extends StatelessWidget {
+  final int taskCount;
+  final double scaleX;
+  final String title;
+
+  const _RightTasksMap({
+    super.key,
+    required this.taskCount,
+    required this.scaleX,
+    required this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // 顶部标题（保留“课程任务/Materials”字样）
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const SizedBox(height: 8),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+
+        // 地图主体
+        Expanded(child: _ChapterPath(scaleX: scaleX, count: taskCount)),
+      ],
+    );
+  }
+}
+
+class _ChapterPath extends StatelessWidget {
+  final double scaleX;
+  final int count;
+  const _ChapterPath({required this.scaleX, required this.count});
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    // 可见区域（你原来就是 1700×900）
     final double boxWidth = 1080 * scaleX;
-    final double boxHeight = 900 * scaleX; // 直线高度不用太大
+    final double boxHeight = 900 * scaleX;
 
-    // 节点外观尺寸
     final double nodeSize = 35 * scaleX;
     final double nodeRadius = nodeSize / 2;
 
-    // 固定间距 & 两侧留白（你只需要改 spacing 就能控制“固定距离”）
-    final double spacing = 180 * scaleX; // ←← 固定间距（自己调）
-    final double sidePad = 60 * scaleX; // 左右留白
+    final double spacing = 180 * scaleX; // 固定间距
+    final double sidePad = 60 * scaleX;  // 左右留白
 
-    final int count = widget.taskCount.clamp(3, 10);
-    if (count <= 0) return const SizedBox.shrink();
+    final int safeCount = count.clamp(3, 10);
+    if (safeCount <= 0) return const SizedBox.shrink();
 
-    // “内容总宽度” = 左留白 + 间距*(count-1) + 右留白
     final double contentWidth =
-        sidePad + (count > 1 ? (count - 1) * spacing : 0) + sidePad;
-
-    // 如果内容比容器窄，就居中；否则让它按自身宽度渲染（外层可横向滚动）
-
-    // 直线的 Y（居中）
+        sidePad + (safeCount > 1 ? (safeCount - 1) * spacing : 0) + sidePad;
     final double lineY = boxHeight * 0.5;
 
-    // 生成“固定间距”的水平直线点
     final List<Offset> points = List.generate(
-      count,
+      safeCount,
       (i) => Offset(sidePad + i * spacing, lineY),
     );
 
@@ -271,31 +362,29 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         height: boxHeight,
         child: Stack(
           children: [
-            // 直线路径
+            // 直线
             CustomPaint(
               size: Size(width, boxHeight),
               painter: StraightLinePathPainter(points: points, scale: scaleX),
             ),
-            // 节点 + 文案
-            ...List.generate(count, (index) {
+            // 节点 + 文案（点击节点不做任何事，不会打开评论板）
+            ...List.generate(safeCount, (index) {
               final pos = points[index];
-              final isUnlocked = index < 9;
+              final isUnlocked = true;
 
               return Positioned(
                 left: pos.dx - nodeRadius - 5,
                 top: pos.dy - nodeRadius,
                 child: Column(
                   children: [
-                    GestureDetector(
-                      onTap: null,
-                      child: Container(
-                        width: nodeSize,
-                        height: nodeSize,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isUnlocked ? Colors.white : Colors.grey[300],
-                          border: Border.all(color: Colors.black),
-                        ),
+                    // 不绑定任何 onTap（满足“点击章节不打开评论板”）
+                    Container(
+                      width: nodeSize,
+                      height: nodeSize,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isUnlocked ? Colors.white : Colors.grey[300],
+                        border: Border.all(color: Colors.black),
                       ),
                     ),
                     SizedBox(height: 6 * scaleX),
@@ -318,7 +407,6 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       );
     }
 
-    // 如果内容超过可见宽度 → 横向滚动；不超过 → 居中显示
     return SizedBox(
       width: boxWidth,
       height: boxHeight,

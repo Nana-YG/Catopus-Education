@@ -243,23 +243,22 @@ class _CommentBoardsAreaState extends State<CommentBoardsArea> {
   }
 
   void _openBoard(_BoardBrief board) async {
-  await Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => CommentBoardDetailPage(
-        boardId: board.boardId,
-        boardTitle: board.title,
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CommentBoardDetailPage(
+          boardId: board.boardId,
+          boardTitle: board.title,
+        ),
       ),
-    ),
-  );
+    );
 
-  // 回来后刷新：清除该板子的预览缓存 + 重新拉列表
-  setState(() {
-    _peekCache.remove(board.boardId);  // 让预览重拉
-    _future = _fetchBoards();          // 刷新板子列表
-  });
-}
-
+    // 回来后刷新：清除该板子的预览缓存 + 重新拉列表
+    setState(() {
+      _peekCache.remove(board.boardId); // 让预览重拉
+      _future = _fetchBoards(); // 刷新板子列表
+    });
+  }
 
   Future<void> _onPullRefresh() async {
     setState(() => _future = _fetchBoards());
@@ -479,7 +478,7 @@ class _BoardCardWithPeek extends StatelessWidget {
                 return ListView.separated(
                   physics: const NeverScrollableScrollPhysics(), // 卡片内不滚动，整页横向滚
                   shrinkWrap: true,
-                  itemCount: items.length.clamp(0, 4),
+                  itemCount: items.length.clamp(0, 3),
                   separatorBuilder: (_, __) => SizedBox(height: height * 0.02),
                   itemBuilder: (_, i) {
                     final it = items[i];
