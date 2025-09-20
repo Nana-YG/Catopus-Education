@@ -291,46 +291,66 @@ class _CommentBoardsAreaState extends State<CommentBoardsArea> {
                     return const Center(child: Text('还没有评论板'));
                   }
 
-                  return RefreshIndicator(
-                    onRefresh: _onPullRefresh,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        // 根据高度自适应评论板尺寸
-                        final h = constraints.maxHeight.clamp(360.0, 720.0);
-                        final boardHeight = (h * 0.8).clamp(420.0, 560.0);
-                        // 按你 PNG 比例大约 3:4 来计算宽度
-                        final boardWidth = boardHeight * 0.75;
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      final availableH = constraints.maxHeight;
+                      final availableW = constraints.maxWidth;
 
-                        return ListView.separated(
-                          key: const PageStorageKey('boards-h-scroll'),
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          itemCount: boards.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(width: 16),
-                          itemBuilder: (_, i) {
-                            final b = boards[i];
-                            return GestureDetector(
-                              onTap: () => _openBoard(b),
-                              onLongPress: _isTeacher
-                                  ? () => _deleteBoard(b.boardId)
-                                  : null,
-                              child: _BoardCardWithPeek(
-                                width: boardWidth,
-                                height: boardHeight,
-                                title: b.title,
-                                loadPeek: () =>
-                                    _fetchPeek(b.boardId), // 👈 用来加载评论预览
+                      // 1) 统一的最小/最大值（别太高，窄屏才不炸）
+                      const double minBoardHeight = 260.0;
+                      const double maxBoardHeight = 640.0;
+                      const double minBoardWidth =
+                          180.0; // 原来 280 太大，窄屏容易 upper<lower
+
+                      // 2) 先算高度，再由 3:4 比例推宽度
+                      final double boardHeight = (availableH * 1)
+                          .clamp(minBoardHeight, maxBoardHeight);
+
+                      // 3) 计算当前视口允许的“最大宽度上界”，并确保 >= 下界
+                      //    注意把左右 padding / 分隔大概预留掉一些，避免过度估计
+                      final double viewportMaxWidth =
+                          (availableW * 0.72); // 可按需调 0.6~0.8
+                      final double safeUpperWidth =
+                          viewportMaxWidth < minBoardWidth
+                              ? minBoardWidth
+                              : viewportMaxWidth;
+
+                      // 4) 由高度得到的理想宽度，再做安全 clamp
+                      final double idealWidth = boardHeight * 0.75;
+                      final double boardWidth =
+                          idealWidth.clamp(minBoardWidth, safeUpperWidth);
+
+                      return ListView.separated(
+                        key: const PageStorageKey('boards-h-scroll'),
+                        scrollDirection: Axis.horizontal,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        itemCount: boards.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        itemBuilder: (_, i) {
+                          final b = boards[i];
+                          return SizedBox(
+                            height: availableH, // 占满可用高
+                            width: boardWidth, // 稳定后的安全宽
+                            child: Center(
+                              child: GestureDetector(
+                                onTap: () => _openBoard(b),
+                                onLongPress: _isTeacher
+                                    ? () => _deleteBoard(b.boardId)
+                                    : null,
+                                child: _BoardCardWithPeek(
+                                  width: boardWidth,
+                                  height: boardHeight,
+                                  title: b.title,
+                                  loadPeek: () => _fetchPeek(b.boardId),
+                                ),
                               ),
-                            );
-                          },
-                        );
-                      },
-                    ),
+                            ),
+                          );
+                        },
+                      );
+                    },
                   );
                 },
               ),
@@ -394,12 +414,39 @@ class _BoardCardWithPeek extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final titleTop = height * 0.13;
-    final titleLeft = width * 0.13;
+    // 以一个“设计基准宽度”来算比例，520 是我选的基准，可以按你图片比例稍微调
+    const double baseW = 400;
+    final double s = (width / baseW).clamp(0.65, 1.8); // 放宽缩放上限，板子变大时更跟手
+
+    final double titleTop = height * 0.13;
+    final double titleLeft = width * 0.13;
+
+// ===== 新增：根据板子大小推导“预览区”和“单卡尺寸/间距/可见数量” =====
+    final double peekAreaTop = height * 0.30;
+    final double peekAreaLeft = width * 0.15;
+    final double peekAreaWidth = width * 0.70;
+    final double peekAreaHeight = height * 0.55;
+
+// 单卡最小高度随缩放，给个上下限
+    final double tagMinHeight = (60 * s).clamp(50, 160);
+// 卡片之间的垂直间隔
+    final double tagSpacing = (12 * s).clamp(8, 20);
+
+// 允许的最大可见数量（根据“可用高度 / (卡高 + 间隔)”来算）
+    final int maxVisibleBySpace =
+        (peekAreaHeight / (tagMinHeight + tagSpacing)).floor().clamp(1, 8);
+
+// 宽度稍微窄一点避免溢出
+    final double tagMaxWidth = width * 0.46;
+
+// 根据板子大小决定每条最多显示几行：板子大就多一行
+    final int tagMaxLines = s >= 1.15 ? 4 : 2;
+
+// 字号也跟随缩放
+    final double tagFontSize = (14 * s).clamp(11, 20);
 
     return Stack(
       children: [
-        // 背景 PNG
         Image.asset(
           'assets/images/board.png',
           width: width,
@@ -407,7 +454,7 @@ class _BoardCardWithPeek extends StatelessWidget {
           fit: BoxFit.contain,
         ),
 
-        // 标题（白色纸条，可多行）
+        // 顶部白色“标题纸条”——字号/内边距跟随 s
         Positioned(
           top: titleTop,
           left: titleLeft,
@@ -418,33 +465,31 @@ class _BoardCardWithPeek extends StatelessWidget {
                 minWidth: width * 0.25,
                 maxWidth: width * 0.75,
               ),
-              child: IntrinsicWidth(
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: width * 0.04,
-                    vertical: width * 0.025,
-                  ),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0x33000000),
-                        blurRadius: 8,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: true,
-                    style: TextStyle(
-                      fontSize: (width * 0.075).clamp(16.0, 24.0),
-                      fontWeight: FontWeight.w800,
-                      color: Colors.black,
-                      height: 1.15,
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 18 * s, // 原来用 width 比例会在极端宽度时跳；用 s 更稳
+                  vertical: 12 * s,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0x33000000),
+                      blurRadius: 8 * s,
+                      offset: Offset(0, 3 * s),
                     ),
+                  ],
+                ),
+                child: Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: true,
+                  style: TextStyle(
+                    fontSize: (22 * s).clamp(12, 36), // ← 随宽度变化
+                    fontWeight: FontWeight.w800,
+                    color: Colors.black,
+                    height: 1.12,
                   ),
                 ),
               ),
@@ -452,42 +497,49 @@ class _BoardCardWithPeek extends StatelessWidget {
           ),
         ),
 
-        // 评论预览：右侧竖排白色标签（正放，不倾斜）
+        // 右侧三条“评论预览便签”——字号/边框/边距全用 s 驱动
         Positioned(
-          // 放在板子右侧中部区域；可按需微调
-          top: height * 0.30,
-          left: width * 0.15,
+          top: peekAreaTop,
+          left: peekAreaLeft,
           child: SizedBox(
-            width: width * 0.7, // 标签列宽度
-            height: height * 0.55,
+            width: peekAreaWidth,
+            height: peekAreaHeight,
             child: FutureBuilder<List<_CommentPreview>>(
               future: loadPeek(),
               builder: (context, snap) {
                 if (snap.connectionState == ConnectionState.waiting) {
-                  return const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                  return SizedBox(
+                    width: 24 * s,
+                    height: 24 * s,
+                    child: const CircularProgressIndicator(strokeWidth: 2),
                   );
                 }
                 final items = snap.data ?? const [];
-                if (items.isEmpty) {
-                  return const SizedBox(); // 没评论就不占位
-                }
-                // 固定最多展示 3~4 个小标签；每个标签固定高，内容溢出省略
+                if (items.isEmpty) return const SizedBox();
+
+                // ✅ 数量随“可用高度”变化
+                final int itemCount = items.length.clamp(0, maxVisibleBySpace);
+
                 return ListView.separated(
-                  physics: const NeverScrollableScrollPhysics(), // 卡片内不滚动，整页横向滚
+                  physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
-                  itemCount: items.length.clamp(0, 3),
-                  separatorBuilder: (_, __) => SizedBox(height: height * 0.02),
+                  itemCount: itemCount,
+                  separatorBuilder: (_, __) => SizedBox(height: tagSpacing),
                   itemBuilder: (_, i) {
                     final it = items[i];
                     return _CommentTag(
                       text: it.content,
-                      // 大小随卡片适配
-                      maxWidth: width * 0.38,
-                      minHeight: height * 0.13,
-                      maxLines: 2, // 最多 2 行
+                      maxWidth: tagMaxWidth,
+                      minHeight: tagMinHeight,
+                      maxLines: tagMaxLines,
+                      fontSize: tagFontSize,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12 * s,
+                        vertical: 8 * s,
+                      ),
+                      borderWidth: (1.5 * s).clamp(1, 2),
+                      shadowBlur: 6 * s,
+                      shadowDy: 3 * s,
                     );
                   },
                 );
@@ -506,28 +558,45 @@ class _CommentTag extends StatelessWidget {
   final double minHeight;
   final int maxLines;
 
+  // 新增：可控的缩放参数
+  final double? fontSize;
+  final EdgeInsets? padding;
+  final double? borderWidth;
+  final double? shadowBlur;
+  final double? shadowDy;
+
   const _CommentTag({
     required this.text,
     required this.maxWidth,
     required this.minHeight,
     this.maxLines = 2,
+    this.fontSize,
+    this.padding,
+    this.borderWidth,
+    this.shadowBlur,
+    this.shadowDy,
   });
 
   @override
   Widget build(BuildContext context) {
+    final double bw = borderWidth ?? 1.5;
+    final double sb = shadowBlur ?? 6;
+    final double sd = shadowDy ?? 3;
+
     return ConstrainedBox(
       constraints: BoxConstraints(minHeight: minHeight, maxWidth: maxWidth),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding:
+            padding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(0), // 直角可改为 0
-          border: Border.all(color: const Color(0xFFCCCCCC), width: 1.5),
-          boxShadow: const [
+          borderRadius: BorderRadius.circular(0),
+          border: Border.all(color: const Color(0xFFCCCCCC), width: bw),
+          boxShadow: [
             BoxShadow(
-              color: Color(0x22000000),
-              blurRadius: 6,
-              offset: Offset(0, 3),
+              color: const Color(0x22000000),
+              blurRadius: sb,
+              offset: Offset(0, sd),
             ),
           ],
         ),
@@ -535,8 +604,8 @@ class _CommentTag extends StatelessWidget {
           text,
           maxLines: maxLines,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 13,
+          style: TextStyle(
+            fontSize: fontSize ?? 13, // ← 这里用传进来的 fontSize
             height: 1.25,
             color: Colors.black87,
             fontWeight: FontWeight.w600,
