@@ -417,7 +417,7 @@ class _StudentChooseClassPageState extends State<StudentChooseClassPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => CourseDetailPage(
+                                builder: (context) => StudentCourseDetailPage(
                                   className: classData['name'],
                                   classId: classData['classId'],
                                   taskCount: classData['taskCount'], // ✅ 传进去
