@@ -330,9 +330,14 @@ class _CommentBoardsAreaState extends State<CommentBoardsArea> {
                         separatorBuilder: (_, __) => const SizedBox(width: 12),
                         itemBuilder: (_, i) {
                           final b = boards[i];
+
+// 基于 boardId 稳定“随机”选择 1 或 2
+                          final bgAsset = (b.boardId.hashCode & 1) == 0
+                              ? 'assets/images/board1.png'
+                              : 'assets/images/board2.png';
                           return SizedBox(
-                            height: availableH, // 占满可用高
-                            width: boardWidth, // 稳定后的安全宽
+                            height: availableH,
+                            width: boardWidth,
                             child: Center(
                               child: GestureDetector(
                                 onTap: () => _openBoard(b),
@@ -344,6 +349,7 @@ class _CommentBoardsAreaState extends State<CommentBoardsArea> {
                                   height: boardHeight,
                                   title: b.title,
                                   loadPeek: () => _fetchPeek(b.boardId),
+                                  bgAsset: bgAsset, // 👈 传入
                                 ),
                               ),
                             ),
@@ -404,12 +410,14 @@ class _BoardCardWithPeek extends StatelessWidget {
   final double height;
   final String title;
   final Future<List<_CommentPreview>> Function() loadPeek;
+  final String bgAsset;
 
   const _BoardCardWithPeek({
     required this.width,
     required this.height,
     required this.title,
     required this.loadPeek,
+    required this.bgAsset,
   });
 
   @override
@@ -448,7 +456,7 @@ class _BoardCardWithPeek extends StatelessWidget {
     return Stack(
       children: [
         Image.asset(
-          'assets/images/board.png',
+          bgAsset,
           width: width,
           height: height,
           fit: BoxFit.contain,

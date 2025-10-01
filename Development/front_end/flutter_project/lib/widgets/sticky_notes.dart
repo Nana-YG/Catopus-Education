@@ -84,7 +84,7 @@ class _StickyCanvas extends StatelessWidget {
 
     // 三张便签的左上角位置（相对 baseH / baseW）
     final _p1 = Offset(baseW * -0.07, baseH * 0.15); // 黄
-    final _p2 = Offset(baseW * 0.08, baseH * 0.38); // 红
+    final _p2 = Offset(baseW * 0.08, baseH * 0.43); // 红
     final _p3 = Offset(baseW * -0.07, baseH * 0.61); // 蓝
 
     return SizedBox(
@@ -93,20 +93,22 @@ class _StickyCanvas extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
+          // ✅ 红色贴纸：显示“班级/课程”（原 classLabel）
           Positioned(
             left: _p1.dx,
             top: _p1.dy,
             child: _StickyCard(
-              imagePath: 'assets/images/sticky_yellow.png',
+              imagePath: 'assets/images/sticky_blue.png',
               width: stickyW,
               height: stickyH,
               label: classLabel,
               rotation: 0,
-              // 字体跟随“便签宽度”缩放；范围自己看效果调
               fontSize: (stickyW * 0.11).clamp(12.0, 26.0),
               onTap: onTapClass,
             ),
           ),
+
+          // ✅ 蓝色贴纸：显示“评论板”（原 commentLabel）
           Positioned(
             left: _p2.dx,
             top: _p2.dy,
@@ -118,19 +120,6 @@ class _StickyCanvas extends StatelessWidget {
               rotation: 0,
               fontSize: (stickyW * 0.11).clamp(12.0, 26.0),
               onTap: onTapComment,
-            ),
-          ),
-          Positioned(
-            left: _p3.dx,
-            top: _p3.dy,
-            child: _StickyCard(
-              imagePath: 'assets/images/sticky_blue.png',
-              width: stickyW,
-              height: stickyH,
-              label: settingsLabel,
-              rotation: 0,
-              fontSize: (stickyW * 0.11).clamp(12.0, 26.0),
-              onTap: onTapSettings,
             ),
           ),
         ],
