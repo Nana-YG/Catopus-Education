@@ -284,6 +284,63 @@ public class CourseController {
         return ResponseEntity.ok(Map.of("className", course.getClassName(), "studentList", studentList));
     }
 
+    // Remove a student from a class (Teacher only)
+    @PostMapping("/removeStudent")
+    public ResponseEntity<?> removeStudentFromClass(
+            @RequestHeader("Username") String teacherUsername,
+            @RequestHeader("Token") String token,
+            @RequestBody Map<String, String> body) {
+
+        String studentUsername = body.get("studentUsername");
+        String classId = body.get("classId");
+
+        if (studentUsername == null || classId == null || studentUsername.isBlank() || classId.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Missing studentUsername or classId"));
+        }
+
+        if (!userService.isTokenValidForUser(teacherUsername, token)) {
+            return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
+        }
+
+        if (userService.getAccountTypeByUsername(teacherUsername) != AccountType.TEACHER) {
+            return ResponseEntity.status(403).body(Map.of("error", "Only teachers can remove students"));
+        }
+
+        Optional<CourseRegistration> courseOpt = courseService.findById(classId);
+        if (courseOpt.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("error", "Course not found"));
+        }
+
+        CourseRegistration course = courseOpt.get();
+
+        if (!course.getTeacher().equals(teacherUsername)) {
+            return ResponseEntity.status(403).body(Map.of("error", "You can only modify your own courses"));
+        }
+
+        List<String> students = course.getStudents() == null || course.getStudents().isBlank()
+                ? List.of()
+                : Arrays.stream(course.getStudents().split(","))
+                        .map(String::trim)
+                        .toList();
+
+        if (!students.contains(studentUsername)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Student is not in this course"));
+        }
+
+        List<String> updated = students.stream()
+                .filter(s -> !s.equals(studentUsername))
+                .toList();
+
+        course.setStudents(String.join(",", updated));
+        courseService.save(course);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Student removed successfully",
+                "classId", classId,
+                "removedStudent", studentUsername
+        ));
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleEnumParseError(HttpMessageNotReadableException ex) {
         if (ex.getCause() instanceof InvalidFormatException formatException) {
