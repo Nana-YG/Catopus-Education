@@ -44,6 +44,11 @@ class _CommentBoardsAreaState extends State<CommentBoardsArea> {
     final res =
         await http.get(uri, headers: {'Username': username, 'Token': token});
 
+    // 👇 直接打印响应
+    print('[_doFetchPeek] GET $uri -> ${res.statusCode}');
+    print('[_doFetchPeek] headers: ${res.headers}');
+    print('[_doFetchPeek] body: ${res.body}');
+
     if (res.statusCode != 200) {
       debugPrint('peek failed: $boardId -> ${res.statusCode} ${res.body}');
       return const [];
@@ -52,23 +57,20 @@ class _CommentBoardsAreaState extends State<CommentBoardsArea> {
     final map = jsonDecode(res.body) as Map<String, dynamic>;
     final List list = (map['comments'] as List? ?? []);
 
-    // ✅ 只保留顶层评论（不是回复）
     final topLevel = list.where((e) {
       final m = e as Map<String, dynamic>;
       final r = m['replyTo'];
       return r == null || (r is String && r.isEmpty);
     }).toList();
 
-    // ✅ 按时间倒序（如果后端未排序）
     topLevel.sort((a, b) {
       final ta = DateTime.tryParse((a['timestamp'] ?? '').toString()) ??
           DateTime.fromMillisecondsSinceEpoch(0);
       final tb = DateTime.tryParse((b['timestamp'] ?? '').toString()) ??
           DateTime.fromMillisecondsSinceEpoch(0);
-      return tb.compareTo(ta); // 新在前
+      return tb.compareTo(ta);
     });
 
-    // 只预览前 4 条
     return topLevel.take(4).map((e) {
       final m = e as Map<String, dynamic>;
       return _CommentPreview(
@@ -107,24 +109,56 @@ class _CommentBoardsAreaState extends State<CommentBoardsArea> {
     final uri = Uri.parse('$baseApiUrl/comments/boards/${widget.classId}');
     final res = await http.get(
       uri,
-      headers: {
-        'Username': username,
-        'Token': token,
-      },
+      headers: {'Username': username, 'Token': token},
     );
+
+    // 直接打印原始响应，便于排查
+    print('[_fetchBoards] GET $uri -> ${res.statusCode}');
+    print('[_fetchBoards] headers: ${res.headers}');
+    print('[_fetchBoards] body: ${res.body}');
 
     if (res.statusCode != 200) {
       _lastError = '加载评论板失败：${res.statusCode} ${res.body}';
       throw Exception(_lastError);
     }
 
-    final List data = jsonDecode(res.body);
-    return data
-        .map((e) => _BoardBrief(
-              boardId: e['boardId'] as String,
-              title: (e['title'] as String?) ?? '',
-            ))
+    final decoded = jsonDecode(res.body);
+
+    // 统一把“可能的列表”提取出来
+    List list;
+    if (decoded is List) {
+      list = decoded;
+    } else if (decoded is Map<String, dynamic>) {
+      // 兼容不同后端键位：优先 boards，其次 comments/data
+      final anyList =
+          decoded['boards'] ?? decoded['comments'] ?? decoded['data'] ?? [];
+      if (anyList is List) {
+        list = anyList;
+      } else {
+        // 没有可用列表，就按空列表处理（避免类型异常）
+        list = const [];
+      }
+    } else {
+      list = const [];
+    }
+
+    // 将列表元素映射为 _BoardBrief（容错：各种可能字段名）
+    final boards = list
+        .map<_BoardBrief>((e) {
+          final m = (e is Map)
+              ? Map<String, dynamic>.from(e as Map)
+              : <String, dynamic>{};
+          final id = (m['boardId'] ?? m['id'] ?? m['_id'] ?? '').toString();
+          final title =
+              (m['title'] ?? m['name'] ?? m['topic'] ?? '').toString();
+          return _BoardBrief(boardId: id, title: title);
+        })
+        // 过滤掉没有 id 的项
+        .where((b) => b.boardId.isNotEmpty)
         .toList();
+
+    print('[_fetchBoards] parsed boards count = ${boards.length}');
+    return boards;
   }
 
   Future<void> _createBoard() async {
@@ -330,9 +364,14 @@ class _CommentBoardsAreaState extends State<CommentBoardsArea> {
                         separatorBuilder: (_, __) => const SizedBox(width: 12),
                         itemBuilder: (_, i) {
                           final b = boards[i];
+
+// 基于 boardId 稳定“随机”选择 1 或 2
+                          final bgAsset = (b.boardId.hashCode & 1) == 0
+                              ? 'assets/images/board1.png'
+                              : 'assets/images/board2.png';
                           return SizedBox(
-                            height: availableH, // 占满可用高
-                            width: boardWidth, // 稳定后的安全宽
+                            height: availableH,
+                            width: boardWidth,
                             child: Center(
                               child: GestureDetector(
                                 onTap: () => _openBoard(b),
@@ -344,6 +383,7 @@ class _CommentBoardsAreaState extends State<CommentBoardsArea> {
                                   height: boardHeight,
                                   title: b.title,
                                   loadPeek: () => _fetchPeek(b.boardId),
+                                  bgAsset: bgAsset, // 👈 传入
                                 ),
                               ),
                             ),
@@ -404,12 +444,14 @@ class _BoardCardWithPeek extends StatelessWidget {
   final double height;
   final String title;
   final Future<List<_CommentPreview>> Function() loadPeek;
+  final String bgAsset;
 
   const _BoardCardWithPeek({
     required this.width,
     required this.height,
     required this.title,
     required this.loadPeek,
+    required this.bgAsset,
   });
 
   @override
@@ -448,7 +490,7 @@ class _BoardCardWithPeek extends StatelessWidget {
     return Stack(
       children: [
         Image.asset(
-          'assets/images/board.png',
+          bgAsset,
           width: width,
           height: height,
           fit: BoxFit.contain,

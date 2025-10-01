@@ -185,85 +185,12 @@ class _LoginPageState extends State<LoginPage> {
             onTap: () => FocusScope.of(context).unfocus(), // 点击空白收起键盘
             child: Stack(
               children: [
-                // 左侧三层斜叠容器（保持不变）
-                Positioned(
-                  left: (-240 * scaleX),
-                  top: -80 * scaleY,
-                  child: Container(
-                    transform: Matrix4.identity()..rotateZ(0.09),
-                    width: 1278.26 * scaleX,
-                    height: 1300.66 * scaleY,
-                    decoration: ShapeDecoration(
-                      color: Colors.white,
-                      shape: const RoundedRectangleBorder(
-                        side: BorderSide(width: 1.5),
-                      ),
-                      shadows: const [
-                        BoxShadow(
-                          color: Color(0x3F000000),
-                          blurRadius: 35,
-                          offset: Offset(4, 4),
-                          spreadRadius: 0,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: -260 * scaleX,
-                  top: -100 * scaleY,
-                  child: Container(
-                    transform: Matrix4.identity()..rotateZ(0.09),
-                    width: 1278.26 * scaleX,
-                    height: 1300.66 * scaleY,
-                    decoration: ShapeDecoration(
-                      color: Colors.white,
-                      shape: const RoundedRectangleBorder(
-                        side: BorderSide(width: 1.5),
-                      ),
-                      shadows: const [
-                        BoxShadow(
-                          color: Color(0x3F000000),
-                          blurRadius: 35,
-                          offset: Offset(4, 4),
-                          spreadRadius: 0,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: -280 * scaleX,
-                  top: -125 * scaleY,
-                  child: Container(
-                    transform: Matrix4.identity()..rotateZ(0.09),
-                    width: 1278.26 * scaleX,
-                    height: 1300.66 * scaleY,
-                    decoration: ShapeDecoration(
-                      color: Colors.white,
-                      shape: const RoundedRectangleBorder(
-                        side: BorderSide(width: 1.5),
-                      ),
-                      shadows: const [
-                        BoxShadow(
-                          color: Color(0x3F000000),
-                          blurRadius: 35,
-                          offset: Offset(4, 4),
-                          spreadRadius: 0,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                // 插图（保持不变）
-                Positioned(
-                  left: -100 * scaleX,
-                  top: 60 * scaleY,
-                  child: SizedBox(
-                    width: 976 * scaleX,
-                    height: 976 * scaleY,
-                    child: Image.asset('assets/images/circle.png',
-                        fit: BoxFit.contain),
+                // 左侧
+                Positioned.fill(
+                  child: Image.asset(
+                    'assets/images/login_left.png',
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center,
                   ),
                 ),
 
